@@ -53,7 +53,7 @@ export function LoginForm() {
     startTransition(async () => {
       try {
         formAction(formData);
-      } catch (error) {
+      } catch {
         toast.error("An unexpected error occurred. Please try again.");
       } finally {
         setIsLoading(false);
@@ -145,7 +145,7 @@ export function LoginForm() {
         </form>
 
         <div className="text-center text-xs pt-2">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/auth/register" className="text-primary hover:underline">
             Register
           </Link>

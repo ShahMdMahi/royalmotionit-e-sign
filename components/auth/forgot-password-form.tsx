@@ -50,7 +50,7 @@ export function ForgotPasswordForm() {
     startTransition(async () => {
       try {
         formAction(formData);
-      } catch (error) {
+      } catch {
         toast.error("An unexpected error occurred. Please try again.");
       } finally {
         setIsLoading(false);
@@ -75,7 +75,7 @@ export function ForgotPasswordForm() {
     <div className="w-full max-w-md mx-auto">
       <div className="text-center mb-4">
         <h1 className="text-xl font-bold">Forgot your password?</h1>
-        <p className="text-muted-foreground text-sm">Enter your email and we'll send you a link to reset your password</p>
+        <p className="text-muted-foreground text-sm">Enter your email and we&apos;ll send you a link to reset your password</p>
       </div>
 
       <div className="space-y-3">

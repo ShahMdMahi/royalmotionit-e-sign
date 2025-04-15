@@ -56,7 +56,7 @@ export function RegisterForm() {
     startTransition(async () => {
       try {
         formAction(formData);
-      } catch (error) {
+      } catch {
         toast.error("An unexpected error occurred. Please try again.");
       } finally {
         setIsLoading(false);
