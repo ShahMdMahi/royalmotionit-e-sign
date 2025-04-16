@@ -4,6 +4,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
 import { auth } from "@/auth";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Reset Password - Authentication - Royal Sign - RoyalMotionIT",
+  description: "Secure authentication portal for Royal Sign, providing access to electronic signature and document management services developed by RoyalMotionIT",
+};
 
 interface ResetPasswordPageProps {
   params: Promise<{

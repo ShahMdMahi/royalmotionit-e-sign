@@ -3,6 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Login - Authentication - Royal Sign - RoyalMotionIT",
+  description: "Secure authentication portal for Royal Sign, providing access to electronic signature and document management services developed by RoyalMotionIT",
+};
 
 export default async function Login() {
   const session = await auth();
