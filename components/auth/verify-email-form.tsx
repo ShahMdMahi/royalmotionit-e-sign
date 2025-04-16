@@ -40,7 +40,7 @@ export function VerifyEmailForm({ token }: VerifyEmailProps) {
           setMessage(result.message);
           toast.error(result.message);
         }
-      } catch (error) {
+      } catch {
         setStatus("error");
         setMessage("An error occurred during verification. Please try again later.");
         toast.error("An unexpected error occurred. Please try again.");
@@ -73,7 +73,7 @@ export function VerifyEmailForm({ token }: VerifyEmailProps) {
               <CheckCircle2 className="h-12 w-12 text-primary" />
             </div>
             <p className="text-center font-medium">{message}</p>
-            <p className="text-center text-muted-foreground text-sm">You'll be redirected to the login page in a few seconds.</p>
+            <p className="text-center text-muted-foreground text-sm">You&apos;ll be redirected to the login page in a few seconds.</p>
           </div>
         )}
 
