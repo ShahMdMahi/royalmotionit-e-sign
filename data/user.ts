@@ -317,3 +317,43 @@ export async function deleteUserById(id: string): Promise<BaseResponse> {
     };
   }
 }
+
+/**
+ * Retrieves a user by their email and verifies it in the database using Prisma.
+ * @param {string} email - The email of the user to retrieve and verify.
+ * @returns {Promise<UserResponse>} A promise that resolves to an object containing the success status, message, and user data or error information.
+ * @throws {Error} Throws an error if there is an issue with the database query.
+ * @description This function uses Prisma to find a user in the database by their email and update the email verification date. If the user is found and updated, it returns the user data; otherwise, it returns an error message.
+ */
+export async function getUserByEmailAndVerify(email: string): Promise<UserResponse> {
+  try {
+    const user = await prisma.user.update({
+      where: {
+        email: email,
+      },
+      data: {
+        emailVerified: new Date(),
+      },
+    });
+
+    if (user) {
+      return {
+        success: true,
+        message: "User email verified successfully",
+        user: user,
+      };
+    }
+
+    return {
+      success: false,
+      message: "User not found",
+    };
+  } catch (error) {
+    console.error("Error fetching user by email:", error);
+    return {
+      success: false,
+      message: "Failed to fetch user",
+      error: error,
+    };
+  }
+}

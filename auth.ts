@@ -3,6 +3,8 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/prisma/prisma";
 import authConfig from "./auth.config";
 import { JWT } from "next-auth/jwt";
+import { sendAccountVerificationEmail } from "./actions/email";
+import { generateVerificationToken } from "./lib/token";
 
 declare module "next-auth" {
   interface Session {
@@ -43,7 +45,14 @@ export const {
         where: { id: user.id },
       });
 
-      if (!existingUser?.emailVerified) return false;
+      if (!existingUser?.emailVerified) {
+        if (!existingUser?.email) return false;
+        if (!existingUser?.name) return false;
+        const verificationToken = await generateVerificationToken(existingUser.email);
+        if (!verificationToken.verificationToken?.token) return false;
+        await sendAccountVerificationEmail(existingUser.name, existingUser.email, verificationToken.verificationToken.token);
+        return false;
+      }
 
       return true;
     },

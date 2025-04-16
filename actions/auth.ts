@@ -345,3 +345,61 @@ export async function googleAuth(): Promise<{ redirectUrl?: string }> {
     return {};
   }
 }
+
+/**
+ * Verify User Email
+ */
+export async function verifyUserEmail(token: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const verificationToken = await prisma.verificationToken.findFirst({
+      where: { token },
+    });
+
+    if (!verificationToken) {
+      return {
+        success: false,
+        message: "Invalid or expired verification token.",
+      };
+    }
+
+    const hashExpired = verificationToken.expires < new Date(Date.now());
+
+    if (hashExpired) {
+      await prisma.verificationToken.delete({
+        where: { id: verificationToken.id },
+      });
+
+      return {
+        success: false,
+        message: "Verification token has expired.",
+      };
+    }
+
+    const verifiedUser = await prisma.user.update({
+      where: { email: verificationToken.identifier },
+      data: { emailVerified: new Date(Date.now()) },
+    });
+
+    if (!verifiedUser) {
+      return {
+        success: false,
+        message: "User not found.",
+      };
+    }
+
+    await prisma.verificationToken.delete({
+      where: { id: verificationToken.id },
+    });
+
+    return {
+      success: true,
+      message: "Email verified successfully.",
+    };
+  } catch (error) {
+    console.error("Error verifying email:", error);
+    return {
+      success: false,
+      message: "Error verifying email. Please try again.",
+    };
+  }
+}
