@@ -4,7 +4,8 @@ import { prisma } from "@/prisma/prisma";
 import bcryptjs from "bcryptjs";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
-import { error } from "console";
+import { generateVerificationToken } from "@/lib/token";
+import { sendAccountVerificationEmail, sendWelcomeEmail } from "@/actions/email";
 
 // Types for form states
 type RegisterFormState = {
@@ -107,7 +108,15 @@ export async function registerUser(prevState: RegisterFormState, formData: FormD
     }
 
     // Send a welcome email
-    // TODO: Implement email sending logic
+    await sendWelcomeEmail(`${firstName} ${lastName}`, emailLower);
+
+    // Generate a verification email token
+    const verificationToken = await generateVerificationToken(emailLower);
+
+    // Send a verification email
+    if (verificationToken.verificationToken?.token) {
+      await sendAccountVerificationEmail(`${firstName} ${lastName}`, emailLower, verificationToken.verificationToken?.token);
+    }
 
     return {
       message: "Registration successful!",
