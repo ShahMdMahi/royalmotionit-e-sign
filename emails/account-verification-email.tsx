@@ -8,7 +8,7 @@ interface AccountVerificationEmailProps {
 
 export const AccountVerificationEmail = ({ username, userEmail, verificationToken }: AccountVerificationEmailProps) => {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://royal-sign.vercel.app";
-  const verificationUrl = `${baseUrl}/auth/verify-email?token=${verificationToken}`;
+  const verificationUrl = `${baseUrl}/auth/verify-email/${verificationToken}`;
 
   // Theme colors from globals.css using exact OKLCH values
   const theme = {
