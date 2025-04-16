@@ -207,6 +207,11 @@ export async function loginUser(prevState: LoginFormState, formData: FormData): 
             message: "Invalid credentials",
             success: false,
           };
+        case "AccessDenied":
+          return {
+            message: "Access denied. Please check your permissions or verify your email.",
+            success: false,
+          };
         default:
           return {
             message: "An error occurred during login. Please try again.",
