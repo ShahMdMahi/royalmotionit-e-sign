@@ -305,5 +305,16 @@ export async function logoutUser(): Promise<void> {
  * Authenticate with Google
  */
 export async function googleAuth(): Promise<void> {
-  //TODO: Implement Google authentication logic
+  try {
+    await signIn("google", {
+      redirect: true,
+      callbackUrl: "/dashboard",
+    });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      console.error("Google authentication error:", error);
+      return;
+    }
+    console.error("An error occurred during Google authentication:", error);
+  }
 }
