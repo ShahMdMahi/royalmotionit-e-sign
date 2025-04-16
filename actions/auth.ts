@@ -304,17 +304,30 @@ export async function logoutUser(): Promise<void> {
 /**
  * Authenticate with Google
  */
-export async function googleAuth(): Promise<void> {
+export async function googleAuth(): Promise<{ redirectUrl?: string }> {
   try {
-    await signIn("google", {
-      redirect: true,
+    const result = await signIn("google", {
+      redirect: false,
       callbackUrl: "/dashboard",
     });
+
+    console.log("Google auth result:", result);
+
+    // Check if the result is a string (direct URL) or an object with a url property
+    if (typeof result === "string") {
+      return { redirectUrl: result };
+    } else if (result?.url) {
+      return { redirectUrl: result.url };
+    } else {
+      console.error("No redirect URL returned from Google auth");
+      return {};
+    }
   } catch (error) {
     if (error instanceof AuthError) {
       console.error("Google authentication error:", error);
-      return;
+      return {};
     }
     console.error("An error occurred during Google authentication:", error);
+    return {};
   }
 }
