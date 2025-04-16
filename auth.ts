@@ -2,6 +2,27 @@ import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/prisma/prisma";
 import authConfig from "./auth.config";
+import { JWT } from "next-auth/jwt";
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      isOauth: boolean;
+      role: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    };
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    isOauth?: boolean;
+    role?: string;
+  }
+}
 
 export const {
   handlers: { GET, POST },
@@ -50,15 +71,12 @@ export const {
       return token;
     },
     async session({ token, session }) {
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: token.sub,
-          isOauth: token.isOauth,
-          role: token.role,
-        },
-      };
+      if (token.sub) {
+        session.user.id = token.sub;
+        session.user.isOauth = token.isOauth as boolean;
+        session.user.role = token.role as string;
+      }
+      return session;
     },
   },
 });

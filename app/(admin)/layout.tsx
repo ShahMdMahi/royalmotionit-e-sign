@@ -8,16 +8,6 @@ export const metadata: Metadata = {
   description: "Administrative dashboard for Royal Sign e-signature application. Manage documents, users, and system settings.",
 };
 
-declare module "next-auth" {
-  interface User {
-    role?: Role;
-  }
-
-  interface Session {
-    user?: User;
-  }
-}
-
 export default async function RootLayout({
   children,
 }: Readonly<{
