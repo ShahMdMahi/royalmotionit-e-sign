@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "E-Sign - RoyalMotionIT",
+  title: "Royal Sign - RoyalMotionIT",
   description: "A platform for electronic signatures and document management",
 };
 
