@@ -211,7 +211,7 @@ export default function Home() {
                 <CardContent className="pt-6">
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-1 text-amber-400">{"★★★★★"}</div>
-                    <p className="text-muted-foreground">"Royal Sign has transformed our contract signing process. What used to take days now takes minutes."</p>
+                    <p className="text-muted-foreground">&quot;Royal Sign has transformed our contract signing process. What used to take days now takes minutes.&quot;</p>
                     <div className="flex items-center gap-3 mt-2">
                       <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
                         <span className="text-primary font-semibold">SJ</span>
@@ -228,7 +228,7 @@ export default function Home() {
                 <CardContent className="pt-6">
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-1 text-amber-400">{"★★★★★"}</div>
-                    <p className="text-muted-foreground">"The security features and audit trail give us peace of mind for all our legal documents."</p>
+                    <p className="text-muted-foreground">&quot;The security features and audit trail give us peace of mind for all our legal documents.&quot;</p>
                     <div className="flex items-center gap-3 mt-2">
                       <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
                         <span className="text-primary font-semibold">MC</span>
@@ -245,7 +245,7 @@ export default function Home() {
                 <CardContent className="pt-6">
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-1 text-amber-400">{"★★★★★"}</div>
-                    <p className="text-muted-foreground">"The API integration allowed us to embed e-signatures directly into our customer portal."</p>
+                    <p className="text-muted-foreground">&quot;The API integration allowed us to embed e-signatures directly into our customer portal.&quot;</p>
                     <div className="flex items-center gap-3 mt-2">
                       <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
                         <span className="text-primary font-semibold">AR</span>
@@ -490,7 +490,7 @@ export default function Home() {
               <div className="flex flex-col gap-4 rounded-xl border bg-card p-6 shadow-lg">
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold">Send us a message</h3>
-                  <p className="text-sm text-muted-foreground">Fill out the form below and we'll get back to you as soon as possible.</p>
+                  <p className="text-sm text-muted-foreground">Fill out the form below and we&apos;ll get back to you as soon as possible.</p>
                 </div>
                 <div className="grid gap-4">
                   <div className="grid grid-cols-2 gap-4">
