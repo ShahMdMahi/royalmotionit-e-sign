@@ -120,3 +120,54 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom container styling */
+.container {
+  @apply px-4 md:px-6 mx-auto;
+  max-width: 100%;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1536px;
+  }
+}
+
+/* Gradient backgrounds */
+.gradient-bg {
+  @apply bg-gradient-to-r from-primary to-chart-4;
+}
+
+.gradient-text {
+  @apply bg-gradient-to-r from-primary to-chart-4 bg-clip-text text-transparent;
+}
+
+/* Card hover effects */
+.card-hover {
+  @apply transition-all duration-200 hover:shadow-xl hover:-translate-y-1;
+}
