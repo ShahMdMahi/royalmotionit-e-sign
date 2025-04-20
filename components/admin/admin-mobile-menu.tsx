@@ -9,7 +9,6 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { logoutUser } from "@/actions/auth";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +20,6 @@ interface AdminMobileMenuProps {
 
 export function AdminMobileMenu({ userName, userEmail, userImage }: AdminMobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
 
   const adminNavItems = [
     { name: "Home", href: "/", icon: <Home className="h-4 w-4 mr-2" /> },
