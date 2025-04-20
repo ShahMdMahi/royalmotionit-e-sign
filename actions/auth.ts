@@ -314,7 +314,7 @@ export async function resetPassword(token: string, prevState: ResetPasswordFormS
  */
 export async function logoutUser(): Promise<void> {
   try {
-    await signOut();
+    await signOut({ redirect: false });
     redirect("/auth/login");
   } catch (error) {
     console.error("Logout error:", error);

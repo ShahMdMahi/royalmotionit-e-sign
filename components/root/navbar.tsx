@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LayoutDashboard, LogOut, Settings, User } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { logoutUser } from "@/actions/auth";
+import { redirect } from "next/navigation";
 
 export default async function Navbar() {
   const session = await auth();
@@ -105,7 +106,13 @@ export default async function Navbar() {
                     </Link>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="text-destructive" asChild>
-                      <form action={logoutUser}>
+                      <form
+                        action={async () => {
+                          "use server";
+                          await logoutUser();
+                          redirect("/auth/login");
+                        }}
+                      >
                         <Button type="submit" className="w-full flex items-center">
                           <LogOut className="mr-2 h-4 w-4" />
                           <span>Sign out</span>

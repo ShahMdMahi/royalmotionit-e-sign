@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { logoutUser } from "@/actions/auth";
 
 interface MobileMenuProps {
@@ -150,7 +150,14 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
 
               <Separator className="my-2 -mx-4 sm:-mx-6" />
 
-              <form action={logoutUser} className="w-full">
+              <form
+                action={async () => {
+                  "use server";
+                  await logoutUser();
+                  redirect("/auth/login");
+                }}
+                className="w-full"
+              >
                 <Button type="submit" variant="destructive" size="sm" className="justify-start gap-2 w-full text-xs sm:text-sm h-8 sm:h-9 px-3">
                   <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   Sign Out
