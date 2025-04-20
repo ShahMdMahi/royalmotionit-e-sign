@@ -93,52 +93,52 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
                   <Button
                     variant="outline"
                     size="sm"
-                    className="justify-start gap-1.5 text-primary text-xs h-7 px-2"
+                    className="justify-start gap-1.5 text-primary text-sm h-8 px-3"
                     onClick={() => {
                       router.push("/admin/dashboard");
                       setIsOpen(false);
                     }}
                   >
-                    <User className="h-3 w-3" />
+                    <User className="h-4 w-4" />
                     Admin
                   </Button>
                 )}
                 <Button
                   variant="outline"
                   size="sm"
-                  className="justify-start gap-1.5 text-xs h-7 px-2"
+                  className="justify-start gap-1.5 text-sm h-8 px-3"
                   onClick={() => {
                     router.push("/dashboard");
                     setIsOpen(false);
                   }}
                 >
-                  <FileSignature className="h-3 w-3" />
+                  <FileSignature className="h-4 w-4" />
                   Dashboard
                 </Button>
 
                 <Button
                   variant="outline"
                   size="sm"
-                  className="justify-start gap-1.5 text-xs h-7 px-2"
+                  className="justify-start gap-1.5 text-sm h-8 px-3"
                   onClick={() => {
                     router.push("/dashboard/profile");
                     setIsOpen(false);
                   }}
                 >
-                  <User className="h-3 w-3" />
+                  <User className="h-4 w-4" />
                   Profile
                 </Button>
 
                 <Button
                   variant="outline"
                   size="sm"
-                  className="justify-start gap-1.5 text-xs h-7 px-2"
+                  className="justify-start gap-1.5 text-sm h-8 px-3"
                   onClick={() => {
                     router.push("/dashboard/settings");
                     setIsOpen(false);
                   }}
                 >
-                  <Settings className="h-3 w-3" />
+                  <Settings className="h-4 w-4" />
                   Settings
                 </Button>
               </div>
