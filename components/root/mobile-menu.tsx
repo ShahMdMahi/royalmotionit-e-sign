@@ -62,10 +62,10 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
           </div>
         )}
 
-        <div className="flex flex-col gap-0.5 my-1.5 flex-1 overflow-y-auto max-h-[50vh] px-0.5">
+        <div className="flex flex-col gap-1 my-1.5 flex-1 overflow-y-auto max-h-[50vh] px-1">
           <span className="text-xs font-medium text-muted-foreground mb-0.5 px-1">NAVIGATION</span>
 
-          <Link href="/" className="flex items-center text-sm py-1 px-2 hover:text-primary transition-colors rounded hover:bg-muted/50" onClick={() => setIsOpen(false)}>
+          <Link href="/" className="flex items-center text-sm py-1.5 px-2 hover:text-primary transition-colors rounded hover:bg-muted/50" onClick={() => setIsOpen(false)}>
             <Home className="h-4 w-4 mr-2" />
             Home
           </Link>
@@ -73,7 +73,7 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
           {navItems
             .filter((item) => item.name !== "Home")
             .map((item) => (
-              <Link key={item.name} href={item.href} className="flex items-center text-sm py-1 px-2 hover:text-primary transition-colors rounded hover:bg-muted/50" onClick={() => setIsOpen(false)}>
+              <Link key={item.name} href={item.href} className="flex items-center text-sm py-1.5 px-2 hover:text-primary transition-colors rounded hover:bg-muted/50" onClick={() => setIsOpen(false)}>
                 {item.name === "About" && <Info className="h-4 w-4 mr-2" />}
                 {item.name === "Contact" && <Phone className="h-4 w-4 mr-2" />}
                 {item.name === "Privacy Policy" && <FileText className="h-4 w-4 mr-2" />}
@@ -85,10 +85,10 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
 
         <Separator className="my-1.5 -mx-3 sm:-mx-4" />
 
-        <div className="flex flex-col gap-2 mt-2 px-1.5">
+        <div className="flex flex-col gap-1.5 mt-1 px-0.5">
           {isLoggedIn ? (
             <>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 {isAdmin && (
                   <Button
                     variant="outline"
@@ -152,7 +152,7 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
                 }}
                 className="w-full"
               >
-                <Button type="submit" variant="destructive" size="sm" className="justify-start gap-1.5 w-full text-sm h-8 px-3">
+                <Button type="submit" variant="destructive" size="sm" className="justify-start gap-1.5 w-full text-xs h-8 px-3">
                   <LogOut className="h-4 w-4" />
                   Sign Out
                 </Button>
