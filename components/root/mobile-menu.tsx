@@ -66,7 +66,7 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
           <span className="text-xs font-medium text-muted-foreground mb-0.5 px-1">NAVIGATION</span>
 
           <Link href="/" className="flex items-center text-xs py-1 px-2 hover:text-primary transition-colors rounded hover:bg-muted/50" onClick={() => setIsOpen(false)}>
-            <Home className="h-3 w-3 mr-1.5" />
+            <Home className="h-4 w-4 mr-2" />
             Home
           </Link>
 
@@ -74,10 +74,10 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
             .filter((item) => item.name !== "Home")
             .map((item) => (
               <Link key={item.name} href={item.href} className="flex items-center text-xs py-1 px-2 hover:text-primary transition-colors rounded hover:bg-muted/50" onClick={() => setIsOpen(false)}>
-                {item.name === "About" && <Info className="h-3 w-3 mr-1.5" />}
-                {item.name === "Contact" && <Phone className="h-3 w-3 mr-1.5" />}
-                {item.name === "Privacy Policy" && <FileText className="h-3 w-3 mr-1.5" />}
-                {item.name === "Terms of Service" && <FileText className="h-3 w-3 mr-1.5" />}
+                {item.name === "About" && <Info className="h-4 w-4 mr-2" />}
+                {item.name === "Contact" && <Phone className="h-4 w-4 mr-2" />}
+                {item.name === "Privacy Policy" && <FileText className="h-4 w-4 mr-2" />}
+                {item.name === "Terms of Service" && <FileText className="h-4 w-4 mr-2" />}
                 {item.name}
               </Link>
             ))}
