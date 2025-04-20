@@ -77,7 +77,7 @@ export default async function Navbar() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <ScrollArea className="h-[var(--radix-dropdown-menu-content-available-height)] max-h-50">
+                  <ScrollArea className="h-full max-h-50">
                     {isAdmin && (
                       <Link href="/admin/dashboard">
                         <DropdownMenuItem className="text-primary">
@@ -108,9 +108,7 @@ export default async function Navbar() {
                     <DropdownMenuItem className="text-destructive" asChild>
                       <form
                         action={async () => {
-                          "use server";
                           await logoutUser();
-                          redirect("/auth/login");
                         }}
                       >
                         <Button type="submit" className="w-full flex items-center">
