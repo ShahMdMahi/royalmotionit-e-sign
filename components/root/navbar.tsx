@@ -61,12 +61,12 @@ export default async function Navbar() {
         <div className="flex items-center gap-4">
           {isLoggedIn ? (
             <div className="flex gap-4 items-center">
-              <Link href="/dashboard">
-                <Button variant="outline" className="flex items-center">
+              <Button className="flex items-center" asChild>
+                <Link href="/dashboard">
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   <span>Dashboard</span>
-                </Button>
-              </Link>
+                </Link>
+              </Button>
 
               {/* User Menu */}
               <DropdownMenu>
