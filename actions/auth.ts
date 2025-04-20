@@ -2,10 +2,11 @@
 import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from "@/schema";
 import { prisma } from "@/prisma/prisma";
 import bcryptjs from "bcryptjs";
-import { signIn } from "@/auth";
+import { signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
 import { generateVerificationToken } from "@/lib/token";
 import { sendAccountVerificationEmail, sendWelcomeEmail } from "@/actions/email";
+import { redirect } from "next/navigation";
 
 // Types for form states
 type RegisterFormState = {
@@ -312,7 +313,12 @@ export async function resetPassword(token: string, prevState: ResetPasswordFormS
  * Log out a user
  */
 export async function logoutUser(): Promise<void> {
-  //TODO: Implement logout logic
+  try {
+    await signOut();
+    redirect("/auth/login");
+  } catch (error) {
+    console.error("Logout error:", error);
+  }
 }
 
 /**

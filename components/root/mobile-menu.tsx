@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { logoutUser } from "@/actions/auth";
 
 interface MobileMenuProps {
   navItems: Array<{ name: string; href: string }>;
@@ -92,20 +93,21 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
         <div className="flex flex-col gap-2 mt-1 sm:mt-2 px-0.5">
           {isLoggedIn ? (
             <>
-              <Button
-                variant="default"
-                size="sm"
-                className="justify-start gap-2 mb-2 text-xs sm:text-sm h-8 sm:h-9 px-3"
-                onClick={() => {
-                  router.push("/dashboard/new");
-                  setIsOpen(false);
-                }}
-              >
-                <FileSignature className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                New Document
-              </Button>
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {isAdmin && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="justify-start gap-2 text-primary text-xs sm:text-sm h-8 sm:h-9 px-3"
+                    onClick={() => {
+                      router.push("/admin/dashboard");
+                      setIsOpen(false);
+                    }}
+                  >
+                    <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    Admin
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
@@ -116,7 +118,7 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
                   }}
                 >
                   <FileSignature className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  My Documents
+                  Dashboard
                 </Button>
 
                 <Button
@@ -144,26 +146,11 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
                   <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   Settings
                 </Button>
-
-                {isAdmin && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="justify-start gap-2 text-primary text-xs sm:text-sm h-8 sm:h-9 px-3"
-                    onClick={() => {
-                      router.push("/admin/dashboard");
-                      setIsOpen(false);
-                    }}
-                  >
-                    <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    Admin
-                  </Button>
-                )}
               </div>
 
               <Separator className="my-2 -mx-4 sm:-mx-6" />
 
-              <form action="/api/auth/signout" method="post" className="w-full">
+              <form action={logoutUser} className="w-full">
                 <Button type="submit" variant="destructive" size="sm" className="justify-start gap-2 w-full text-xs sm:text-sm h-8 sm:h-9 px-3">
                   <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   Sign Out
@@ -182,7 +169,7 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
                 }}
               >
                 <LogIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                Log in
+                Login
               </Button>
               <Button
                 size="sm"
@@ -193,7 +180,7 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
                 }}
               >
                 <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                Get Started
+                Register
               </Button>
             </div>
           )}
