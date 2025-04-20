@@ -34,7 +34,7 @@ export function VerifyEmailForm({ token }: VerifyEmailProps) {
           // Redirect to login after successful verification
           setTimeout(() => {
             router.push("/auth/login");
-          }, 2000);
+          }, 100);
         } else {
           setStatus("error");
           setMessage(result.message);

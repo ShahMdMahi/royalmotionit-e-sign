@@ -67,7 +67,7 @@ export function LoginForm() {
     toast.success("Login successful! Redirecting to dashboard...");
     setTimeout(() => {
       router.push("/dashboard");
-    }, 2000);
+    }, 100);
   }
 
   // Show error message if there's a failure

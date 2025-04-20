@@ -63,7 +63,7 @@ export function ForgotPasswordForm() {
     toast.success("Reset link sent! Check your email inbox. Redirecting to home...");
     setTimeout(() => {
       router.push("/");
-    }, 2000);
+    }, 100);
   }
 
   // Show error message if there's a failure

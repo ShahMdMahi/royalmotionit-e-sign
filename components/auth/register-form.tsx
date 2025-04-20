@@ -70,7 +70,7 @@ export function RegisterForm() {
     toast.success("Registration successful! Redirecting to login...");
     setTimeout(() => {
       router.push("/auth/login");
-    }, 2000);
+    }, 100);
   }
 
   // Show error message if there's a failure
