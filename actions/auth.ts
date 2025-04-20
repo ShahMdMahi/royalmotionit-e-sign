@@ -6,7 +6,6 @@ import { signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
 import { generateVerificationToken } from "@/lib/token";
 import { sendAccountVerificationEmail, sendWelcomeEmail } from "@/actions/email";
-import { redirect } from "next/navigation";
 
 // Types for form states
 type RegisterFormState = {

@@ -10,7 +10,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LayoutDashboard, LogOut, Settings, User } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { logoutUser } from "@/actions/auth";
-import { redirect } from "next/navigation";
 
 export default async function Navbar() {
   const session = await auth();
