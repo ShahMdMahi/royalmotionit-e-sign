@@ -61,6 +61,13 @@ export default async function Navbar() {
         <div className="flex items-center gap-4">
           {isLoggedIn ? (
             <div className="flex gap-4 items-center">
+              <Link href="/dashboard">
+                <Button variant="outline" className="flex items-center">
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  <span>Dashboard</span>
+                </Button>
+              </Link>
+
               {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -91,13 +98,13 @@ export default async function Navbar() {
                         <span>Dashboard</span>
                       </DropdownMenuItem>
                     </Link>
-                    <Link href="/dashboard/profile">
+                    <Link href="/profile">
                       <DropdownMenuItem>
                         <User className="mr-2 h-4 w-4" />
                         <span>Profile</span>
                       </DropdownMenuItem>
                     </Link>
-                    <Link href="/dashboard/settings">
+                    <Link href="/settings">
                       <DropdownMenuItem>
                         <Settings className="mr-2 h-4 w-4" />
                         <span>Settings</span>

@@ -121,7 +121,7 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
                   size="sm"
                   className="justify-start gap-1.5 text-sm h-8 px-3"
                   onClick={() => {
-                    router.push("/dashboard/profile");
+                    router.push("/profile");
                     setIsOpen(false);
                   }}
                 >
@@ -134,7 +134,7 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
                   size="sm"
                   className="justify-start gap-1.5 text-sm h-8 px-3"
                   onClick={() => {
-                    router.push("/dashboard/settings");
+                    router.push("/settings");
                     setIsOpen(false);
                   }}
                 >
