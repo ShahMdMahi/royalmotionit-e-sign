@@ -77,6 +77,14 @@ export default async function Navbar() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <ScrollArea className="h-[var(--radix-dropdown-menu-content-available-height)] max-h-72">
+                    {isAdmin && (
+                      <Link href="/admin/dashboard">
+                        <DropdownMenuItem className="text-primary">
+                          <User className="mr-2 h-4 w-4" />
+                          <span>Admin Dashboard</span>
+                        </DropdownMenuItem>
+                      </Link>
+                    )}
                     <Link href="/dashboard">
                       <DropdownMenuItem>
                         <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -95,28 +103,13 @@ export default async function Navbar() {
                         <span>Settings</span>
                       </DropdownMenuItem>
                     </Link>
-                    {isAdmin && (
-                      <Link href="/admin/dashboard">
-                        <DropdownMenuItem className="text-primary">
-                          <User className="mr-2 h-4 w-4" />
-                          <span>Admin Dashboard</span>
-                        </DropdownMenuItem>
-                      </Link>
-                    )}
                     <DropdownMenuSeparator />
-                    <form
-                      action={async () => {
-                        await signOut({ redirect: true, redirectTo: "/auth/login" });
-                      }}
-                      method="post"
-                    >
                       <DropdownMenuItem className="text-destructive" asChild>
                         <button className="w-full flex items-center">
                           <LogOut className="mr-2 h-4 w-4" />
                           <span>Sign out</span>
                         </button>
                       </DropdownMenuItem>
-                    </form>
                   </ScrollArea>
                 </DropdownMenuContent>
               </DropdownMenu>
