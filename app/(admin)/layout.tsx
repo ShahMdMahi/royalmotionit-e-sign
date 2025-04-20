@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Role } from "@prisma/client";
+import { AdminNavbar } from "@/components/admin/admin-navbar";
 
 export const metadata: Metadata = {
   title: "Admin - Royal Sign - RoyalMotionIT",
@@ -19,6 +20,11 @@ export default async function RootLayout({
   } else if (session?.user?.role !== Role.ADMIN) {
     redirect("/");
   } else {
-    return <>{children}</>;
+    return (
+      <>
+        <AdminNavbar />
+        {children}
+      </>
+    );
   }
 }
