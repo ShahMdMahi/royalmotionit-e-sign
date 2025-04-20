@@ -16,7 +16,7 @@ export default function NotFound() {
       </div>
 
       <h1 className="text-3xl font-bold tracking-tight mb-2">Page Not Found</h1>
-      <p className="text-muted-foreground mb-8">The page you are looking for doesn't exist or has been moved.</p>
+      <p className="text-muted-foreground mb-8">The page you are looking for doesn&apos;t exist or has been moved.</p>
 
       <Card className="card-hover border-none shadow-lg w-full">
         <CardHeader>

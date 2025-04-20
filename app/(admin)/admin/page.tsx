@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
 
-export default async function () {
+export default async function Redirect() {
   const session = await auth();
   if (!session) {
     redirect("/auth/login");
