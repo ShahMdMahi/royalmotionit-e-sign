@@ -108,7 +108,6 @@ export default async function Navbar() {
                     <DropdownMenuItem className="text-destructive" asChild>
                       <form
                         action={async () => {
-                          "use server";
                           await logoutUser();
                           redirect("/auth/login");
                         }}

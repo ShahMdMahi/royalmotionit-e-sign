@@ -30,13 +30,7 @@ export default function Home() {
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/5 rounded-2xl backdrop-blur-sm border border-primary/10 transform rotate-3"></div>
                 <div className="relative bg-background backdrop-blur-sm border border-border p-6 rounded-2xl shadow-lg">
-                  <Image
-                    src="/placeholder.svg?height=550&width=550"
-                    width={550}
-                    height={550}
-                    alt="Royal Sign Platform"
-                    className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full"
-                  />
+                  <Image src="/hero.png" width={550} height={550} alt="Royal Sign Platform" className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full" />
                 </div>
               </div>
             </div>
