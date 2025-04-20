@@ -152,8 +152,8 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
                 }}
                 className="w-full"
               >
-                <Button type="submit" variant="destructive" size="sm" className="justify-start gap-1.5 w-full text-xs h-7 px-2">
-                  <LogOut className="h-3 w-3" />
+                <Button type="submit" variant="destructive" size="sm" className="justify-start gap-1.5 w-full text-sm h-8 px-3">
+                  <LogOut className="h-4 w-4" />
                   Sign Out
                 </Button>
               </form>
