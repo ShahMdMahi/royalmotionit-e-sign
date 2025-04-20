@@ -104,12 +104,12 @@ export default async function Navbar() {
                       </DropdownMenuItem>
                     </Link>
                     <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive" asChild>
-                        <button className="w-full flex items-center">
-                          <LogOut className="mr-2 h-4 w-4" />
-                          <span>Sign out</span>
-                        </button>
-                      </DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive" asChild>
+                      <button className="w-full flex items-center">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Sign out</span>
+                      </button>
+                    </DropdownMenuItem>
                   </ScrollArea>
                 </DropdownMenuContent>
               </DropdownMenu>
