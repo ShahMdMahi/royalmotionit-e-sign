@@ -17,14 +17,16 @@ export default async function RootLayout({
   const session = await auth();
   if (!session) {
     redirect("/auth/login");
-  } else if (session?.user?.role !== Role.ADMIN) {
-    redirect("/");
-  } else {
+  } else if (session.user.role === Role.USER) {
+    redirect("/dashboard");
+  } else if (session.user.role === Role.ADMIN) {
     return (
       <>
         <AdminNavbar />
         {children}
       </>
     );
+  } else {
+    redirect("/");
   }
 }

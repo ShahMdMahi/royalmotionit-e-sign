@@ -4,11 +4,11 @@ import { redirect } from "next/navigation";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dashboard - Admin - Royal Sign - RoyalMotionIT",
-  description: "Dashboard for managing administrative tasks in Royal Sign e-signature application.",
+  title: "Users - Admin - Royal Sign - RoyalMotionIT",
+  description: "Users for managing administrative tasks in Royal Sign e-signature application.",
 };
 
-export default async function AdminDashboard() {
+export default async function AdminUsers() {
   const session = await auth();
   if (!session) {
     redirect("/auth/login");
@@ -17,7 +17,7 @@ export default async function AdminDashboard() {
   } else if (session.user.role === Role.ADMIN) {
     return (
       <div>
-        <h1>Dashboard</h1>
+        <h1>Users</h1>
         <p>Welcome {session.user.email}</p>
         <p>{JSON.stringify(session)}</p>
         <p>{JSON.stringify(session?.user)}</p>

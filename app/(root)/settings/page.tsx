@@ -3,17 +3,17 @@ import { redirect } from "next/navigation";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dashboard - Royal Sign - RoyalMotionIT",
-  description: "User dashboard for Royal Sign e-signature application.",
+  title: "Settings - Royal Sign - RoyalMotionIT",
+  description: "User settings for Royal Sign e-signature application.",
 };
 
-export default async function Dashboard() {
+export default async function Settings() {
   const session = await auth();
   if (session) {
     return (
       <div>
         <div>Welcome</div>
-        <div>User Dashboard</div>
+        <div>User Settings</div>
         <div>Additional Content Here</div>
       </div>
     );

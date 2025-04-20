@@ -439,9 +439,9 @@ export default function Home() {
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
                 <Button size="lg" variant="secondary" asChild className="font-medium">
-                  <Link href="#signup">Sign Up Free</Link>
+                  <Link href="/auth/register">Sign Up Free</Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="text-white border-white/30 hover:bg-white/10">
+                <Button size="lg" variant="outline" asChild className="text-black border-white/30 hover:bg-white/10">
                   <Link href="#demo">
                     Schedule Demo <ArrowRight className="ml-2 size-4" />
                   </Link>
