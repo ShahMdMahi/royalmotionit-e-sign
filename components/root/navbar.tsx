@@ -77,7 +77,7 @@ export default async function Navbar() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <ScrollArea className="h-[var(--radix-dropdown-menu-content-available-height)] max-h-72">
+                  <ScrollArea className="h-[var(--radix-dropdown-menu-content-available-height)] max-h-40">
                     {isAdmin && (
                       <Link href="/admin/dashboard">
                         <DropdownMenuItem className="text-primary">
