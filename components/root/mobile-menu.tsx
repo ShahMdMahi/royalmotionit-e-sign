@@ -145,12 +145,7 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
 
               <Separator className="my-1.5 -mx-3 sm:-mx-4" />
 
-              <form
-                action={async () => {
-                  await logoutUser();
-                }}
-                className="w-full"
-              >
+              <form action={logoutUser} className="w-full">
                 <Button type="submit" variant="destructive" size="sm" className="justify-start gap-1.5 w-full text-xs h-8 px-3">
                   <LogOut className="h-4 w-4" />
                   Sign Out

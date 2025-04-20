@@ -106,11 +106,7 @@ export default async function Navbar() {
                     </Link>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="text-destructive" asChild>
-                      <form
-                        action={async () => {
-                          await logoutUser();
-                        }}
-                      >
+                      <form action={logoutUser}>
                         <Button type="submit" className="w-full flex items-center">
                           <LogOut className="mr-2 h-4 w-4" />
                           <span>Sign out</span>
