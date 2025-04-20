@@ -152,9 +152,7 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
 
               <form
                 action={async () => {
-                  "use server";
                   await logoutUser();
-                  redirect("/auth/login");
                 }}
                 className="w-full"
               >
