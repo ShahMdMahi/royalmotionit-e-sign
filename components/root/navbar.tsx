@@ -7,8 +7,9 @@ import { auth } from "@/auth";
 import { Role } from "@prisma/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileSignature, LogOut, Settings, User } from "lucide-react";
+import { LayoutDashboard, LogOut, Settings, User } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { signOut } from "@/auth";
 
 export default async function Navbar() {
   const session = await auth();
@@ -60,14 +61,6 @@ export default async function Navbar() {
         <div className="flex items-center gap-4">
           {isLoggedIn ? (
             <div className="flex gap-4 items-center">
-              {/* Create New Button */}
-              <Button asChild variant="default" size="sm" className="hidden sm:flex">
-                <Link href="/dashboard/new">
-                  <FileSignature className="h-4 w-4 mr-2" />
-                  New Document
-                </Link>
-              </Button>
-
               {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -86,8 +79,8 @@ export default async function Navbar() {
                   <ScrollArea className="h-[var(--radix-dropdown-menu-content-available-height)] max-h-72">
                     <Link href="/dashboard">
                       <DropdownMenuItem>
-                        <FileSignature className="mr-2 h-4 w-4" />
-                        <span>My Documents</span>
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        <span>Dashboard</span>
                       </DropdownMenuItem>
                     </Link>
                     <Link href="/dashboard/profile">
@@ -111,7 +104,12 @@ export default async function Navbar() {
                       </Link>
                     )}
                     <DropdownMenuSeparator />
-                    <form action="/api/auth/signout" method="post">
+                    <form
+                      action={async () => {
+                        await signOut({ redirect: true, redirectTo: "/auth/login" });
+                      }}
+                      method="post"
+                    >
                       <DropdownMenuItem className="text-destructive" asChild>
                         <button className="w-full flex items-center">
                           <LogOut className="mr-2 h-4 w-4" />
@@ -126,10 +124,10 @@ export default async function Navbar() {
           ) : (
             <>
               <Button variant="outline" asChild className="hidden sm:inline-flex">
-                <Link href="/auth/login">Log in</Link>
+                <Link href="/auth/login">Login</Link>
               </Button>
               <Button asChild>
-                <Link href="/auth/register">Get Started</Link>
+                <Link href="/auth/register">Register</Link>
               </Button>
             </>
           )}
