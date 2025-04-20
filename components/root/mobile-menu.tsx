@@ -163,24 +163,24 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
               <Button
                 variant="outline"
                 size="sm"
-                className="justify-start gap-1.5 w-full text-xs h-7 px-2"
+                className="justify-start gap-1.5 w-full text-sm h-8 px-3"
                 onClick={() => {
                   router.push("/auth/login");
                   setIsOpen(false);
                 }}
               >
-                <LogIn className="h-3 w-3" />
+                <LogIn className="h-4 w-4" />
                 Login
               </Button>
               <Button
                 size="sm"
-                className="justify-start gap-1.5 w-full text-xs h-7 px-2"
+                className="justify-start gap-1.5 w-full text-sm h-8 px-3"
                 onClick={() => {
                   router.push("/auth/register");
                   setIsOpen(false);
                 }}
               >
-                <User className="h-3 w-3" />
+                <User className="h-4 w-4" />
                 Register
               </Button>
             </div>
