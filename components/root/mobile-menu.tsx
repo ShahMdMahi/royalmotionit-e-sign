@@ -85,10 +85,10 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
 
         <Separator className="my-1.5 -mx-3 sm:-mx-4" />
 
-        <div className="flex flex-col gap-1.5 mt-1 px-0.5">
+        <div className="flex flex-col gap-2 mt-2 px-1.5">
           {isLoggedIn ? (
             <>
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="grid grid-cols-2 gap-2">
                 {isAdmin && (
                   <Button
                     variant="outline"
