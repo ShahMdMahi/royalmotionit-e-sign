@@ -24,7 +24,7 @@ export default function Maintenance() {
           </div>
 
           <p className="text-lg text-muted-foreground">Our system is currently undergoing scheduled maintenance.</p>
-          <p className="text-sm text-muted-foreground mb-6">We're working to improve your experience. Please check back soon.</p>
+          <p className="text-sm text-muted-foreground mb-6">We&apos;re working to improve your experience. Please check back soon.</p>
         </div>
 
         <div className="mt-6 flex flex-col gap-4">
