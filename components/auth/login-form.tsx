@@ -17,14 +17,10 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { PasswordInput } from "@/components/ui/password-input";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
-import { get } from "@vercel/edge-config";
 
 type FormData = z.infer<typeof loginSchema>;
 
-const isRegistrationActive = await get("REGISTRATION_ACTIVE");
-const isGoogleAuthActive = await get("GOOGLE_AUTH_ACTIVE");
-
-export function LoginForm() {
+export function LoginForm({ isGoogleAuthActive, isRegistrationActive }: { isGoogleAuthActive: boolean; isRegistrationActive: boolean }) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();

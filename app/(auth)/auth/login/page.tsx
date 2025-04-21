@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import { Role } from "@prisma/client";
+import { getIsGoogleAuthActive, getIsRegistrationActive } from "@/actions/edge-config";
 
 export const metadata: Metadata = {
   title: "Login - Authentication - Royal Sign - RoyalMotionIT",
@@ -12,6 +13,8 @@ export const metadata: Metadata = {
 };
 
 export default async function Login() {
+  const isRegistrationActive = await getIsRegistrationActive();
+  const isGoogleAuthActive = await getIsGoogleAuthActive();
   const session = await auth();
   if (!session) {
     return (
@@ -27,7 +30,7 @@ export default async function Login() {
           </div>
           <div className="flex flex-1 items-center justify-center">
             <div className="w-full max-w-xs">
-              <LoginForm />
+              <LoginForm isGoogleAuthActive={isGoogleAuthActive} isRegistrationActive={isRegistrationActive} />
             </div>
           </div>
         </div>
