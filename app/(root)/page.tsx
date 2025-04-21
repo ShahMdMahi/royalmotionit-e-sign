@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CheckCircle, FileSignature, Shield, Zap, Users, ArrowRight, Laptop, Code, Lock } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-export default function Home() {
+export default async function Home() {
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1">
