@@ -9,39 +9,67 @@ const { auth } = NextAuth(authConfig);
 export default auth(async (req) => {
   const isLoggedIn = !!req.auth;
   const { nextUrl } = req;
-  const isRegistrationActive = await get("REGISTRATION_ACTIVE");
 
+  // Get configuration from edge config
+  const isRegistrationActive = await get("REGISTRATION_ACTIVE");
+  const isMaintenanceMode = await get("MAINTENANCE_MODE_ACTIVE");
+
+  // Path detection
   const isPrivateRoute = privateRoutes.includes(nextUrl.pathname);
   const isAuthRoute = nextUrl.pathname.includes("/auth");
   const isApiRoute = nextUrl.pathname.includes("/api");
   const isRegistrationRoute = nextUrl.pathname.includes("/auth/register");
+  const isMaintenanceRoute = nextUrl.pathname.includes("/maintenance");
 
+  // Don't redirect API routes
   if (isApiRoute) {
     return;
   }
 
+  // Strict maintenance mode enforcement - redirect everyone to maintenance page
+  if (isMaintenanceMode) {
+    // If already on maintenance page, allow access
+    if (isMaintenanceRoute) {
+      return;
+    }
+
+    // Redirect everyone to maintenance page regardless of role
+    const url = req.nextUrl.clone();
+    url.pathname = "/maintenance";
+    return NextResponse.redirect(url);
+  }
+
+  // The code below will only execute if NOT in maintenance mode
+
+  // If user is logged in and tries to access auth pages, redirect to home
   if (isLoggedIn && isAuthRoute) {
     const url = req.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);
   }
 
+  // If registration is disabled and user tries to register, redirect to login
   if (!isRegistrationActive && isRegistrationRoute) {
-    console.log("Registration is not active");
     const url = req.nextUrl.clone();
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
   }
 
+  // Non-logged in users can access auth routes
   if (isAuthRoute && !isLoggedIn) {
     return;
   }
 
+  // Redirect non-logged in users to login if they try to access private routes
   if (!isLoggedIn && isPrivateRoute) {
     const url = req.nextUrl.clone();
     url.pathname = "/auth/login";
+    url.searchParams.set("callbackUrl", nextUrl.pathname);
     return NextResponse.redirect(url);
   }
+
+  // Allow all other routes
+  return;
 });
 
 export const config = {

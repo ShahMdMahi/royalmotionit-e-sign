@@ -2,9 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { auth } from "@/auth";
-import { get } from "@vercel/edge-config";
-import { Role } from "@prisma/client";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,25 +23,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const maintenanceMode = await get("MAINTENANCE_MODE_ACTIVE");
-  const session = await auth();
-  if (maintenanceMode && session?.user?.role === Role.ADMIN) {
-    return (
-      <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full`}>
-          {children}
-          <Toaster />
-        </body>
-      </html>
-    );
-  } else {
-    return (
-      <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full`}>
-          {children}
-          <Toaster />
-        </body>
-      </html>
-    );
-  }
+  return (
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full`}>
+        {children}
+        <Toaster />
+      </body>
+    </html>
+  );
 }
