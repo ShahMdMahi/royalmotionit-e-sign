@@ -17,8 +17,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { PasswordInput } from "@/components/ui/password-input";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
+import { get } from "@vercel/edge-config";
 
 type FormData = z.infer<typeof registerSchema>;
+
+const isGoogleAuthActive = await get("GOOGLE_AUTH_ACTIVE");
 
 export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -155,16 +158,20 @@ export function RegisterForm() {
           </Button>
         </form>
 
-        <div className="relative my-2">
-          <div className="absolute inset-0 flex items-center">
-            <Separator className="w-full" />
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-background px-2 text-muted-foreground text-xs">Or continue with</span>
-          </div>
-        </div>
+        {isGoogleAuthActive && (
+          <>
+            <div className="relative my-2">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-background px-2 text-muted-foreground text-xs">Or continue with</span>
+              </div>
+            </div>
 
-        <GoogleAuthButton />
+            <GoogleAuthButton />
+          </>
+        )}
 
         <div className="text-center text-xs pt-2">
           Already have an account?{" "}

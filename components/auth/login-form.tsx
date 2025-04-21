@@ -17,8 +17,12 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { PasswordInput } from "@/components/ui/password-input";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
+import { get } from "@vercel/edge-config";
 
 type FormData = z.infer<typeof loginSchema>;
+
+const isRegistrationActive = await get("REGISTRATION_ACTIVE");
+const isGoogleAuthActive = await get("GOOGLE_AUTH_ACTIVE");
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -124,23 +128,29 @@ export function LoginForm() {
           </Button>
         </form>
 
-        <div className="relative my-2">
-          <div className="absolute inset-0 flex items-center">
-            <Separator className="w-full" />
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-background px-2 text-muted-foreground text-xs">Or continue with</span>
-          </div>
-        </div>
+        {isGoogleAuthActive && (
+          <>
+            <div className="relative my-2">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-background px-2 text-muted-foreground text-xs">Or continue with</span>
+              </div>
+            </div>
 
-        <GoogleAuthButton />
+            <GoogleAuthButton />
+          </>
+        )}
 
-        <div className="text-center text-xs pt-2">
-          Don&apos;t have an account?{" "}
-          <Link href="/auth/register" className="text-primary hover:underline">
-            Register
-          </Link>
-        </div>
+        {isRegistrationActive && (
+          <div className="text-center text-xs pt-2">
+            Don&apos;t have an account?{" "}
+            <Link href="/auth/register" className="text-primary hover:underline">
+              Register
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
