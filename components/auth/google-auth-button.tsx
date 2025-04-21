@@ -19,8 +19,13 @@ export function GoogleAuthButton({ variant = "outline", fullWidth = true, classN
     startTransition(async () => {
       try {
         toast.info("Redirecting to Google authentication...");
-        const { redirectUrl } = await googleAuth();
+        const { redirectUrl, message } = await googleAuth();
         console.log("Google auth response - redirectUrl:", redirectUrl);
+
+        if (message) {
+          toast.error(message);
+          return;
+        }
 
         if (redirectUrl) {
           console.log("Redirecting to:", redirectUrl);

@@ -6,6 +6,7 @@ import { signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
 import { generateVerificationToken } from "@/lib/token";
 import { sendAccountVerificationEmail, sendWelcomeEmail } from "@/actions/email";
+import { get } from "@vercel/edge-config";
 
 // Types for form states
 type RegisterFormState = {
@@ -50,6 +51,14 @@ type ResetPasswordFormState = {
  * Register a new user
  */
 export async function registerUser(prevState: RegisterFormState, formData: FormData): Promise<RegisterFormState> {
+  const isRegistrationActive = await get("REGISTRATION_ACTIVE");
+  if (!isRegistrationActive) {
+    return {
+      message: "Registration is not active. Contact support for more information.",
+      success: false,
+    };
+  }
+
   // Validate form fields
   const validatedFields = registerSchema.safeParse({
     firstName: formData.get("firstName"),
@@ -313,7 +322,7 @@ export async function resetPassword(token: string, prevState: ResetPasswordFormS
  */
 export async function logoutUser(): Promise<void> {
   try {
-    await signOut({ redirect: true, redirectTo: "/" });
+    await signOut({ redirectTo: "/" });
   } catch (error) {
     console.error("Logout error:", error);
   }
@@ -322,8 +331,13 @@ export async function logoutUser(): Promise<void> {
 /**
  * Authenticate with Google
  */
-export async function googleAuth(): Promise<{ redirectUrl?: string }> {
+export async function googleAuth(): Promise<{ redirectUrl?: string; message?: string }> {
   try {
+    const isGoogleAuthActive = await get("GOOGLE_AUTH_ACTIVE");
+    if (!isGoogleAuthActive) {
+      console.error("Google authentication is not enabled.");
+      return { message: "Google authentication is not enabled. Contact support for more information." };
+    }
     const result = await signIn("google", {
       redirect: false,
       callbackUrl: "/dashboard",
