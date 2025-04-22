@@ -1,4 +1,5 @@
 import { createVerificationToken, deleteVerificationToken, getVerificationTokenByIdentifier } from "@/data/verification-token";
+import { createResetPasswordToken, deleteResetPasswordToken, getResetPasswordTokenByIdentifier } from "@/data/reset-password-token";
 import { v4 as uuid } from "uuid";
 
 // Define interfaces for return types
@@ -93,15 +94,15 @@ export async function generateResetPasswordToken(email: string): Promise<ResetPa
     const emailLower = email.toLowerCase(); // Ensure the email is in lowercase
 
     // Check if a token already exists for the email
-    const existingToken = await getVerificationTokenByIdentifier(emailLower);
+    const existingToken = await getResetPasswordTokenByIdentifier(emailLower);
 
     // Delete the existing token if it exists
     if (existingToken.success && existingToken.token) {
-      await deleteVerificationToken(emailLower);
+      await deleteResetPasswordToken(emailLower);
     }
 
     // Create a new token
-    const resetPasswordToken = await createVerificationToken({
+    const resetPasswordToken = await createResetPasswordToken({
       identifier: emailLower,
       token: token,
       expires: expires,
