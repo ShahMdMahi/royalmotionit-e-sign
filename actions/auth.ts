@@ -4,8 +4,8 @@ import { prisma } from "@/prisma/prisma";
 import bcryptjs from "bcryptjs";
 import { signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
-import { generateVerificationToken } from "@/lib/token";
-import { sendAccountVerificationEmail, sendWelcomeEmail } from "@/actions/email";
+import { generateResetPasswordToken, generateVerificationToken } from "@/lib/token";
+import { sendAccountVerificationEmail, sendResetPasswordEmail, sendWelcomeEmail } from "@/actions/email";
 import { get } from "@vercel/edge-config";
 
 // Types for form states
@@ -265,10 +265,55 @@ export async function forgotPassword(prevState: ForgotPasswordFormState, formDat
   const { email } = validatedFields.data;
 
   try {
-    //TODO: Implement password reset logic
-    console.log("Forgoting password:", email);
+    // Normalize email to lowercase
+    const emailLower = email.toLowerCase();
+
+    // Check if the user exists
+    const user = await prisma.user.findUnique({
+      where: { email: emailLower },
+    });
+
+    if (!user) {
+      return {
+        errors: { email: ["User not found"] },
+        message: "User not found",
+        success: false,
+      };
+    }
+
+    if (!user.name) {
+      return {
+        errors: { email: ["User not found"] },
+        message: "User not found",
+        success: false,
+      };
+    }
+
+    if (!user.emailVerified) {
+      // Create User Verify Token
+      const verificationToken = await generateVerificationToken(emailLower);
+
+      if (verificationToken.verificationToken?.token) {
+        await sendAccountVerificationEmail(user.name, emailLower, verificationToken.verificationToken?.token);
+      }
+
+      return {
+        errors: { email: ["Email not verified"] },
+        message: "Verify your email to reset your password. Verification email sent.",
+        success: false,
+      };
+    }
+
+    // Create a password reset token
+    const resetPasswordToken = await generateResetPasswordToken(emailLower);
+
+    // Send a password reset email
+    if (resetPasswordToken.resetPasswordToken?.token) {
+      await sendResetPasswordEmail(user.name, emailLower, resetPasswordToken.resetPasswordToken?.token);
+    }
+
     return {
-      message: "If an account with that email exists, we've sent a password reset link.",
+      message: "Password reset email sent successfully.",
       success: true,
     };
   } catch (error) {
@@ -302,8 +347,38 @@ export async function resetPassword(token: string, prevState: ResetPasswordFormS
   const { password } = validatedFields.data;
 
   try {
-    //TODO: Implement reset password logic
-    console.log("Resetting password:", { token, password });
+    const resetPasswordToken = await prisma.verificationToken.findFirst({
+      where: { token },
+    });
+
+    if (!resetPasswordToken) {
+      return {
+        message: "Invalid or expired reset token.",
+        success: false,
+      };
+    }
+
+    const hashExpired = resetPasswordToken.expires < new Date(Date.now());
+
+    if (hashExpired) {
+      await prisma.verificationToken.delete({
+        where: { id: resetPasswordToken.id },
+      });
+
+      return {
+        message: "Reset token has expired.",
+        success: false,
+      };
+    }
+
+    // Hash the new password before saving to the database
+    const hashedPassword = await bcryptjs.hash(password, 10);
+
+    await prisma.user.update({
+      where: { email: resetPasswordToken.identifier },
+      data: { password: hashedPassword },
+    });
+
     return {
       message: "Your password has been reset successfully.",
       success: true,
@@ -324,6 +399,10 @@ export async function logoutUser(): Promise<void> {
   try {
     await signOut({ redirectTo: "/" });
   } catch (error) {
+    // NEXT_REDIRECT error should be re-thrown to be handled by Next.js
+    if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+      throw error;
+    }
     console.error("Logout error:", error);
   }
 }

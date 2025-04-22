@@ -66,6 +66,15 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model ResetPasswordToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
 // Optional for WebAuthn support
 model Authenticator {
   credentialID         String  @id @map("_id")
