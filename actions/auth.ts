@@ -347,7 +347,7 @@ export async function resetPassword(token: string, prevState: ResetPasswordFormS
   const { password } = validatedFields.data;
 
   try {
-    const resetPasswordToken = await prisma.verificationToken.findFirst({
+    const resetPasswordToken = await prisma.resetPasswordToken.findFirst({
       where: { token },
     });
 
