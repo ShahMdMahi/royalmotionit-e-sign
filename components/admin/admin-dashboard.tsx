@@ -129,19 +129,19 @@ export function AdminDashboardComponent() {
             </Link>
 
             <form action={logoutUser} className="w-full">
-              <Button type="submit" className="w-full h-full p-0" variant="ghost">
-                <Card className="h-full card-hover border-border hover:border-destructive/10 cursor-pointer w-full">
-                  <CardContent className="flex flex-col items-center justify-center gap-4 pt-6 pb-6">
-                    <div className="size-12 rounded-full bg-destructive/10 flex items-center justify-center">
-                      <LogOut className="size-6 text-destructive" />
-                    </div>
-                    <div className="space-y-1 text-center">
-                      <h3 className="text-lg font-medium">Logout</h3>
-                      <p className="text-sm text-muted-foreground">Sign out of your account</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Button>
+              <Card className="h-full card-hover border-border hover:border-destructive/50 cursor-pointer">
+                <CardContent className="flex flex-col items-center justify-center gap-4 pt-6 pb-6">
+                  <div className="size-12 rounded-full bg-destructive/10 flex items-center justify-center">
+                    <LogOut className="size-6 text-destructive" />
+                  </div>
+                  <div className="space-y-1 text-center">
+                    <Button variant="ghost" className="font-medium h-auto p-0">
+                      Logout
+                    </Button>
+                    <p className="text-sm text-muted-foreground">Sign out of your account</p>
+                  </div>
+                </CardContent>
+              </Card>
             </form>
           </div>
         </div>
