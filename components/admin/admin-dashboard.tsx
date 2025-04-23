@@ -129,7 +129,6 @@ export function AdminDashboardComponent() {
             </Link>
 
             <form action={logoutUser} className="w-full">
-              <Button type="submit" className="w-full" variant="ghost">
                 <Card className="h-full card-hover border-border ho</button>ver:border-destructive/10 cursor-pointer">
                   <CardContent className="flex flex-col items-center justify-center gap-4 pt-6 pb-6">
                     <div className="size-12 rounded-full bg-destructive/10 flex items-center justify-center">
@@ -143,7 +142,6 @@ export function AdminDashboardComponent() {
                     </div>
                   </CardContent>
                 </Card>
-              </Button>
             </form>
           </div>
         </div>
