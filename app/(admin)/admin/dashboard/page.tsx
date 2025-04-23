@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
+import { AdminDashboardComponent } from "@/components/admin/admin-dashboard";
 
 export const metadata: Metadata = {
   title: "Dashboard - Admin - Royal Sign - RoyalMotionIT",
@@ -15,14 +16,7 @@ export default async function AdminDashboard() {
   } else if (session.user.role === Role.USER) {
     redirect("/dashboard");
   } else if (session.user.role === Role.ADMIN) {
-    return (
-      <div>
-        <h1>Dashboard</h1>
-        <p>Welcome {session.user.email}</p>
-        <p>{JSON.stringify(session)}</p>
-        <p>{JSON.stringify(session?.user)}</p>
-      </div>
-    );
+    return <AdminDashboardComponent />;
   } else {
     redirect("/");
   }
