@@ -8,7 +8,6 @@ import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Label } from "@/components/ui/label";
 
 export function UsersComponent({ users }: { users: User[] }) {
   const [searchTerm, setSearchTerm] = useState("");
