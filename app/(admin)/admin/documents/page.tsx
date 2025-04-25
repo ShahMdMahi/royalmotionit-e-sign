@@ -19,7 +19,8 @@ export default async function AdminDocuments() {
   } else if (session.user.role === Role.ADMIN) {
     const documentSets = await prisma.documentSet.findMany();
     const documents = await prisma.document.findMany();
-    return <DocumentComponent documents={documents} documentSets={documentSets} />;
+    const users = await prisma.user.findMany();
+    return <DocumentComponent documents={documents} documentSets={documentSets} users={users} />; 
   } else {
     redirect("/");
   }

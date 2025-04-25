@@ -1,6 +1,6 @@
 "use client";
 
-import { Document, DocumentStatus, DocumentSet } from "@prisma/client";
+import { Document, DocumentStatus, DocumentSet, User } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
@@ -15,7 +15,7 @@ type DocumentWithSet = Document & {
   documentSet?: DocumentSet | null;
 };
 
-export function DocumentComponent({ documents, documentSets }: { documents: Document[]; documentSets: DocumentSet[] }) {
+export function DocumentComponent({ documents, documentSets, users }: { documents: Document[]; documentSets: DocumentSet[]; users: User[] }) {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const router = useRouter();
 
@@ -161,7 +161,7 @@ export function DocumentComponent({ documents, documentSets }: { documents: Docu
         </div>
 
         {/* Document Table - Now using the DocumentTable component with enhanced data */}
-        <DocumentTable documents={documentsWithSets} />
+        <DocumentTable documents={documentsWithSets} users={users} />
       </div>
 
       {/* Document Upload Component */}
