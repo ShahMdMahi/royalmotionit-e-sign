@@ -3,7 +3,10 @@ import { auth } from "@/auth";
 import { prisma } from "@/prisma/prisma";
 import { del } from "@vercel/blob";
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }): Promise<NextResponse> {
+export async function DELETE(
+  request: NextRequest,
+  context: { params: { id: string } }
+): Promise<NextResponse> {
   const session = await auth();
 
   // Ensure the user is authenticated
@@ -11,7 +14,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const documentId = params.id;
+  const documentId = context.params.id;
 
   try {
     // First, find the document to get the blob URL if it exists
