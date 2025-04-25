@@ -17,11 +17,12 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
-  // Optional for WebAuthn support
   Authenticator Authenticator[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  authoredDocuments Document[] @relation("AuthoredDocuments")
+  signeedDocuments  Document[] @relation("SigneedDocuments")
 }
 
 model Account {
@@ -91,7 +92,50 @@ model Authenticator {
   @@unique([userId, credentialID])
 }
 
+model Document {
+  id                 String         @id @default(auto()) @map("_id") @db.ObjectId
+  title              String
+  description        String?
+  pathname           String?
+  contentType        String
+  contentDisposition String?
+  url                String?
+  downloadUrl        String?
+  status             DocumentStatus @default(PENDING)
+  signedAt           DateTime?
+  expiresAt          DateTime?
+  signeeId           String?        @db.ObjectId
+  authorId           String         @db.ObjectId
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  documentType       DocumentType   @default(UNSIGNED)
+
+  author        User         @relation("AuthoredDocuments", fields: [authorId], references: [id], onDelete: Cascade)
+  signee        User?        @relation("SigneedDocuments", fields: [signeeId], references: [id], onDelete: SetNull)
+  documentSet   DocumentSet? @relation(fields: [documentSetId], references: [id])
+  documentSetId String?      @db.ObjectId
+}
+
+model DocumentSet {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  documents Document[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
 enum Role {
   USER
   ADMIN
+}
+
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum DocumentType {
+  SIGNED
+  UNSIGNED
 }
