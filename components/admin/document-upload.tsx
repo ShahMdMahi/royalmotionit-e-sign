@@ -72,6 +72,82 @@ export function DocumentUpload({ isOpen, onCloseAction, onUploadCompleteAction }
     }
   }, [documentId]);
 
+  const uploadFile = useCallback(
+    async (docId?: string) => {
+      const currentDocId = docId || documentId;
+
+      if (!file || !documentSetId || !currentDocId) {
+        console.error("Missing required data for upload", {
+          file: !!file,
+          documentSetId,
+          documentId: currentDocId,
+        });
+        setError("Missing required data for upload");
+        setUploading(false);
+        return;
+      }
+
+      try {
+        // Now use the document ID in the filename
+        const customFilename = `${documentSetId}/${currentDocId}`;
+
+        // Update the upload function with progress tracking
+        const newBlob = await upload(`${customFilename}.pdf`, file, {
+          access: "public",
+          handleUploadUrl: "/api/upload",
+          onUploadProgress: (progressEvent: UploadProgressEvent) => {
+            setUploadProgress(progressEvent.percentage / 100);
+            console.log(`Loaded ${progressEvent.loaded} bytes`);
+            console.log(`Total ${progressEvent.total} bytes`);
+            console.log(`Percentage ${progressEvent.percentage}%`);
+          },
+        });
+
+        // Debug what's being returned from Vercel Blob
+        // console.log("Blob response:", newBlob);
+
+        // Call the callback with all the blob properties returned by Vercel
+        await onUploadCompleteAction(
+          newBlob.url,
+          title,
+          description,
+          {
+            pathname: newBlob.pathname,
+            contentType: newBlob.contentType,
+            contentDisposition: newBlob.contentDisposition,
+            url: newBlob.url,
+            downloadUrl: newBlob.downloadUrl,
+          },
+          documentSetId,
+          currentDocId
+        );
+
+        // Reset states
+        setUploading(false);
+        setFile(null);
+        setTitle("");
+        setDescription("");
+        setDocumentSetName("");
+        setDocumentId(null);
+        setUploadProgress(0);
+        setStep("docSet");
+        setRetryCount(0);
+        setIsPDFValidated(false);
+
+        toast.success("Document uploaded successfully");
+      } catch (err) {
+        console.error("Upload failed:", err);
+
+        // Increment retry counter and trigger retry logic
+        setRetryCount((prev) => prev + 1);
+        setShouldRetry(true);
+
+        toast.error(`Upload attempt ${retryCount + 1}/${MAX_RETRIES} failed, retrying...`);
+      }
+    },
+    [documentId, documentSetId, file, onUploadCompleteAction, retryCount, title, description]
+  );
+
   // Handle retry logic
   useEffect(() => {
     if (shouldRetry && retryCount < MAX_RETRIES) {
@@ -95,7 +171,7 @@ export function DocumentUpload({ isOpen, onCloseAction, onUploadCompleteAction }
       // Clean up the created document entry if upload ultimately fails
       cleanupDocumentEntry();
     }
-  }, [shouldRetry, retryCount, cleanupDocumentEntry, documentId]);
+  }, [shouldRetry, retryCount, cleanupDocumentEntry, documentId, uploadFile]);
 
   // Check if a file is actually a PDF by examining its header
   const validatePDFHeader = async (file: File): Promise<boolean> => {
@@ -201,10 +277,10 @@ export function DocumentUpload({ isOpen, onCloseAction, onUploadCompleteAction }
       setDocumentSetId(data.documentSet.id);
       setStep("upload");
       toast.success("Document set created successfully");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error creating document set:", err);
 
-      if (err.name === "AbortError") {
+      if (err instanceof Error && err.name === "AbortError") {
         setError("Request timed out. Please try again.");
       } else {
         setError(`Failed to create document set: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -213,79 +289,6 @@ export function DocumentUpload({ isOpen, onCloseAction, onUploadCompleteAction }
       toast.error("Failed to create document set");
     } finally {
       setUploading(false);
-    }
-  };
-
-  const uploadFile = async (docId?: string) => {
-    const currentDocId = docId || documentId;
-
-    if (!file || !documentSetId || !currentDocId) {
-      console.error("Missing required data for upload", {
-        file: !!file,
-        documentSetId,
-        documentId: currentDocId,
-      });
-      setError("Missing required data for upload");
-      setUploading(false);
-      return;
-    }
-
-    try {
-      // Now use the document ID in the filename
-      const customFilename = `${documentSetId}/${currentDocId}`;
-
-      // Update the upload function with progress tracking
-      const newBlob = await upload(`${customFilename}.pdf`, file, {
-        access: "public",
-        handleUploadUrl: "/api/upload",
-        onUploadProgress: (progressEvent: UploadProgressEvent) => {
-          setUploadProgress(progressEvent.percentage / 100);
-          console.log(`Loaded ${progressEvent.loaded} bytes`);
-          console.log(`Total ${progressEvent.total} bytes`);
-          console.log(`Percentage ${progressEvent.percentage}%`);
-        },
-      });
-
-      // Debug what's being returned from Vercel Blob
-      console.log("Blob response:", newBlob);
-
-      // Call the callback with all the blob properties returned by Vercel
-      await onUploadCompleteAction(
-        newBlob.url,
-        title,
-        description,
-        {
-          pathname: newBlob.pathname,
-          contentType: newBlob.contentType,
-          contentDisposition: newBlob.contentDisposition,
-          url: newBlob.url,
-          downloadUrl: newBlob.downloadUrl,
-        },
-        documentSetId,
-        currentDocId
-      );
-
-      // Reset states
-      setUploading(false);
-      setFile(null);
-      setTitle("");
-      setDescription("");
-      setDocumentSetName("");
-      setDocumentId(null);
-      setUploadProgress(0);
-      setStep("docSet");
-      setRetryCount(0);
-      setIsPDFValidated(false);
-
-      toast.success("Document uploaded successfully");
-    } catch (err) {
-      console.error("Upload failed:", err);
-
-      // Increment retry counter and trigger retry logic
-      setRetryCount((prev) => prev + 1);
-      setShouldRetry(true);
-
-      toast.error(`Upload attempt ${retryCount + 1}/${MAX_RETRIES} failed, retrying...`);
     }
   };
 
@@ -317,9 +320,9 @@ export function DocumentUpload({ isOpen, onCloseAction, onUploadCompleteAction }
 
       const docData = await createDocResponse.json();
       return docData.document.id;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error creating document entry:", err);
-      if (err.name === "AbortError") {
+      if (err instanceof Error && err.name === "AbortError") {
         throw new Error("Request timed out while creating document entry");
       }
       throw err;
@@ -370,7 +373,7 @@ export function DocumentUpload({ isOpen, onCloseAction, onUploadCompleteAction }
 
       // Then upload the file with the new document ID
       await uploadFile(newDocumentId);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Process failed:", err);
       setError(`Upload process failed: ${err instanceof Error ? err.message : "Unknown error"}`);
       setUploading(false);

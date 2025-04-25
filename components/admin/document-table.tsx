@@ -294,7 +294,9 @@ export function DocumentTable({ documents, users }: { documents: DocumentWithSet
                                     size="sm"
                                     onClick={(e) => {
                                       e.stopPropagation(); // Prevent toggling the parent
-                                      document.downloadUrl ? handleDownload(document.downloadUrl, document.title, document.id) : null;
+                                      if (document.downloadUrl) {
+                                        handleDownload(document.downloadUrl, document.title, document.id);
+                                      }
                                     }}
                                     title="Download"
                                     disabled={!document.downloadUrl}

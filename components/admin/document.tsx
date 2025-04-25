@@ -4,7 +4,7 @@ import { Document, DocumentStatus, DocumentSet, User } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
-import { Upload, FileSignature, CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import { Upload, FileSignature, CheckCircle, Clock } from "lucide-react";
 import { DocumentUpload } from "@/components/admin/document-upload";
 import { DocumentTable } from "@/components/admin/document-table";
 import { toast } from "sonner";
@@ -72,7 +72,7 @@ export function DocumentComponent({ documents, documentSets, users }: { document
         downloadUrl: blobDetails.downloadUrl,
         documentSetId,
       };
-      console.log("Sending to API:", documentData);
+      // console.log("Sending to API:", documentData);
 
       // Add timeout to handle cases where the API might hang
       const controller = new AbortController();
@@ -101,30 +101,34 @@ export function DocumentComponent({ documents, documentSets, users }: { document
 
         // Refresh the page data instead of reloading
         router.refresh();
-      } catch (err: any) {
-        // Explicitly type as any to access properties safely
+      } catch (err: unknown) {
+        // Explicitly type error
         clearTimeout(timeoutId);
 
-        if (err.name === "AbortError") {
+        if (err instanceof Error && err.name === "AbortError") {
           throw new Error("Request timed out. The server might be experiencing issues.");
         }
         throw err;
       }
 
       return Promise.resolve();
-    } catch (err: any) {
-      // Explicitly type as any to access properties safely
+    } catch (err: unknown) {
+      // Use proper error typing
       console.error("Error saving document:", err);
 
       // Provide more specific error messages based on the error
-      if (err.message?.includes("timed out")) {
-        toast.error("The request took too long to complete. Please try again later.");
-      } else if (err.message?.includes("Failed to save")) {
-        toast.error(`Failed to save document: ${err.message}`);
-      } else if (err.message?.includes("network") || err.message?.includes("fetch")) {
-        toast.error("Network error. Please check your connection and try again.");
+      if (err instanceof Error) {
+        if (err.message.includes("timed out")) {
+          toast.error("The request took too long to complete. Please try again later.");
+        } else if (err.message.includes("Failed to save")) {
+          toast.error(`Failed to save document: ${err.message}`);
+        } else if (err.message.includes("network") || err.message.includes("fetch")) {
+          toast.error("Network error. Please check your connection and try again.");
+        } else {
+          toast.error("An error occurred during document processing. Please try again.");
+        }
       } else {
-        toast.error("An error occurred during document processing. Please try again.");
+        toast.error("An unexpected error occurred during document processing.");
       }
 
       // Try to clean up the document entry if update failed
@@ -199,7 +203,7 @@ export function DocumentComponent({ documents, documentSets, users }: { document
 
           <Card className="card-hover border-border overflow-hidden">
             <CardContent className="p-0">
-              <div className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-primary/5 to-primary/10 p-6 transition-all duration-300">
+              <div className="flex flex-col items-center justify-center h-full p-6 transition-all duration-300">
                 <Upload className="h-8 w-8 text-primary mb-2" />
                 <p className="font-medium mb-3 text-center">Upload New Document</p>
                 <Button
