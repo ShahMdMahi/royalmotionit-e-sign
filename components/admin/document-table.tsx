@@ -5,8 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { Eye, Download, Search, FileSignature, ChevronDown, ChevronRight, Zap } from "lucide-react";
+import React, { useState } from "react";
+import { Eye, Download, Search, FileSignature, ChevronDown, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -137,9 +137,9 @@ export function DocumentTable({ documents, users }: { documents: DocumentWithSet
               <TableBody>
                 {Object.entries(documentsBySet).length > 0 ? (
                   Object.entries(documentsBySet).map(([setId, { documentSet, documents }]) => (
-                    <>
+                    <React.Fragment key={setId}>
                       {/* DocumentSet Row (Parent) */}
-                      <TableRow key={setId} className="bg-white hover:bg-gray-50 cursor-pointer border-b" onClick={() => toggleSetExpansion(setId)}>
+                      <TableRow className="bg-white hover:bg-gray-50 cursor-pointer border-b" onClick={() => toggleSetExpansion(setId)}>
                         <TableCell className="p-2">
                           <div className="flex items-center">
                             {expandedSets[setId] ? <ChevronDown className="h-4 w-4 text-gray-500" /> : <ChevronRight className="h-4 w-4 text-gray-500" />}
@@ -318,7 +318,7 @@ export function DocumentTable({ documents, users }: { documents: DocumentWithSet
                             </TableRow>
                           );
                         })}
-                    </>
+                    </React.Fragment>
                   ))
                 ) : (
                   <TableRow>

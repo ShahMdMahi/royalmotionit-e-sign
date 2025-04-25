@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma/prisma";
+import { DocumentStatus } from "@prisma/client";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const session = await auth();
@@ -39,19 +40,43 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       contentDisposition,
     });
 
-    // Update the document with the provided ID directly
-    const document = await prisma.document.update({
-      where: {
-        id: documentId,
-      },
-      data: {
-        pathname,
-        contentType,
-        contentDisposition,
-        url,
-        downloadUrl,
-      },
-    });
+    // Use transaction for document update to ensure consistency
+    const document = await prisma
+      .$transaction(async (tx) => {
+        // First check if document exists
+        const existingDocument = await tx.document.findUnique({
+          where: { id: documentId },
+        });
+
+        if (!existingDocument) {
+          throw new Error(`Document with ID ${documentId} not found`);
+        }
+
+        // Update the document with the provided ID
+        return tx.document.update({
+          where: {
+            id: documentId,
+          },
+          data: {
+            pathname,
+            contentType,
+            contentDisposition,
+            url,
+            downloadUrl,
+            status: DocumentStatus.PENDING, // Ensure correct status after successful upload
+          },
+        });
+      })
+      .catch((error) => {
+        if (error.message.includes("not found")) {
+          return null;
+        }
+        throw error;
+      });
+
+    if (!document) {
+      return NextResponse.json({ error: "Document not found" }, { status: 404 });
+    }
 
     return NextResponse.json(
       {

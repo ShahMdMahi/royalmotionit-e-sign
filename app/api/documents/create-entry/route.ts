@@ -34,31 +34,45 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Verify document set exists
-    const documentSet = await prisma.documentSet.findUnique({
-      where: { id: documentSetId },
-    });
+    // Use a transaction to ensure document set verification and document creation are atomic
+    const document = await prisma
+      .$transaction(async (tx) => {
+        // Verify document set exists
+        const documentSet = await tx.documentSet.findUnique({
+          where: { id: documentSetId },
+        });
 
-    if (!documentSet) {
+        if (!documentSet) {
+          throw new Error("Document set not found");
+        }
+
+        // Create a placeholder document entry - actual file details will be updated later
+        return tx.document.create({
+          data: {
+            title,
+            description: description || "",
+            pathname: "",
+            contentType: "application/pdf",
+            contentDisposition: "",
+            url: "",
+            downloadUrl: "",
+            status: DocumentStatus.PENDING,
+            authorId: session.user.id,
+            documentSetId,
+            documentType: DocumentType.UNSIGNED,
+          },
+        });
+      })
+      .catch((error) => {
+        if (error.message === "Document set not found") {
+          return null;
+        }
+        throw error;
+      });
+
+    if (!document) {
       return NextResponse.json({ error: "Document set not found" }, { status: 404 });
     }
-
-    // Create a placeholder document entry - actual file details will be updated later
-    const document = await prisma.document.create({
-      data: {
-        title,
-        description: description || "",
-        pathname: "",
-        contentType: "application/pdf",
-        contentDisposition: "",
-        url: "",
-        downloadUrl: "",
-        status: DocumentStatus.PENDING,
-        authorId: session.user.id,
-        documentSetId,
-        documentType: DocumentType.UNSIGNED,
-      },
-    });
 
     return NextResponse.json(
       {
@@ -69,6 +83,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   } catch (error) {
     console.error("Error creating document entry:", error);
-    return NextResponse.json({ error: "Error creating document entry", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Error creating document entry",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }

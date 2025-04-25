@@ -4,7 +4,7 @@ import { Document, DocumentStatus, DocumentSet, User } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
-import { Upload, FileSignature, CheckCircle, Clock } from "lucide-react";
+import { Upload, FileSignature, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { DocumentUpload } from "@/components/admin/document-upload";
 import { DocumentTable } from "@/components/admin/document-table";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ type DocumentWithSet = Document & {
 
 export function DocumentComponent({ documents, documentSets, users }: { documents: Document[]; documentSets: DocumentSet[]; users: User[] }) {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
 
   const pendingDocuments = documents.filter((doc) => doc.status === DocumentStatus.PENDING);
@@ -32,6 +33,12 @@ export function DocumentComponent({ documents, documentSets, users }: { document
   });
 
   const handleCloseAction = async () => {
+    if (isProcessing) {
+      // Show warning if trying to close during processing
+      toast.warning("Please wait until the current operation completes");
+      return Promise.resolve();
+    }
+
     setIsUploadDialogOpen(false);
     return Promise.resolve();
   };
@@ -51,6 +58,8 @@ export function DocumentComponent({ documents, documentSets, users }: { document
     documentId: string
   ) => {
     try {
+      setIsProcessing(true);
+
       // Debug: Log what we're sending to the API
       const documentData = {
         documentId,
@@ -65,30 +74,76 @@ export function DocumentComponent({ documents, documentSets, users }: { document
       };
       console.log("Sending to API:", documentData);
 
-      // Call your API to save the document metadata in your database
-      const response = await fetch("/api/documents", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(documentData),
-      });
+      // Add timeout to handle cases where the API might hang
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-      if (!response.ok) {
-        throw new Error("Failed to save document");
+      try {
+        // Call your API to save the document metadata in your database
+        const response = await fetch("/api/documents", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(documentData),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || "Failed to save document");
+        }
+
+        toast.success("Document uploaded and saved successfully");
+        setIsUploadDialogOpen(false);
+
+        // Refresh the page data instead of reloading
+        router.refresh();
+      } catch (err: any) {
+        // Explicitly type as any to access properties safely
+        clearTimeout(timeoutId);
+
+        if (err.name === "AbortError") {
+          throw new Error("Request timed out. The server might be experiencing issues.");
+        }
+        throw err;
       }
 
-      toast.success("Document uploaded successfully");
-      setIsUploadDialogOpen(false);
-
-      // Refresh the page data instead of reloading
-      router.refresh();
-
       return Promise.resolve();
-    } catch (error) {
-      console.error("Error saving document:", error);
-      toast.error("Failed to save document");
+    } catch (err: any) {
+      // Explicitly type as any to access properties safely
+      console.error("Error saving document:", err);
+
+      // Provide more specific error messages based on the error
+      if (err.message?.includes("timed out")) {
+        toast.error("The request took too long to complete. Please try again later.");
+      } else if (err.message?.includes("Failed to save")) {
+        toast.error(`Failed to save document: ${err.message}`);
+      } else if (err.message?.includes("network") || err.message?.includes("fetch")) {
+        toast.error("Network error. Please check your connection and try again.");
+      } else {
+        toast.error("An error occurred during document processing. Please try again.");
+      }
+
+      // Try to clean up the document entry if update failed
+      try {
+        if (documentId) {
+          toast.info("Cleaning up incomplete document upload...");
+
+          await fetch(`/api/documents/${documentId}`, {
+            method: "DELETE",
+          });
+        }
+      } catch (cleanupErr) {
+        console.error("Failed to clean up after error:", cleanupErr);
+      }
+
+      // Return a resolved promise to ensure the component can continue
       return Promise.resolve();
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -147,14 +202,19 @@ export function DocumentComponent({ documents, documentSets, users }: { document
               <div className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-primary/5 to-primary/10 p-6 transition-all duration-300">
                 <Upload className="h-8 w-8 text-primary mb-2" />
                 <p className="font-medium mb-3 text-center">Upload New Document</p>
-                <Button className="relative overflow-hidden group bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg" size="lg" onClick={() => setIsUploadDialogOpen(true)}>
+                <Button
+                  className="relative overflow-hidden group bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
+                  size="lg"
+                  onClick={() => setIsUploadDialogOpen(true)}
+                  disabled={isProcessing}
+                >
                   <span className="relative z-10 flex items-center gap-2">
                     <Upload className="h-4 w-4" />
-                    Upload
+                    {isProcessing ? "Processing..." : "Upload"}
                   </span>
                   <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                 </Button>
-                <p className="text-xs text-muted-foreground mt-3">Supported formats: PDF</p>
+                <p className="text-xs text-muted-foreground mt-3">Supported formats: PDF (max 10MB)</p>
               </div>
             </CardContent>
           </Card>
