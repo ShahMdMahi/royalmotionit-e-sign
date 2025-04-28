@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Upload, FileSignature, CheckCircle, Clock, Download, Eye, Edit, MoreHorizontal, Search } from "lucide-react";
+import { Upload, FileSignature, CheckCircle, Clock, Eye, MoreHorizontal, Search } from "lucide-react";
 import { FileUploadModal } from "./file-upload-modal";
 import { Document, DocumentStatus, DocumentType, User } from "@prisma/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -271,14 +271,6 @@ export function DocumentComponent({ documents, users }: { documents: Document[];
                                   <Eye className="h-4 w-4" />
                                   <span className="sr-only">View document</span>
                                 </Link>
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <Edit className="h-4 w-4" />
-                                <span className="sr-only">Edit document</span>
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <Download className="h-4 w-4" />
-                                <span className="sr-only">Download document</span>
                               </Button>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>

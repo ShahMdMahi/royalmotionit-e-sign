@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, RotateCw, ChevronLeft, ChevronRight, Loader2, AlertCircle, Maximize, Minimize, Book, PanelLeft, PanelRight } from "lucide-react";
+import { ZoomIn, ZoomOut, RotateCw, ChevronLeft, ChevronRight, Loader2, AlertCircle, Maximize, Minimize, Book, PanelLeft, PanelRight, PenLine, Hand, Eraser, Save, Square } from "lucide-react";
 import { pdfjs, Document as PDFDocument, Page } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
@@ -10,6 +10,11 @@ import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { HexColorPicker } from "react-colorful";
 
 // Use local PDF worker to avoid CORS issues
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
@@ -17,9 +22,28 @@ pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 // Export the props interface for use in single-document.tsx
 export interface PDFViewerProps {
   pdfData: ArrayBuffer | null;
+  allowAnnotations?: boolean;
+  allowSignature?: boolean;
+  onSaveAnnotations?: (annotations: PdfAnnotation[]) => Promise<void>;
+  readOnly?: boolean;
+  documentId?: string;
 }
 
-export default function PDFViewer({ pdfData }: PDFViewerProps) {
+// Define annotation types
+export type PdfAnnotation = {
+  id: string;
+  type: "freehand" | "signature" | "text" | "highlight" | "rectangle";
+  points?: { x: number; y: number }[];
+  pageNumber: number;
+  color: string;
+  strokeWidth: number;
+  content?: string;
+  position?: { x: number; y: number; width: number; height: number };
+  createdAt: Date;
+  modifiedAt: Date;
+};
+
+export default function PDFViewer({ pdfData, allowAnnotations = false, allowSignature = false, onSaveAnnotations, readOnly = true, documentId }: PDFViewerProps) {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1);
@@ -31,6 +55,20 @@ export default function PDFViewer({ pdfData }: PDFViewerProps) {
   const [pageIsRendering, setPageIsRendering] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
   const documentContainerRef = useRef<HTMLDivElement>(null);
+  const annotationCanvasRef = useRef<HTMLCanvasElement>(null);
+  const pdfContainerRef = useRef<HTMLDivElement>(null);
+
+  // Annotation states
+  const [activeToolTab, setActiveToolTab] = useState<string>("view");
+  const [currentTool, setCurrentTool] = useState<string>("hand");
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [annotations, setAnnotations] = useState<PdfAnnotation[]>([]);
+  const [currentAnnotation, setCurrentAnnotation] = useState<PdfAnnotation | null>(null);
+  const [strokeColor, setStrokeColor] = useState<string>("#FF0000");
+  const [strokeWidth, setStrokeWidth] = useState<number>(2);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [signatureMode, setSignatureMode] = useState<boolean>(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
 
   // Convert ArrayBuffer to Blob to prevent the "detached ArrayBuffer" error
   const pdfBlob = useMemo(() => {
@@ -199,6 +237,234 @@ export default function PDFViewer({ pdfData }: PDFViewerProps) {
     setPageIsRendering(true);
   }, [pageNumber, scale, rotation]);
 
+  // Add a state to control text layer rendering
+  const [shouldRenderTextLayer, setShouldRenderTextLayer] = useState(true);
+
+  // Handle page changes more gracefully by temporarily disabling text layer
+  useEffect(() => {
+    // Temporarily disable text layer when changing pages
+    setShouldRenderTextLayer(false);
+
+    // Re-enable text layer after a short delay to prevent abort errors
+    const timeoutId = setTimeout(() => {
+      setShouldRenderTextLayer(true);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [pageNumber]);
+
+  // Annotation mode handlers
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (readOnly || activeToolTab !== "annotate") return;
+
+    const canvas = annotationCanvasRef.current;
+    const pdfContainer = pdfContainerRef.current;
+    if (!canvas || !pdfContainer) return;
+
+    const rect = pdfContainer.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    setIsDrawing(true);
+
+    if (currentTool === "pen") {
+      // Start a new freehand annotation
+      const newAnnotation: PdfAnnotation = {
+        id: `annotation-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        type: "freehand",
+        points: [{ x, y }],
+        pageNumber,
+        color: strokeColor,
+        strokeWidth,
+        createdAt: new Date(),
+        modifiedAt: new Date(),
+      };
+      setCurrentAnnotation(newAnnotation);
+    } else if (currentTool === "rectangle") {
+      // Start a new rectangle annotation
+      const newAnnotation: PdfAnnotation = {
+        id: `annotation-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        type: "rectangle",
+        pageNumber,
+        color: strokeColor,
+        strokeWidth,
+        position: { x, y, width: 0, height: 0 },
+        createdAt: new Date(),
+        modifiedAt: new Date(),
+      };
+      setCurrentAnnotation(newAnnotation);
+    } else if (currentTool === "signature" && signatureMode) {
+      // Place signature at this position
+      const newSignature: PdfAnnotation = {
+        id: `signature-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        type: "signature",
+        pageNumber,
+        color: strokeColor,
+        strokeWidth,
+        position: { x, y, width: 200, height: 80 },
+        content: "Placeholder Signature",
+        createdAt: new Date(),
+        modifiedAt: new Date(),
+      };
+
+      // Add signature to annotations
+      setAnnotations((prev) => [...prev, newSignature]);
+      setSignatureMode(false);
+      setHasUnsavedChanges(true);
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDrawing || readOnly || !currentAnnotation || activeToolTab !== "annotate") return;
+
+    const canvas = annotationCanvasRef.current;
+    const pdfContainer = pdfContainerRef.current;
+    if (!canvas || !pdfContainer) return;
+
+    const rect = pdfContainer.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    if (currentTool === "pen" && currentAnnotation.points) {
+      // Continue drawing freehand
+      setCurrentAnnotation({
+        ...currentAnnotation,
+        points: [...currentAnnotation.points, { x, y }],
+        modifiedAt: new Date(),
+      });
+    } else if (currentTool === "rectangle" && currentAnnotation.position) {
+      // Update rectangle dimensions
+      const startX = currentAnnotation.position.x;
+      const startY = currentAnnotation.position.y;
+      setCurrentAnnotation({
+        ...currentAnnotation,
+        position: {
+          x: startX,
+          y: startY,
+          width: x - startX,
+          height: y - startY,
+        },
+        modifiedAt: new Date(),
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (isDrawing && currentAnnotation && !readOnly && activeToolTab === "annotate") {
+      setAnnotations((prev) => [...prev, currentAnnotation]);
+      setCurrentAnnotation(null);
+      setIsDrawing(false);
+      setHasUnsavedChanges(true);
+    }
+  };
+
+  // Drawing annotations on canvas
+  useEffect(() => {
+    const canvas = annotationCanvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Set canvas dimensions to match container
+    if (pdfContainerRef.current) {
+      const rect = pdfContainerRef.current.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+
+    // Draw existing annotations for current page
+    const pageAnnotations = annotations.filter((anno) => anno.pageNumber === pageNumber);
+    pageAnnotations.forEach((annotation) => {
+      ctx.strokeStyle = annotation.color;
+      ctx.lineWidth = annotation.strokeWidth;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+
+      if (annotation.type === "freehand" && annotation.points) {
+        ctx.beginPath();
+        if (annotation.points.length > 0) {
+          ctx.moveTo(annotation.points[0].x, annotation.points[0].y);
+          for (let i = 1; i < annotation.points.length; i++) {
+            ctx.lineTo(annotation.points[i].x, annotation.points[i].y);
+          }
+        }
+        ctx.stroke();
+      } else if (annotation.type === "rectangle" && annotation.position) {
+        ctx.strokeRect(annotation.position.x, annotation.position.y, annotation.position.width, annotation.position.height);
+      } else if (annotation.type === "signature" && annotation.position) {
+        // Draw signature placeholder
+        ctx.fillStyle = annotation.color;
+        ctx.font = "16px cursive";
+        ctx.fillText("Signature", annotation.position.x + 10, annotation.position.y + 40);
+        ctx.strokeRect(annotation.position.x, annotation.position.y, annotation.position.width, annotation.position.height);
+      }
+    });
+
+    // Draw current annotation being drawn
+    if (currentAnnotation && currentAnnotation.pageNumber === pageNumber) {
+      ctx.strokeStyle = currentAnnotation.color;
+      ctx.lineWidth = currentAnnotation.strokeWidth;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+
+      if (currentAnnotation.type === "freehand" && currentAnnotation.points) {
+        ctx.beginPath();
+        if (currentAnnotation.points.length > 0) {
+          ctx.moveTo(currentAnnotation.points[0].x, currentAnnotation.points[0].y);
+          for (let i = 1; i < currentAnnotation.points.length; i++) {
+            ctx.lineTo(currentAnnotation.points[i].x, currentAnnotation.points[i].y);
+          }
+        }
+        ctx.stroke();
+      } else if (currentAnnotation.type === "rectangle" && currentAnnotation.position) {
+        ctx.strokeRect(currentAnnotation.position.x, currentAnnotation.position.y, currentAnnotation.position.width, currentAnnotation.position.height);
+      }
+    }
+  }, [annotations, currentAnnotation, pageNumber]);
+
+  // Add a handler for text layer render errors
+  const onPageRenderError = useCallback(
+    (error: Error) => {
+      // Ignore AbortException errors from TextLayer as they are expected during page changes
+      if (error.message.includes("TextLayer") && error.message.includes("cancelled")) {
+        // These errors are expected when changing pages quickly
+        return;
+      }
+
+      console.error("Page render error:", error);
+      setError(`Error rendering page ${pageNumber}: ${error.message}`);
+    },
+    [pageNumber]
+  );
+
+  const handleSaveAnnotations = async () => {
+    if (onSaveAnnotations && annotations.length > 0) {
+      try {
+        await onSaveAnnotations(annotations);
+        setHasUnsavedChanges(false);
+      } catch (error) {
+        console.error("Error saving annotations:", error);
+        // Show error notification
+      }
+    }
+  };
+
+  const handleClearAnnotations = () => {
+    if (readOnly) return;
+    setAnnotations((prev) => prev.filter((anno) => anno.pageNumber !== pageNumber));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleAddSignature = () => {
+    if (readOnly) return;
+    setCurrentTool("signature");
+    setSignatureMode(true);
+  };
+
   // Render thumbnails
   const renderThumbnails = () => {
     if (!numPages || !showThumbnails) return null;
@@ -227,6 +493,112 @@ export default function PDFViewer({ pdfData }: PDFViewerProps) {
             </div>
           ))}
         </div>
+      </div>
+    );
+  };
+
+  // Annotation toolbar
+  const renderAnnotationTools = () => {
+    if (!allowAnnotations && !allowSignature) return null;
+
+    return (
+      <div className={cn("absolute top-16 left-3 p-2 bg-card rounded-md border shadow-md z-20", activeToolTab !== "annotate" && "hidden md:block")}>
+        <Tabs defaultValue="view" value={activeToolTab} onValueChange={setActiveToolTab} className="w-full">
+          <TabsList className="mb-2">
+            <TabsTrigger value="view" className="text-xs">
+              <Hand className="h-4 w-4 mr-1" />
+              View
+            </TabsTrigger>
+            {allowAnnotations && (
+              <TabsTrigger value="annotate" className="text-xs">
+                <PenLine className="h-4 w-4 mr-1" />
+                Annotate
+              </TabsTrigger>
+            )}
+          </TabsList>
+
+          <TabsContent value="annotate" className="space-y-2">
+            <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-2 gap-1">
+                <Button variant={currentTool === "hand" ? "default" : "outline"} size="sm" onClick={() => setCurrentTool("hand")} className="h-8 flex items-center justify-center">
+                  <Hand className="h-4 w-4" />
+                  <span className="sr-only">Hand tool</span>
+                </Button>
+                <Button variant={currentTool === "pen" ? "default" : "outline"} size="sm" onClick={() => setCurrentTool("pen")} className="h-8 flex items-center justify-center">
+                  <PenLine className="h-4 w-4" />
+                  <span className="sr-only">Pen tool</span>
+                </Button>
+                <Button variant={currentTool === "rectangle" ? "default" : "outline"} size="sm" onClick={() => setCurrentTool("rectangle")} className="h-8 flex items-center justify-center">
+                  <Square className="h-4 w-4" />
+                  <span className="sr-only">Rectangle tool</span>
+                </Button>
+                {allowSignature && (
+                  <Button
+                    variant={currentTool === "signature" ? "default" : "outline"}
+                    size="sm"
+                    onClick={handleAddSignature}
+                    className={cn("h-8 flex items-center justify-center", signatureMode && "bg-primary text-primary-foreground")}
+                  >
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4 12h16M4 12l3-3m-3 3l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path
+                        d="M12 7s2-2 5-2 5 2.5 5 5.5c0 3-1 4-2 5.5L12 21c-3.5-3.5-7-6.5-7-10 0-2 1-4 3-4s4 2 4 4z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    <span className="sr-only">Signature tool</span>
+                  </Button>
+                )}
+              </div>
+
+              <Separator className="my-1" />
+
+              <div className="flex justify-between items-center">
+                <Popover open={showColorPicker} onOpenChange={setShowColorPicker}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 w-8 p-0 rounded-full" style={{ backgroundColor: strokeColor }}>
+                      <span className="sr-only">Pick color</span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-3">
+                    <HexColorPicker color={strokeColor} onChange={setStrokeColor} />
+                  </PopoverContent>
+                </Popover>
+                <div className="flex gap-1">
+                  <ToggleGroup type="single" value={strokeWidth.toString()}>
+                    {[1, 2, 4].map((width) => (
+                      <ToggleGroupItem key={width} value={width.toString()} onClick={() => setStrokeWidth(width)} className="h-8 w-8">
+                        <div
+                          className="bg-current rounded-full mx-auto"
+                          style={{
+                            width: `${width * 2}px`,
+                            height: `${width * 2}px`,
+                          }}
+                        />
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
+                </div>
+              </div>
+            </div>
+
+            <Separator className="my-1" />
+
+            <div className="flex justify-between gap-1">
+              <Button variant="destructive" size="sm" onClick={handleClearAnnotations} className="h-8 flex-1">
+                <Eraser className="h-3 w-3 mr-1" />
+                Clear
+              </Button>
+              <Button variant="default" size="sm" onClick={handleSaveAnnotations} className={cn("h-8 flex-1", !hasUnsavedChanges && "opacity-50")} disabled={!hasUnsavedChanges}>
+                <Save className="h-3 w-3 mr-1" />
+                Save
+              </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     );
   };
@@ -355,8 +727,33 @@ export default function PDFViewer({ pdfData }: PDFViewerProps) {
         {renderThumbnails()}
 
         {/* Main document area */}
-        <div ref={documentContainerRef} className={cn("flex-1 overflow-auto", isFullScreen ? "p-6" : "p-4")}>
-          <div className="flex justify-center">
+        <div ref={documentContainerRef} className={cn("flex-1 overflow-auto relative", isFullScreen ? "p-6" : "p-4")}>
+          <div className="flex justify-center relative" ref={pdfContainerRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+            {/* Annotation canvas overlay */}
+            {(allowAnnotations || allowSignature) && (
+              <canvas
+                ref={annotationCanvasRef}
+                className={cn(
+                  "absolute top-0 left-0 right-0 bottom-0 z-10",
+                  activeToolTab === "annotate"
+                    ? currentTool === "hand"
+                      ? "cursor-grab"
+                      : currentTool === "pen"
+                        ? "cursor-crosshair"
+                        : currentTool === "rectangle"
+                          ? "cursor-crosshair"
+                          : currentTool === "signature" && signatureMode
+                            ? "cursor-crosshair"
+                            : "cursor-default"
+                    : "pointer-events-none"
+                )}
+              />
+            )}
+
+            {/* Annotation tools */}
+            {renderAnnotationTools()}
+
+            {/* PDF Document */}
             {pdfBlob && (
               <PDFDocument
                 file={pdfBlob}
@@ -390,9 +787,10 @@ export default function PDFViewer({ pdfData }: PDFViewerProps) {
                     scale={scale}
                     rotate={rotation}
                     className={cn("rounded", isFullScreen ? "shadow-lg" : "shadow-sm")}
-                    renderTextLayer={true}
+                    renderTextLayer={shouldRenderTextLayer}
                     renderAnnotationLayer={true}
                     onRenderSuccess={onPageRenderSuccess}
+                    onRenderError={onPageRenderError}
                     loading={
                       <div className="flex items-center justify-center min-h-[400px] min-w-[300px] border rounded-md bg-muted/20">
                         <Loader2 className="h-6 w-6 animate-spin text-primary" />
