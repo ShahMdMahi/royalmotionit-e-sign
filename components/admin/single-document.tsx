@@ -10,7 +10,7 @@ import { Download, Loader2, AlertCircle, FileText } from "lucide-react";
 import dynamic from "next/dynamic";
 
 // Import type for PDFViewer props
-import type { PDFViewerProps } from "./pdf-viewer"; 
+import type { PDFViewerProps } from "./pdf-viewer";
 
 // Dynamically import the PDF components to avoid SSR issues
 const PDFViewer = dynamic<PDFViewerProps>(() => import("@/components/admin/pdf-viewer"), {
@@ -147,13 +147,7 @@ export function SingleDocumentComponent({ document, author, signee }: SingleDocu
             <CardDescription>{document.description || "No description available"}</CardDescription>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            className="self-start md:self-auto"
-            onClick={handleDownload}
-            disabled={!pdfData}
-          >
+          <Button variant="outline" size="sm" className="self-start md:self-auto" onClick={handleDownload} disabled={!pdfData}>
             <Download className="mr-2 h-4 w-4" />
             Download
           </Button>
@@ -164,24 +158,107 @@ export function SingleDocumentComponent({ document, author, signee }: SingleDocu
 
       <CardContent className="pt-4">
         {/* Document metadata */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Author</p>
-            <p className="text-sm text-muted-foreground">{author.name || "Unknown"}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Signee</p>
-            <p className="text-sm text-muted-foreground">{signee?.name || "No signee assigned"}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Created</p>
-            <p className="text-sm text-muted-foreground">
-              {document.createdAt ? new Date(document.createdAt).toLocaleString() : "Unknown"}
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Status</p>
-            <p className="text-sm text-muted-foreground">{document.status || "Unknown"}</p>
+        <div className="bg-muted/20 rounded-lg p-4 mb-6 border">
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <FileText className="h-4 w-4 text-primary" />
+            Document Information
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Basic Info */}
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Document Type</p>
+                <p className="text-sm font-medium">{document.fileName?.split(".").pop()?.toUpperCase() || "PDF"}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">File Name</p>
+                <p className="text-sm font-medium break-all">{document.fileName || "Unknown"}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Document Type</p>
+                <p className="text-sm font-medium">{document.documentType || "UNSIGNED"}</p>
+              </div>
+            </div>
+
+            {/* People */}
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Author</p>
+                <div className="flex items-center gap-2">
+                  <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary font-medium">{author.name?.charAt(0) || "?"}</div>
+                  <div>
+                    <p className="text-sm font-medium">{author.name || "Unknown"}</p>
+                    <p className="text-xs text-muted-foreground">{author.email || "No email available"}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Signee</p>
+                {signee ? (
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary font-medium">{signee.name?.charAt(0) || "?"}</div>
+                    <div>
+                      <p className="text-sm font-medium">{signee.name}</p>
+                      <p className="text-xs text-muted-foreground">{signee.email || "No email available"}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No signee assigned</p>
+                )}
+              </div>
+            </div>
+
+            {/* Status & Dates */}
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Status</p>
+                <div className="flex items-center">
+                  <div
+                    className={`h-2 w-2 rounded-full mr-2 ${
+                      document.status === "APPROVED"
+                        ? "bg-green-500"
+                        : document.status === "PENDING"
+                          ? "bg-amber-500"
+                          : document.status === "REJECTED"
+                            ? "bg-red-500"
+                            : document.status === "EXPIRED"
+                              ? "bg-gray-500"
+                              : "bg-gray-500"
+                    }`}
+                  />
+                  <p className="text-sm font-medium">{document.status || "Unknown"}</p>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Created</p>
+                <p className="text-sm font-medium">{document.createdAt ? new Date(document.createdAt).toLocaleString() : "Unknown"}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Last Updated</p>
+                <p className="text-sm font-medium">{document.updatedAt ? new Date(document.updatedAt).toLocaleString() : "Unknown"}</p>
+              </div>
+              {document.signedAt && (
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Signed Date</p>
+                  <p className="text-sm font-medium">{new Date(document.signedAt).toLocaleString()}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Additional Metadata */}
+            {document.hash && (
+              <div className="col-span-1 md:col-span-2 lg:col-span-3 space-y-1">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Document Hash</p>
+                <p className="text-xs font-mono bg-muted p-2 rounded overflow-x-auto">{document.hash}</p>
+              </div>
+            )}
+
+            {document.description && (
+              <div className="col-span-1 md:col-span-2 lg:col-span-3 space-y-1">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Notes</p>
+                <p className="text-sm text-muted-foreground bg-muted/30 p-2 rounded">{document.description}</p>
+              </div>
+            )}
           </div>
         </div>
 
