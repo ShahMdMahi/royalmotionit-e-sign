@@ -26,7 +26,6 @@ export interface PDFViewerProps {
   allowSignature?: boolean;
   onSaveAnnotations?: (annotations: PdfAnnotation[]) => Promise<void>;
   readOnly?: boolean;
-  documentId?: string;
 }
 
 // Define annotation types
@@ -43,7 +42,7 @@ export type PdfAnnotation = {
   modifiedAt: Date;
 };
 
-export default function PDFViewer({ pdfData, allowAnnotations = false, allowSignature = false, onSaveAnnotations, readOnly = true, documentId }: PDFViewerProps) {
+export default function PDFViewer({ pdfData, allowAnnotations = false, allowSignature = false, onSaveAnnotations, readOnly = true }: PDFViewerProps) {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1);

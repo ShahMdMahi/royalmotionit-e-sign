@@ -6,7 +6,7 @@ import { getFromR2 } from "@/actions/r2";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Download, Loader2, AlertCircle, FileText, Share2, Copy, CheckCircle, Clock, Ban, Calendar, Pencil, UserPlus, AlertTriangle } from "lucide-react";
+import { Download, Loader2, AlertCircle, FileText, Copy, CheckCircle, Clock, Ban, Calendar, Pencil, AlertTriangle } from "lucide-react";
 import dynamic from "next/dynamic";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -39,7 +39,6 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("document");
-  const [showSignaturePrompt, setShowSignaturePrompt] = useState(false);
   const [copyLinkTooltip, setCopyLinkTooltip] = useState("Copy link");
 
   // Fetch PDF data from R2 storage
@@ -145,13 +144,12 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
   };
 
   const handleSignDocument = () => {
-    setShowSignaturePrompt(true);
     setActiveTab("document");
     toast("Place your signature on the document", {
       description: "Click where you want to place your signature and then save it.",
       action: {
         label: "Got it",
-        onClick: () => setShowSignaturePrompt(false),
+        onClick: () => {},
       },
     });
   };
@@ -290,7 +288,7 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
                   <p className="text-xs text-muted-foreground text-center mt-1">{pdfError}</p>
                 </div>
               ) : (
-                <PDFViewer pdfData={pdfData} allowAnnotations={canSign} allowSignature={canSign} readOnly={isReadOnly} onSaveAnnotations={handleSaveAnnotations} documentId={document.id} />
+                <PDFViewer pdfData={pdfData} allowAnnotations={canSign} allowSignature={canSign} readOnly={isReadOnly} onSaveAnnotations={handleSaveAnnotations} />
               )}
             </div>
           </TabsContent>
