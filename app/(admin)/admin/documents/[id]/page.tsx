@@ -12,23 +12,28 @@ export default async function SignleDocument({ params }: { params: Promise<{ id:
     redirect("/dashboard");
   } else if (session.user.role === Role.ADMIN) {
     const id = (await params).id;
-    const document = await prisma.document.findUnique({ where: { id: id } });
+    try {
+      const document = await prisma.document.findUnique({ where: { id: id } });
 
-    let author = null;
-    if (document?.authorId) {
-      author = await prisma.user.findUnique({
-        where: { id: document.authorId },
-      });
+      let author = null;
+      if (document?.authorId) {
+        author = await prisma.user.findUnique({
+          where: { id: document.authorId },
+        });
+      }
+
+      let signee = null;
+      if (document?.signeeId) {
+        signee = await prisma.user.findUnique({
+          where: { id: document.signeeId },
+        });
+      }
+
+      return <SingleDocumentComponent document={document} author={author} signee={signee} />;
+    } catch (error) {
+      console.error("Error fetching document:", error);
+      redirect("/admin/documents");
     }
-
-    let signee = null;
-    if (document?.signeeId) {
-      signee = await prisma.user.findUnique({
-        where: { id: document.signeeId },
-      });
-    }
-
-    return <SingleDocumentComponent document={document ?? null} author={author} signee={signee} />;
   } else {
     redirect("/");
   }
