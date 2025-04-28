@@ -3,6 +3,7 @@ import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import { DocumentComponent } from "@/components/admin/document";
+import { prisma } from "@/prisma/prisma";
 
 export const metadata: Metadata = {
   title: "Documents - Admin - Royal Sign - RoyalMotionIT",
@@ -16,7 +17,8 @@ export default async function AdminDocuments() {
   } else if (session.user.role === Role.USER) {
     redirect("/dashboard");
   } else if (session.user.role === Role.ADMIN) {
-    return <DocumentComponent />;
+    const documents = await prisma.document.findMany();
+    return <DocumentComponent documents={documents} />; 
   } else {
     redirect("/");
   }

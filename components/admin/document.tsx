@@ -5,12 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, FileSignature, CheckCircle, Clock } from "lucide-react";
 import { FileUploadModal } from "./file-upload-modal";
+import { Document, DocumentStatus, DocumentType } from "@prisma/client";
 
-export function DocumentComponent() {
+export function DocumentComponent({ documents }: { documents: Document[] }) {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const openUploadModal = () => setIsUploadModalOpen(true);
   const closeUploadModal = () => setIsUploadModalOpen(false);
+
+  const allDocuments = documents.length;
+  const pendingDocuments = documents.filter((doc) => doc.status === DocumentStatus.PENDING).length;
+  const signedDocuments = documents.filter((doc) => doc.documentType === DocumentType.SIGNED).length;
 
   return (
     <div className="container py-8 max-w-7xl mx-auto">
@@ -31,7 +36,7 @@ export function DocumentComponent() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">N/A</div>
+              <div className="text-3xl font-bold">{allDocuments}</div>
               <p className="text-sm text-muted-foreground">Total documents in the system</p>
             </CardContent>
           </Card>
@@ -44,7 +49,7 @@ export function DocumentComponent() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">N/A</div>
+              <div className="text-3xl font-bold">{pendingDocuments}</div>
               <p className="text-sm text-muted-foreground">Documents awaiting signature</p>
             </CardContent>
           </Card>
@@ -57,7 +62,7 @@ export function DocumentComponent() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">N/A</div>
+              <div className="text-3xl font-bold">{signedDocuments}</div>
               <p className="text-sm text-muted-foreground">Completed documents</p>
             </CardContent>
           </Card>

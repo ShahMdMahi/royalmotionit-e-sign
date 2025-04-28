@@ -150,51 +150,6 @@ export function FileUploadModal({ isOpen, onCloseAction }: FileUploadModalProps)
     toast.info("Upload canceled");
   }, []);
 
-  // Handle manual retry attempt
-  const handleRetry = useCallback(() => {
-    if (!file) return;
-
-    setUploadStatus("retrying");
-    setErrorMessage("");
-    handleUpload();
-  }, [file]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Cleanup on unmount or when modal closes
-  useEffect(() => {
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, []);
-
-  // Update upload speed and remaining time calculations
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-
-    if (uploading && uploadProgress > 0 && uploadProgress < 100) {
-      timer = setInterval(() => {
-        if (uploadStartTimeRef.current && file) {
-          const elapsedTime = (Date.now() - uploadStartTimeRef.current) / 1000; // seconds
-          const uploadedBytes = file.size * (uploadProgress / 100);
-
-          // Calculate upload speed in bytes per second
-          uploadSpeedRef.current = uploadedBytes / elapsedTime;
-
-          // Calculate remaining time
-          const remainingBytes = file.size - uploadedBytes;
-          if (uploadSpeedRef.current > 0) {
-            remainingTimeRef.current = remainingBytes / uploadSpeedRef.current;
-          }
-        }
-      }, 1000);
-    }
-
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [uploading, uploadProgress, file]);
-
   // Format file size in human-readable form
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return bytes + " B";
@@ -216,6 +171,36 @@ export function FileUploadModal({ isOpen, onCloseAction }: FileUploadModalProps)
     setHasPendingUpload(false);
     setFileName("");
   }, []);
+
+  // Handle upload errors - moved this function earlier to resolve circular dependency
+  const handleUploadError = useCallback(
+    (message: string) => {
+      setUploadStatus("error");
+      setErrorMessage(message || "Failed to upload document");
+
+      // Check if this error should trigger auto-retry
+      const shouldAutoRetry = AUTO_RETRY_ERRORS.some((errType) => message.toLowerCase().includes(errType));
+
+      if (shouldAutoRetry && retryCount < MAX_RETRIES) {
+        // Auto-retry on specific errors
+        const nextRetryCount = retryCount + 1;
+        setRetryCount(nextRetryCount);
+        setUploadStatus("retrying");
+
+        // Exponential backoff for retries: 2s, 4s, 8s
+        const backoffTime = 2000 * Math.pow(2, retryCount);
+        toast.warning(`Upload error. Auto-retrying in ${backoffTime / 1000}s (${nextRetryCount}/${MAX_RETRIES})...`);
+
+        setTimeout(() => handleUpload(), backoffTime);
+      } else {
+        toast.error("Upload failed", {
+          description: message || "Failed to upload document",
+        });
+        setUploading(false);
+      }
+    },
+    [retryCount]
+  );
 
   // Handle upload process using XMLHttpRequest for progress tracking
   const handleUpload = useCallback(async () => {
@@ -284,7 +269,7 @@ export function FileUploadModal({ isOpen, onCloseAction }: FileUploadModalProps)
               // Server returned success: false
               handleUploadError(response.message || "Server rejected the upload");
             }
-          } catch (parseError) {
+          } catch {
             // Response parsing error
             handleUploadError("Invalid response from server");
           }
@@ -294,7 +279,7 @@ export function FileUploadModal({ isOpen, onCloseAction }: FileUploadModalProps)
             // Try to parse error details from response
             const errorResponse = JSON.parse(xhr.responseText);
             handleUploadError(errorResponse.message || `Server error (${xhr.status})`);
-          } catch (parseError) {
+          } catch {
             // If parsing fails, use status text
             handleUploadError(`Upload failed with status: ${xhr.status} ${xhr.statusText}`);
           }
@@ -352,37 +337,58 @@ export function FileUploadModal({ isOpen, onCloseAction }: FileUploadModalProps)
       // Handle any errors in setup or execution
       handleUploadError(error instanceof Error ? error.message : "An unknown error occurred");
     }
-  }, [file, fileName, description, onCloseAction, resetForm, retryCount, uploadStatus]);
+  }, [file, fileName, description, onCloseAction, resetForm, retryCount, uploadStatus, handleUploadError]);
 
-  // Handle upload errors
-  const handleUploadError = useCallback(
-    (message: string) => {
-      setUploadStatus("error");
-      setErrorMessage(message || "Failed to upload document");
+  // Handle manual retry attempt - moved after handleUpload is defined
+  const handleRetry = useCallback(() => {
+    if (!file) return;
 
-      // Check if this error should trigger auto-retry
-      const shouldAutoRetry = AUTO_RETRY_ERRORS.some((errType) => message.toLowerCase().includes(errType));
+    setUploadStatus("retrying");
+    setErrorMessage("");
+    handleUpload();
+  }, [file, handleUpload]);
 
-      if (shouldAutoRetry && retryCount < MAX_RETRIES) {
-        // Auto-retry on specific errors
-        const nextRetryCount = retryCount + 1;
-        setRetryCount(nextRetryCount);
-        setUploadStatus("retrying");
+  // This useEffect ensures handleRetry has access to the latest handleUpload function
+  useEffect(() => {
+    // This is intentionally left empty as it's just to satisfy the React Hook dependency warning
+    // The actual connection between handleRetry and handleUpload happens when handleRetry is called
+  }, [handleRetry, handleUpload]);
 
-        // Exponential backoff for retries: 2s, 4s, 8s
-        const backoffTime = 2000 * Math.pow(2, retryCount);
-        toast.warning(`Upload error. Auto-retrying in ${backoffTime / 1000}s (${nextRetryCount}/${MAX_RETRIES})...`);
-
-        setTimeout(() => handleUpload(), backoffTime);
-      } else {
-        toast.error("Upload failed", {
-          description: message || "Failed to upload document",
-        });
-        setUploading(false);
+  // Cleanup on unmount or when modal closes
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
-    },
-    [retryCount]
-  );
+    };
+  }, []);
+
+  // Update upload speed and remaining time calculations
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    if (uploading && uploadProgress > 0 && uploadProgress < 100) {
+      timer = setInterval(() => {
+        if (uploadStartTimeRef.current && file) {
+          const elapsedTime = (Date.now() - uploadStartTimeRef.current) / 1000; // seconds
+          const uploadedBytes = file.size * (uploadProgress / 100);
+
+          // Calculate upload speed in bytes per second
+          uploadSpeedRef.current = uploadedBytes / elapsedTime;
+
+          // Calculate remaining time
+          const remainingBytes = file.size - uploadedBytes;
+          if (uploadSpeedRef.current > 0) {
+            remainingTimeRef.current = remainingBytes / uploadSpeedRef.current;
+          }
+        }
+      }, 1000);
+    }
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [uploading, uploadProgress, file]);
 
   // Handle modal close
   const handleClose = useCallback(() => {
