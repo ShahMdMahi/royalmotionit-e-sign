@@ -94,6 +94,12 @@ export async function AdminNavbar() {
                     <span>User Dashboard</span>
                   </DropdownMenuItem>
                 </Link>
+                <Link href="/admin/documents">
+                  <DropdownMenuItem>
+                    <FileSignature className="mr-2 h-4 w-4" />
+                    <span>Admin Documents</span>
+                  </DropdownMenuItem>
+                </Link>
                 <Link href="/admin/profile">
                   <DropdownMenuItem>
                     <User className="mr-2 h-4 w-4" />

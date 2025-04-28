@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, User, FileSignature, LogIn, LogOut, Home, Info, Phone, FileText, Settings } from "lucide-react";
+import { Menu, User, FileSignature, LogIn, LogOut, Home, Info, Phone, FileText, Settings, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
@@ -112,8 +112,21 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
                     setIsOpen(false);
                   }}
                 >
-                  <FileSignature className="h-4 w-4" />
+                  <LayoutDashboard className="h-4 w-4" />
                   Dashboard
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="justify-start gap-1.5 text-sm h-8 px-3"
+                  onClick={() => {
+                    router.push("/documents");
+                    setIsOpen(false);
+                  }}
+                >
+                  <FileSignature className="h-4 w-4" />
+                  Documents
                 </Button>
 
                 <Button

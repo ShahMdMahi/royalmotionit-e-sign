@@ -7,7 +7,7 @@ import { auth } from "@/auth";
 import { Role } from "@prisma/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LayoutDashboard, LogOut, Settings, User } from "lucide-react";
+import { FileSignature, LayoutDashboard, LogOut, Settings, User } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { logoutUser } from "@/actions/auth";
 
@@ -96,6 +96,12 @@ export default async function Navbar() {
                       <DropdownMenuItem>
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         <span>Dashboard</span>
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/documents">
+                      <DropdownMenuItem>
+                        <FileSignature className="mr-2 h-4 w-4" />
+                        <span>Documents</span>
                       </DropdownMenuItem>
                     </Link>
                     <Link href="/profile">
