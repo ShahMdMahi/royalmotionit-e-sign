@@ -137,14 +137,14 @@ export async function uploadToR2(params: PutObjectCommandInput, retries = 3): Pr
  */
 export async function getFromR2(params: GetObjectCommandInput, retries = 3): Promise<R2Result<any>> {
   // Validate required parameters
-  if (!params.Bucket) {
-    return {
-      success: false,
-      error: new Error("Missing bucket parameter"),
-      message: "Bucket name is required",
-      statusCode: 400,
-    };
-  }
+  // if (!params.Bucket) {
+  //   return {
+  //     success: false,
+  //     error: new Error("Missing bucket parameter"),
+  //     message: "Bucket name is required",
+  //     statusCode: 400,
+  //   };
+  // }
 
   if (!params.Key) {
     return {
