@@ -126,14 +126,14 @@ export function FileUploadModal({ isOpen, onCloseAction, onUploadSuccess }: File
             } else {
               setError(response.message || "Upload failed");
             }
-          } catch (parseError) {
+          } catch {
             setError("Failed to process server response");
           }
         } else {
           try {
             const response = JSON.parse(xhr.responseText);
             setError(response.message || `Upload failed with status ${xhr.status}`);
-          } catch (parseError) {
+          } catch {
             setError(`Upload failed with status ${xhr.status}`);
           }
         }
