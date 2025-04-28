@@ -1,10 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, FileSignature, CheckCircle, Clock } from "lucide-react";
+import { FileUploadModal } from "./file-upload-modal";
 
 export function DocumentComponent() {
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+  const openUploadModal = () => setIsUploadModalOpen(true);
+  const closeUploadModal = () => setIsUploadModalOpen(false);
+
   return (
     <div className="container py-8 max-w-7xl mx-auto">
       <div className="flex flex-col gap-8">
@@ -60,14 +67,14 @@ export function DocumentComponent() {
               <div className="flex flex-col items-center justify-center h-full p-6 transition-all duration-300">
                 <Upload className="h-8 w-8 text-primary mb-2" />
                 <p className="font-medium mb-3 text-center">Upload New Document</p>
-                <Button className="relative overflow-hidden group bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg" size="lg">
+                <Button className="relative overflow-hidden group bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg" size="lg" onClick={openUploadModal}>
                   <span className="relative z-10 flex items-center gap-2">
                     <Upload className="h-4 w-4" />
                     Upload
                   </span>
                   <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                 </Button>
-                <p className="text-xs text-muted-foreground mt-3">Supported formats: PDF (max 5MB)</p>
+                <p className="text-xs text-muted-foreground mt-3">Supported formats: PDF (max 10MB)</p>
               </div>
             </CardContent>
           </Card>
@@ -75,6 +82,9 @@ export function DocumentComponent() {
 
         {/* Document Table */}
       </div>
+
+      {/* Upload Modal */}
+      <FileUploadModal isOpen={isUploadModalOpen} onCloseAction={closeUploadModal} />
     </div>
   );
 }
