@@ -3,8 +3,8 @@
 import { Document, User } from "@prisma/client";
 
 interface SingleDocumentComponentProps {
-  document?: Document | null;
-  author?: User | null;
+  document: Document;
+  author: User;
   signee?: User | null;
 }
 

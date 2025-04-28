@@ -15,21 +15,22 @@ export default async function SignleDocument({ params }: { params: Promise<{ id:
     try {
       const document = await prisma.document.findUnique({ where: { id: id } });
 
-      let author = null;
-      if (document?.authorId) {
-        author = await prisma.user.findUnique({
+      if (document) {
+        const author = await prisma.user.findUnique({
           where: { id: document.authorId },
         });
-      }
 
-      let signee = null;
-      if (document?.signeeId) {
-        signee = await prisma.user.findUnique({
-          where: { id: document.signeeId },
-        });
-      }
+        if (author) {
+          let signee = null;
+          if (document?.signeeId) {
+            signee = await prisma.user.findUnique({
+              where: { id: document.signeeId },
+            });
+          }
 
-      return <SingleDocumentComponent document={document} author={author} signee={signee} />;
+          return <SingleDocumentComponent document={document} author={author} signee={signee} />;
+        }
+      }
     } catch (error) {
       console.error("Error fetching document:", error);
       redirect("/admin/documents");
