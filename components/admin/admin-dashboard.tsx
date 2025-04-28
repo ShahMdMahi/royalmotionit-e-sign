@@ -1,9 +1,9 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { FileSignature, Users, User, Settings, LayoutDashboard, LogOut, BarChart4, Bell, Calendar, Clock } from "lucide-react";
+import { FileSignature, Users, User, Settings, LayoutDashboard, LogOut } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { logoutUser } from "@/actions/auth";
 
@@ -148,116 +148,6 @@ export function AdminDashboardComponent() {
 
         {/* Separator */}
         <Separator className="my-2" />
-
-        {/* Third Row - Additional Features */}
-        <div>
-          <h2 className="text-xl font-medium mb-4">Analytics & Operations</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="card-hover border-border hover:border-primary/50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <BarChart4 className="size-5 text-primary" /> Analytics
-                </CardTitle>
-                <CardDescription>System usage statistics</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="h-[120px] flex items-center justify-center">
-                  <div className="flex items-end gap-2 h-[100px]">
-                    {[40, 65, 30, 80, 55, 70, 25].map((value, i) => (
-                      <div key={i} className="w-6 bg-primary/80 rounded-t-sm" style={{ height: `${value}%` }} />
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="card-hover border-border hover:border-primary/50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Bell className="size-5 text-primary" /> Notifications
-                </CardTitle>
-                <CardDescription>Recent system alerts</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-3">
-                  <div className="border-l-2 border-primary pl-3 py-1">
-                    <p className="font-medium text-sm">System Update</p>
-                    <p className="text-xs text-muted-foreground">Scheduled for today at 2:00 PM</p>
-                  </div>
-                  <div className="border-l-2 border-primary/70 pl-3 py-1">
-                    <p className="font-medium text-sm">New User Registration</p>
-                    <p className="text-xs text-muted-foreground">5 new users in the last 24h</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="card-hover border-border hover:border-primary/50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Calendar className="size-5 text-primary" /> Calendar
-                </CardTitle>
-                <CardDescription>Upcoming events</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <div className="flex-shrink-0 size-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-xs font-medium">23</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Team Meeting</p>
-                      <p className="text-xs text-muted-foreground">Discussion on new features</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-shrink-0 size-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-xs font-medium">28</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Release v2.4</p>
-                      <p className="text-xs text-muted-foreground">Major system update</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="card-hover border-border hover:border-primary/50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Clock className="size-5 text-primary" /> Activity
-                </CardTitle>
-                <CardDescription>Recent system activity</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="size-2 bg-primary rounded-full"></div>
-                      <p className="text-sm">Document signed</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">10m ago</p>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="size-2 bg-primary rounded-full"></div>
-                      <p className="text-sm">New user registered</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">1h ago</p>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="size-2 bg-primary rounded-full"></div>
-                      <p className="text-sm">Settings updated</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">3h ago</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
       </div>
     </div>
   );
