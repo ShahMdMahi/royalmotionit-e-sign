@@ -1,22 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, FileSignature, CheckCircle, Clock, Download, Eye, Edit, MoreHorizontal } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Upload, FileSignature, CheckCircle, Clock, Download, Eye, Edit, MoreHorizontal, Search, X, Filter } from "lucide-react";
 import { FileUploadModal } from "./file-upload-modal";
-import { Document, DocumentStatus, DocumentType } from "@prisma/client";
+import { Document, DocumentStatus, DocumentType, User } from "@prisma/client";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
 
-export function DocumentComponent({ documents }: { documents: Document[] }) {
+export function DocumentComponent({ documents, users }: { documents: Document[]; users: User[] }) {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+  // Search state
+  const [searchTerm, setSearchTerm] = useState("");
 
   const openUploadModal = () => setIsUploadModalOpen(true);
   const closeUploadModal = () => setIsUploadModalOpen(false);
+
+  // Filter documents based on search criteria
+  const filteredDocuments = useMemo(() => {
+    if (!searchTerm.trim()) return documents;
+
+    const searchLower = searchTerm.toLowerCase();
+    return documents.filter((doc) => {
+      // Find the author and signee users
+      const author = users.find((user) => user.id === doc.authorId);
+      const signee = users.find((user) => user.id === doc.signeeId);
+
+      // Check if any search filters match
+      return (
+        doc.title.toLowerCase().includes(searchLower) ||
+        author?.name?.toLowerCase().includes(searchLower) ||
+        author?.email?.toLowerCase().includes(searchLower) ||
+        signee?.name?.toLowerCase().includes(searchLower) ||
+        signee?.email?.toLowerCase().includes(searchLower) ||
+        doc.status.toLowerCase().includes(searchLower) ||
+        doc.documentType.toLowerCase().includes(searchLower)
+      );
+    });
+  }, [documents, users, searchTerm]);
 
   const allDocuments = documents.length;
   const pendingDocuments = documents.filter((doc) => doc.status === DocumentStatus.PENDING).length;
@@ -142,127 +168,146 @@ export function DocumentComponent({ documents }: { documents: Document[] }) {
           </Card>
         </div>
 
-        {/* Document Table */}
-        <div className="rounded-lg border bg-card">
-          <div className="p-4 flex items-center justify-between">
-            <h2 className="text-lg font-medium">Documents List</h2>
-            <div className="flex items-center gap-2">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="sm" variant="outline">
-                      Filter
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Filter documents by status or type</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="sm" variant="outline">
-                      Export
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Export documents as CSV</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+        {/* Document Table - Updated to match users table styling */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <FileSignature className="size-5 text-primary" /> All Documents
+            </CardTitle>
+            <CardDescription>Manage document files and signature requests</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {/* Search input - styled like users table */}
+            <div className="mb-6 flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input type="search" placeholder="Search by title, author, signee, status or type..." className="pl-9" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              </div>
+              <Button variant="outline" size="icon" className="shrink-0" onClick={openUploadModal}>
+                <Upload className="h-4 w-4" />
+                <span className="sr-only">Upload document</span>
+              </Button>
             </div>
-          </div>
-          <Table>
-            <TableCaption>A list of all documents in the system.</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[80px]">ID</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Author</TableHead>
-                <TableHead>Signee</TableHead>
-                <TableHead>Signed At</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Updated At</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {documents.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={9} className="text-center py-6 text-muted-foreground">
-                    No documents found. Upload a new document to get started.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                documents.map((doc) => (
-                  <TableRow key={doc.id}>
-                    <TableCell className="font-medium">{doc.id.slice(0, 8)}</TableCell>
-                    <TableCell className="font-medium max-w-[200px] truncate">{doc.title}</TableCell>
-                    <TableCell>{doc.authorId}</TableCell>
-                    <TableCell>{doc.signeeId || "—"}</TableCell>
-                    <TableCell>{doc.signedAt ? formatDate(doc.signedAt) : "—"}</TableCell>
-                    <TableCell>{getStatusBadge(doc.status)}</TableCell>
-                    <TableCell>{getTypeBadge(doc.documentType)}</TableCell>
-                    <TableCell>{formatDate(doc.updatedAt)}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end items-center gap-2">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
+
+            {filteredDocuments.length > 0 ? (
+              <div className="w-full overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Author</TableHead>
+                      <TableHead>Signee</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Signed At</TableHead>
+                      <TableHead>Updated At</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredDocuments.map((doc) => {
+                      const author = users.find((user) => user.id === doc.authorId);
+                      const signee = users.find((user) => user.id === doc.signeeId);
+                      return (
+                        <TableRow key={doc.id}>
+                          <TableCell className="font-medium max-w-[150px] truncate">{doc.title}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{author?.name || "Unknown"}</span>
+                              <span className="text-sm text-muted-foreground">{author?.email || "—"}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {signee ? (
+                              <div className="flex flex-col">
+                                <span className="font-medium">{signee?.name || "—"}</span>
+
+                                <span className="text-sm text-muted-foreground">{signee?.email || "—"}</span>
+                              </div>
+                            ) : (
+                              <div className="text-sm flex flex-col">
+                                <span className="text-muted-foreground">Not assigned</span>
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>{getStatusBadge(doc.status)}</TableCell>
+                          <TableCell>{getTypeBadge(doc.documentType)}</TableCell>
+                          <TableCell>
+                            {doc.signedAt ? (
+                              <div className="text-sm flex flex-col">
+                                <span>{doc.signedAt.toDateString()}</span>
+                                <span className="text-muted-foreground">
+                                  {new Date(doc.signedAt).toLocaleTimeString("en-US", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    timeZone: "Asia/Dhaka",
+                                    timeZoneName: "short",
+                                  })}
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="text-sm flex flex-col">
+                                <span className="text-muted-foreground">Not signed yet</span>
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm flex flex-col">
+                              <span>{doc.updatedAt.toDateString()}</span>
+                              <span className="text-muted-foreground">
+                                {new Date(doc.updatedAt).toLocaleTimeString("en-US", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  timeZone: "Asia/Dhaka",
+                                  timeZoneName: "short",
+                                })}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end items-center gap-1">
                               <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <Eye className="h-4 w-4" />
                                 <span className="sr-only">View document</span>
                               </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>View document</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <Edit className="h-4 w-4" />
                                 <span className="sr-only">Edit document</span>
                               </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Edit document</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <Download className="h-4 w-4" />
                                 <span className="sr-only">Download document</span>
                               </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Download document</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">More options</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>Send reminder</DropdownMenuItem>
-                            <DropdownMenuItem>Share document</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">Delete document</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">More options</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem>Send reminder</DropdownMenuItem>
+                                  <DropdownMenuItem>Share document</DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem className="text-destructive">Delete document</DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center p-8 text-muted-foreground border rounded-md">
+                {searchTerm ? "No documents found matching your search" : "No documents found. Upload a new document to get started."}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Upload Modal */}
