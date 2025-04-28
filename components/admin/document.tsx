@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 export function DocumentComponent({ documents, users }: { documents: Document[]; users: User[] }) {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -265,9 +266,11 @@ export function DocumentComponent({ documents, users }: { documents: Document[];
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end items-center gap-1">
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <Eye className="h-4 w-4" />
-                                <span className="sr-only">View document</span>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                                <Link href={`/admin/documents/${doc.id}`}>
+                                  <Eye className="h-4 w-4" />
+                                  <span className="sr-only">View document</span>
+                                </Link>
                               </Button>
                               <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <Edit className="h-4 w-4" />
