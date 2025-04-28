@@ -32,7 +32,7 @@ export function FileUploadModal({ isOpen, onCloseAction }: FileUploadModalProps)
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const droppedFile = e.dataTransfer.files[0];
       if (droppedFile.type === "application/pdf" && droppedFile.size <= 10 * 1024 * 1024) {
@@ -67,17 +67,17 @@ export function FileUploadModal({ isOpen, onCloseAction }: FileUploadModalProps)
 
     try {
       setUploading(true);
-      
+
       // Simulate upload delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Here you would normally upload the file to your server
-      // const formData = new FormData();
-      // formData.append('file', file);
-      // formData.append('title', title);
-      // formData.append('description', description);
-      // await fetch('/api/documents', { method: 'POST', body: formData });
-      
+      // await new Promise(resolve => setTimeout(resolve, 1500));
+
+      //  Here you would normally upload the file to your server
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("title", title);
+      formData.append("description", description);
+      await fetch("/api/documents", { method: "POST", body: formData });
+
       setUploading(false);
       resetForm();
       onCloseAction();
@@ -99,13 +99,11 @@ export function FileUploadModal({ isOpen, onCloseAction }: FileUploadModalProps)
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Upload Document</DialogTitle>
-            <DialogDescription>
-              Upload a document for signature. Supported format: PDF (max 10MB).
-            </DialogDescription>
+            <DialogDescription>Upload a document for signature. Supported format: PDF (max 10MB).</DialogDescription>
           </DialogHeader>
-          
+
           {!file ? (
-            <div 
+            <div
               className={`border-2 border-dashed rounded-lg p-10 transition-colors ${
                 isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/20"
               } flex flex-col items-center justify-center gap-4 my-4 cursor-pointer`}
@@ -116,16 +114,11 @@ export function FileUploadModal({ isOpen, onCloseAction }: FileUploadModalProps)
             >
               <Upload className="h-10 w-10 text-muted-foreground" />
               <p className="text-sm text-muted-foreground text-center">
-                <span className="font-medium">Click to upload</span> or drag and drop<br />
+                <span className="font-medium">Click to upload</span> or drag and drop
+                <br />
                 PDF (max. 10MB)
               </p>
-              <Input 
-                id="file-upload" 
-                type="file" 
-                accept="application/pdf" 
-                onChange={handleFileChange} 
-                className="hidden" 
-              />
+              <Input id="file-upload" type="file" accept="application/pdf" onChange={handleFileChange} className="hidden" />
             </div>
           ) : (
             <div className="border rounded-lg p-4 my-4">
@@ -135,42 +128,23 @@ export function FileUploadModal({ isOpen, onCloseAction }: FileUploadModalProps)
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{file.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {(file.size / 1024 / 1024).toFixed(2)} MB • PDF
-                  </p>
+                  <p className="text-xs text-muted-foreground">{(file.size / 1024 / 1024).toFixed(2)} MB • PDF</p>
                 </div>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={removeFile}
-                  className="h-8 w-8 rounded-full"
-                >
+                <Button type="button" variant="ghost" size="icon" onClick={removeFile} className="h-8 w-8 rounded-full">
                   <X className="h-4 w-4" />
                 </Button>
               </div>
             </div>
           )}
-          
+
           <div className="grid gap-4 py-2">
             <div className="grid gap-2">
               <Label htmlFor="title">Document Title</Label>
-              <Input
-                id="title"
-                placeholder="Enter document title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
+              <Input id="title" placeholder="Enter document title" value={title} onChange={(e) => setTitle(e.target.value)} required />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="description">Description (Optional)</Label>
-              <Input
-                id="description"
-                placeholder="Add a description for this document"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
+              <Input id="description" placeholder="Add a description for this document" value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
           </div>
 
