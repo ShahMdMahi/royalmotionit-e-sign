@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/prisma/prisma";
 import { Prisma } from "@prisma/client";
 import crypto from "crypto";
+import { revalidatePath } from "next/cache";
 
 // Define constants for request limits and validation
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -412,6 +413,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Return success response with file details
+    revalidatePath("/admin/documents");
     return NextResponse.json(
       {
         success: true,
