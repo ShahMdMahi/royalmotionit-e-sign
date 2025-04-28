@@ -3,13 +3,12 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Upload, FileSignature, CheckCircle, Clock, Download, Eye, Edit, MoreHorizontal, Search, X, Filter } from "lucide-react";
+import { Upload, FileSignature, CheckCircle, Clock, Download, Eye, Edit, MoreHorizontal, Search } from "lucide-react";
 import { FileUploadModal } from "./file-upload-modal";
 import { Document, DocumentStatus, DocumentType, User } from "@prisma/client";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 
 export function DocumentComponent({ documents, users }: { documents: Document[]; users: User[] }) {
