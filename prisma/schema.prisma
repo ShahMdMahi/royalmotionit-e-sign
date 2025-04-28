@@ -123,6 +123,7 @@ enum DocumentStatus {
   PENDING
   APPROVED
   REJECTED
+  EXPIRED
 }
 
 enum DocumentType {
