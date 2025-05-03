@@ -168,10 +168,10 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
         const response = await fetch(`/api/documents/prepare?documentId=${document.id}`, {
           method: "GET",
         });
-        
+
         if (response.ok) {
           const data = await response.json();
-          
+
           if (data.success && data.fields) {
             // Transform database fields to component format
             const transformedFields: FormField[] = data.fields.map((field: any) => ({
@@ -188,7 +188,7 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
                 pageNumber: field.pageNumber,
               },
             }));
-            
+
             // Update document data with existing fields and information
             setDocumentData({
               fields: transformedFields,
@@ -202,7 +202,7 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
         console.error("Error fetching document fields:", error);
       }
     };
-    
+
     fetchExistingFields();
   }, [document.id, document.signeeId, document.dueDate, document.message]);
 
@@ -356,7 +356,7 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
 
       // Show loading toast
       const loadingToast = toast.loading("Preparing document...");
-      
+
       // Send data to the API
       const response = await fetch("/api/documents/prepare", {
         method: "POST",

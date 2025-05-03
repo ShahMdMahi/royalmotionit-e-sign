@@ -44,11 +44,11 @@ export type PdfAnnotation = {
   modifiedAt: Date;
 };
 
-export default function PDFViewer({ 
-  pdfData, 
-  allowAnnotations = false, 
-  allowSignature = false, 
-  onSaveAnnotations, 
+export default function PDFViewer({
+  pdfData,
+  allowAnnotations = false,
+  allowSignature = false,
+  onSaveAnnotations,
   readOnly = true,
   onPageChange,
   onDocumentLoad

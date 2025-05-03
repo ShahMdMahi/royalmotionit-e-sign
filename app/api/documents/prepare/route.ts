@@ -53,10 +53,8 @@ export async function POST(request: Request) {
     // Create new document fields
     if (fields && fields.length > 0) {
       await Promise.all(
-        // @typescript-eslint/no-explicit-any
         fields.map(async (field: any) => {
           if (!field.position) return;
-          
           await prisma.documentField.create({
             data: {
               documentId,
