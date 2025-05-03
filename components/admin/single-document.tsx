@@ -6,7 +6,7 @@ import { getFromR2 } from "@/actions/r2";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Download, Loader2, AlertCircle, FileText, Copy, CheckCircle, Clock, Ban, Calendar, Pencil, AlertTriangle } from "lucide-react";
+import { Download, Loader2, AlertCircle, FileText, Copy, CheckCircle, Clock, Ban, Calendar, Pencil, AlertTriangle, Edit } from "lucide-react";
 import dynamic from "next/dynamic";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -15,6 +15,7 @@ import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import type { PDFViewerProps, PdfAnnotation } from "@/components/admin/pdf-viewer";
+import { useRouter } from "next/navigation";
 
 // Dynamically import the PDF components to avoid SSR issues
 const PDFViewer = dynamic<PDFViewerProps>(() => import("@/components/admin/pdf-viewer"), {
@@ -40,6 +41,7 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("document");
   const [copyLinkTooltip, setCopyLinkTooltip] = useState("Copy link");
+  const router = useRouter();
 
   // Fetch PDF data from R2 storage
   useEffect(() => {
@@ -247,6 +249,11 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
                 </TooltipTrigger>
                 <TooltipContent>{copyLinkTooltip}</TooltipContent>
               </Tooltip>
+
+              <Button variant="outline" size="sm" disabled={document.documentType === DocumentType.SIGNED} onClick={() => router.push(`/admin/documents/${document.id}/edit`)}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit
+              </Button>
 
               <Button variant="outline" size="sm" onClick={handleDownload} disabled={!pdfData}>
                 <Download className="mr-2 h-4 w-4" />
