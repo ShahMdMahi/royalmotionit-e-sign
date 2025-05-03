@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Document, User } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileWarning, FileText, TextCursor, Pencil, ListChecks, Calendar, Mail, Type, Save, UserCheck, Signature, GripVertical, X, Trash2, Settings, ArrowLeft, Undo, Redo, Plus } from "lucide-react";
+import { FileWarning, FileText, TextCursor, Pencil, ListChecks, Calendar, Mail, Type, Save, UserCheck, Signature, Trash2, Settings, ArrowLeft, Undo, Redo, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
