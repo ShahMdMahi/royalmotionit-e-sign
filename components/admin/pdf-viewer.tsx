@@ -26,6 +26,8 @@ export interface PDFViewerProps {
   allowSignature?: boolean;
   onSaveAnnotations?: (annotations: PdfAnnotation[]) => Promise<void>;
   readOnly?: boolean;
+  onPageChange?: (pageNumber: number) => void;
+  onDocumentLoad?: ({ numPages }: { numPages: number }) => void;
 }
 
 // Define annotation types
@@ -42,7 +44,15 @@ export type PdfAnnotation = {
   modifiedAt: Date;
 };
 
-export default function PDFViewer({ pdfData, allowAnnotations = false, allowSignature = false, onSaveAnnotations, readOnly = true }: PDFViewerProps) {
+export default function PDFViewer({ 
+  pdfData, 
+  allowAnnotations = false, 
+  allowSignature = false, 
+  onSaveAnnotations, 
+  readOnly = true,
+  onPageChange,
+  onDocumentLoad
+}: PDFViewerProps) {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1);
@@ -124,6 +134,9 @@ export default function PDFViewer({ pdfData, allowAnnotations = false, allowSign
     setPageNumber(1);
     setIsLoading(false);
     setLoadProgress(100);
+    if (onDocumentLoad) {
+      onDocumentLoad({ numPages });
+    }
   };
 
   // PDF document loading progress
@@ -153,9 +166,12 @@ export default function PDFViewer({ pdfData, allowAnnotations = false, allowSign
     (pageNum: number) => {
       if (numPages && pageNum >= 1 && pageNum <= numPages) {
         setPageNumber(pageNum);
+        if (onPageChange) {
+          onPageChange(pageNum);
+        }
       }
     },
-    [numPages]
+    [numPages, onPageChange]
   );
 
   // Zoom controls

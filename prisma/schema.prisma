@@ -109,9 +109,31 @@ model Document {
   updatedAt    DateTime       @updatedAt
   documentType DocumentType   @default(UNSIGNED)
   hash         String? // File hash for integrity verification and duplicate detection
+  dueDate      DateTime?
+  message      String?
 
   author User  @relation("AuthoredDocuments", fields: [authorId], references: [id], onDelete: Cascade)
   signee User? @relation("SigneedDocuments", fields: [signeeId], references: [id], onDelete: SetNull)
+  fields DocumentField[]
+}
+
+model DocumentField {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  documentId  String  @db.ObjectId
+  type        String
+  label       String
+  required    Boolean @default(false)
+  placeholder String?
+  x           Float
+  y           Float
+  width       Float
+  height      Float
+  pageNumber  Int
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 }
 
 enum Role {
