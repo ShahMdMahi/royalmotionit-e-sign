@@ -86,9 +86,8 @@ export function DocumentTemplates({
       setShowSaveDialog(false);
       setTemplateName("");
       setTemplateDescription("");
-    } catch (error) {
+    } catch {
       toast.error("Failed to save template");
-      console.error(error);
     } finally {
       setIsLoading(false);
     }

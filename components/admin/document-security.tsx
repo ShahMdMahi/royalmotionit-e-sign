@@ -49,7 +49,6 @@ interface DocumentSecurityProps {
 }
 
 export function DocumentSecurity({
-  documentId,
   settings,
   auditTrail,
   onUpdateSecurity,

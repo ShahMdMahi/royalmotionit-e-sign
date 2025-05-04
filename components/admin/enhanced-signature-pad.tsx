@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Trash2, Save, Download, Undo, Repeat, Image as ImageIcon, CheckCircle, RotateCw, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
+import Image from "next/image";
 
 export interface SignatureData {
   id: string;
@@ -37,7 +38,6 @@ export function EnhancedSignaturePad({ onSave, defaultSignature = null, signerId
   // Refs
   const signaturePadRef = useRef<SignatureCanvas>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const signatureHistory = useRef<string[]>([]);
   const redoStack = useRef<string[]>([]);
 
@@ -647,7 +647,15 @@ export function EnhancedSignaturePad({ onSave, defaultSignature = null, signerId
         {readOnly && defaultSignature && (
           <div className="border rounded-md bg-white p-4 flex justify-center items-center min-h-[200px]">
             {defaultSignature.type === "draw" && defaultSignature.imageData ? (
-              <img src={defaultSignature.imageData} alt="Signature" className="max-w-full max-h-[180px]" />
+              <div className="relative w-full h-[180px] flex items-center justify-center">
+                <Image 
+                  src={defaultSignature.imageData} 
+                  alt="Signature" 
+                  style={{ objectFit: "contain" }}
+                  fill
+                  sizes="(max-width: 600px) 100vw, 600px"
+                />
+              </div>
             ) : defaultSignature.type === "type" && defaultSignature.textContent ? (
               <div
                 className="text-center text-3xl py-4"

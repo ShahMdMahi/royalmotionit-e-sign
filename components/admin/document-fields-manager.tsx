@@ -86,7 +86,7 @@ export interface DocumentField {
   label?: string;
   required: boolean;
   placeholder?: string;
-  value?: any;
+  value?: string | boolean | number; // Replace any with specific types
   options?: string[];
   assignedTo?: string | null;
   pageNumber: number;
@@ -98,23 +98,6 @@ export interface DocumentField {
   };
   createdAt: Date;
   modifiedAt: Date;
-}
-
-// Replace any type with proper interface
-interface FieldData {
-  id: string;
-  type: string;
-  label: string;
-  required: boolean;
-  position: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    pageNumber: number;
-  };
-  value?: string | boolean;
-  options?: string[];
 }
 
 interface Recipient {
