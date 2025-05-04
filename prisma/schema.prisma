@@ -93,24 +93,26 @@ model Authenticator {
 }
 
 model Document {
-  id           String         @id @default(auto()) @map("_id") @db.ObjectId
-  title        String
-  description  String?
-  pathname     String?
-  url          String?
-  key          String?
-  fileName     String?
-  status       DocumentStatus @default(PENDING)
-  signedAt     DateTime?
-  expiresAt    DateTime?
-  signeeId     String?        @db.ObjectId
-  authorId     String         @db.ObjectId
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  documentType DocumentType   @default(UNSIGNED)
-  hash         String? // File hash for integrity verification and duplicate detection
-  dueDate      DateTime?
-  message      String?
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  description   String?
+  pathname      String?
+  url           String?
+  key           String?
+  fileName      String?
+  status        DocumentStatus @default(PENDING)
+  signedAt      DateTime?
+  expiresAt     DateTime?
+  preparedAt    DateTime?      // Added preparedAt field
+  expiresInDays Int?           // Added expiresInDays field
+  signeeId      String?        @db.ObjectId
+  authorId      String         @db.ObjectId
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  documentType  DocumentType   @default(UNSIGNED)
+  hash          String? // File hash for integrity verification and duplicate detection
+  dueDate       DateTime?
+  message       String?
 
   author User  @relation("AuthoredDocuments", fields: [authorId], references: [id], onDelete: Cascade)
   signee User? @relation("SigneedDocuments", fields: [signeeId], references: [id], onDelete: SetNull)
