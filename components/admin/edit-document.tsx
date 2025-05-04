@@ -71,6 +71,26 @@ interface DocumentPrepareData {
   expiryDays: number;
 }
 
+// Fix the TypeScript error by replacing any with a specific type
+interface ServerFieldData {
+  id: string;
+  type: string;
+  label: string;
+  required: boolean;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  pageNumber: number;
+  placeholder?: string;
+  validations?: {
+    minLength?: number;
+    maxLength?: number;
+    pattern?: string;
+  };
+  options?: string[];
+}
+
 export function EditDocumentComponent({ document, users = [] }: { document: Document; users?: User[] }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("prepare");
@@ -217,7 +237,7 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
 
           if (data.success && data.fields) {
             // Transform database fields to component format
-            const transformedFields: FormField[] = data.fields.map((field: any) => ({
+            const transformedFields: FormField[] = data.fields.map((field: ServerFieldData) => ({
               id: field.id,
               type: field.type as FieldType,
               label: field.label,
@@ -266,7 +286,7 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
       setHistory([{ ...documentData }]);
       setHistoryIndex(0);
     }
-  }, [documentData.fields]);
+  }, [documentData.fields, documentData, history, historyIndex]);
 
   // Function to add a new field
   const addField = (type: FieldType, position?: { x: number; y: number; width: number; height: number; pageNumber?: number; label?: string }) => {

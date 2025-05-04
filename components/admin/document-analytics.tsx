@@ -392,7 +392,7 @@ export function DocumentAnalytics({
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         <div className="flex -space-x-2">
-                          {doc.signers.slice(0, 3).map((signer, idx) => (
+                          {doc.signers.slice(0, 3).map((signer) => (
                             <div 
                               key={signer.id}
                               className={`h-6 w-6 rounded-full border-2 border-background flex items-center justify-center text-[10px] font-medium ${

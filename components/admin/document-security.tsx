@@ -5,10 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { 
-  AlertTriangle, CheckCircle2, Copy, Download, Eye, FileWarning, 
-  Lock, ShieldCheck, ShieldX, History, Key, FileLock2
-} from "lucide-react";
+import { FileLock2, Lock, ShieldCheck, History, AlertTriangle, Key, FileWarning, Download, CheckCircle2, ShieldX } from "lucide-react";
 
 interface DocumentSecuritySettings {
   passwordProtection: boolean;
@@ -33,7 +30,7 @@ interface DocumentSecuritySettings {
     ESIGN: boolean;
     UETA: boolean;
   };
-  [key: string]: any; // Add index signature to allow string keys
+  [key: string]: unknown;
 }
 
 interface DocumentSecurityProps {
@@ -67,17 +64,15 @@ export function DocumentSecurity({
       const pathParts = path.split(".");
       
       if (pathParts.length === 1) {
-        // Handle top-level properties
         return {
           ...newSettings,
           [path]: !newSettings[path as keyof DocumentSecuritySettings]
         };
       } else {
-        // Handle nested properties
         const nestedCopy = JSON.parse(JSON.stringify(newSettings));
-        let current: any = nestedCopy;
+        let current: Record<string, unknown> = nestedCopy;
         for (let i = 0; i < pathParts.length - 1; i++) {
-          current = current[pathParts[i]];
+          current = current[pathParts[i]] as Record<string, unknown>;
         }
         
         const lastKey = pathParts[pathParts.length - 1];

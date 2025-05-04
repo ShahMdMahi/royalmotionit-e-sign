@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Check, LayoutTemplate, Plus, Trash2 } from "lucide-react";
@@ -9,12 +9,32 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 
+export interface TemplateField {
+  id: string;
+  type: string;
+  label: string;
+  required: boolean;
+  position?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    pageNumber: number;
+  };
+  placeholder?: string;
+  validations?: {
+    minLength?: number;
+    maxLength?: number;
+    pattern?: string;
+  };
+}
+
 export interface DocumentTemplate {
   id: string;
   name: string;
   description: string;
   createdAt: Date;
-  fields: any[]; // Template fields
+  fields: TemplateField[]; // Replace any[] with TemplateField[]
   workflow?: {
     signers: { order: number; role: string }[];
     expiryDays: number;
@@ -27,7 +47,7 @@ interface DocumentTemplatesProps {
   onSelectTemplate: (template: DocumentTemplate) => void;
   onSaveTemplate: (template: Omit<DocumentTemplate, "id" | "createdAt">) => Promise<void>;
   onDeleteTemplate: (templateId: string) => Promise<void>;
-  currentFields: any[];
+  currentFields: TemplateField[];
   currentWorkflow?: {
     signers: { order: number; role: string }[];
     expiryDays: number;

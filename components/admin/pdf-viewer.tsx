@@ -25,6 +25,7 @@ import {
   Circle,
   ArrowRight,
   Trash2,
+  Download,
 } from "lucide-react";
 import { pdfjs, Document as PDFDocument, Page } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
@@ -186,6 +187,22 @@ export default function PDFViewer({ pdfData, allowAnnotations = false, allowSign
     window.addEventListener("keydown", handleEscKey);
     return () => window.removeEventListener("keydown", handleEscKey);
   }, [isFullScreen]);
+
+  // Add a warning indicator when there are unsaved changes
+  useEffect(() => {
+    if (hasUnsavedChanges && !readOnly && allowAnnotations) {
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        e.preventDefault();
+        e.returnValue = "You have unsaved annotations. Are you sure you want to leave?";
+        return "You have unsaved annotations. Are you sure you want to leave?";
+      };
+
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }
+  }, [hasUnsavedChanges, readOnly, allowAnnotations]);
 
   // PDF document loaded successfully
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
@@ -1132,6 +1149,27 @@ export default function PDFViewer({ pdfData, allowAnnotations = false, allowSign
                 <Button size="sm" variant="outline" className="text-xs gap-1" onClick={handleSaveAnnotations}>
                   <Save className="h-3 w-3" /> Save
                 </Button>
+                {allowSignature && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddSignature}
+                    className="text-xs gap-1"
+                    disabled={readOnly}
+                  >
+                    <PenLine className="h-3 w-3" /> Add Signature
+                  </Button>
+                )}
+                {!readOnly && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownloadPdf}
+                    className="text-xs gap-1"
+                  >
+                    <Download className="h-3 w-3" /> Download PDF
+                  </Button>
+                )}
               </div>
             </div>
           </TabsContent>

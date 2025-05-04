@@ -13,19 +13,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Switch } from "@/components/ui/switch";
 import { Trash2, Save, Download, Undo, Repeat, Image as ImageIcon, CheckCircle, RotateCw, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
 
-// Use universal imports for touch events support (mobile + desktop)
-import HammerJS from "hammerjs";
-import { isMobile, isTablet } from "react-device-detect";
-
-// Define interfaces for properly typed hammer.js usage
-interface HammerEvent {
-  scale: number;
-  rotation: number;
-}
-
-// Use the imported HammerJS directly rather than trying to redefine its types
-// This avoids type conflicts with the actual Hammer.js library
-
 export interface SignatureData {
   id: string;
   type: "draw" | "type";
@@ -44,10 +31,9 @@ interface EnhancedSignaturePadProps {
   signerId?: string;
   signerName?: string;
   readOnly?: boolean;
-  signaturePosition?: { pageNumber: number; x: number; y: number; width: number; height: number };
 }
 
-export function EnhancedSignaturePad({ onSave, defaultSignature = null, signerId, signerName, readOnly = false, signaturePosition }: EnhancedSignaturePadProps) {
+export function EnhancedSignaturePad({ onSave, defaultSignature = null, signerId, signerName, readOnly = false }: EnhancedSignaturePadProps) {
   // Refs
   const signaturePadRef = useRef<SignatureCanvas>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -68,7 +54,7 @@ export function EnhancedSignaturePad({ onSave, defaultSignature = null, signerId
   const [isEmpty, setIsEmpty] = useState<boolean>(!defaultSignature);
   const [isSaved, setIsSaved] = useState<boolean>(!!defaultSignature);
   const [useTimestamp, setUseTimestamp] = useState<boolean>(true);
-  const [signatureTimestamp, setSignatureTimestamp] = useState<Date>(new Date());
+  const signatureTimestamp = new Date();
 
   // Available fonts
   const availableFonts = [
@@ -79,9 +65,6 @@ export function EnhancedSignaturePad({ onSave, defaultSignature = null, signerId
     { name: "Great Vibes", className: "font-great-vibes" },
     { name: "Sacramento", className: "font-sacramento" },
   ];
-
-  // Device detection for touch capabilities
-  const isTouchDevice = isMobile || isTablet;
 
   // Load default signature if provided
   useEffect(() => {
@@ -116,37 +99,6 @@ export function EnhancedSignaturePad({ onSave, defaultSignature = null, signerId
       setSignatureName(defaultSignature.name || signerName || "");
     }
   }, [defaultSignature, signerName]);
-
-  // Set up touch handling for mobile devices
-  useEffect(() => {
-    if (signaturePadRef.current && canvasRef.current) {
-      // Initialize Hammer.js manager for touch gestures
-      const hammerManager = new HammerJS.Manager(canvasRef.current);
-
-      // Add recognizers
-      const pinch = new HammerJS.Pinch();
-      const rotate = new HammerJS.Rotate();
-      pinch.recognizeWith(rotate);
-      hammerManager.add([pinch, rotate]);
-
-      // Handle pinch and rotation
-      hammerManager.on("pinchrotate", (e) => {
-        // Handle pinch for zoom
-        setScale((prevScale) => Math.min(Math.max(prevScale * e.scale, 0.5), 3));
-
-        // Handle rotation
-        const rotation = e.rotation;
-        if (Math.abs(rotation) > 15) {
-          // Threshold to avoid accidental rotation
-          setRotation((prev) => (prev + Math.sign(rotation) * 90) % 360);
-        }
-      });
-
-      return () => {
-        hammerManager.destroy();
-      };
-    }
-  }, [isTouchDevice]);
 
   // Setup signature pad options
   useEffect(() => {
