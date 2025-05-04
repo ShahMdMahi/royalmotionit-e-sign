@@ -4,7 +4,7 @@ import { prisma } from "@/prisma/prisma";
 import { DocumentType, Role } from "@prisma/client";
 import { redirect } from "next/navigation";
 
-export default async function EditDocument({ params }: { params: { id: string } }) {
+export default async function EditDocument({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session) {
     redirect("/auth/login");
