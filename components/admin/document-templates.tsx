@@ -143,6 +143,7 @@ export function DocumentTemplates({
                             await onDeleteTemplate(template.id);
                             toast.success("Template deleted");
                           } catch (error) {
+                            console.error("Error deleting template:", error);
                             toast.error("Failed to delete template");
                           }
                         }
