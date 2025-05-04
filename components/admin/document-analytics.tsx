@@ -1,10 +1,10 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+  XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, 
   PieChart, Pie, Cell, Legend, LineChart, Line
 } from "recharts";
 import { 
@@ -246,7 +246,7 @@ export function DocumentAnalytics({
                         />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <RechartsTooltip />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
@@ -278,7 +278,7 @@ export function DocumentAnalytics({
                   <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
                   <XAxis dataKey="date" />
                   <YAxis />
-                  <Tooltip />
+                  <RechartsTooltip />
                   <Legend />
                   <Line
                     type="monotone"

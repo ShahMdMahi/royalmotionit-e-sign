@@ -20,8 +20,6 @@ import {
   Eraser,
   Save,
   Square,
-  Image,
-  Download,
   Highlighter,
   Type,
   Circle,
@@ -33,9 +31,7 @@ import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import { HexColorPicker } from "react-colorful";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -109,21 +105,18 @@ export default function PDFViewer({ pdfData, allowAnnotations = false, allowSign
   const [isDrawing, setIsDrawing] = useState(false);
   const [annotations, setAnnotations] = useState<PdfAnnotation[]>([]);
   const [currentAnnotation, setCurrentAnnotation] = useState<PdfAnnotation | null>(null);
-  const [strokeColor, setStrokeColor] = useState<string>("#FF0000");
-  const [strokeWidth, setStrokeWidth] = useState<number>(2);
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const [signatureMode, setSignatureMode] = useState<boolean>(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [annotationColor, setAnnotationColor] = useState<string>("#FF0000");
   const [lineWidth, setLineWidth] = useState<number>(2);
   const [opacity, setOpacity] = useState<number>(1);
   const [fontSize, setFontSize] = useState<number>(14);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
 
   // Signature dialog state
   const [showSignatureDialog, setShowSignatureDialog] = useState<boolean>(false);
   const [signatureType, setSignatureType] = useState<"draw" | "type">("draw");
   const [typedSignature, setTypedSignature] = useState<string>("");
   const [signatureFont, setSignatureFont] = useState<string>("Dancing Script");
+  const [signatureMode, setSignatureMode] = useState<boolean>(false);
 
   // Convert ArrayBuffer to Blob to prevent the "detached ArrayBuffer" error
   const pdfBlob = useMemo(() => {
@@ -513,8 +506,8 @@ export default function PDFViewer({ pdfData, allowAnnotations = false, allowSign
         id: `signature-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         type: "signature",
         pageNumber,
-        color: strokeColor,
-        strokeWidth,
+        color: annotationColor,
+        strokeWidth: lineWidth,
         position: { x, y, width: 200, height: 80 },
         fieldName: `Signature_${Date.now()}`,
         required: true,
@@ -529,8 +522,8 @@ export default function PDFViewer({ pdfData, allowAnnotations = false, allowSign
         id: `initial-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         type: "initial",
         pageNumber,
-        color: strokeColor,
-        strokeWidth,
+        color: annotationColor,
+        strokeWidth: lineWidth,
         position: { x, y, width: 100, height: 60 },
         fieldName: `Initial_${Date.now()}`,
         required: false,
@@ -885,7 +878,7 @@ export default function PDFViewer({ pdfData, allowAnnotations = false, allowSign
 
         // Use selected font
         ctx.font = `48px ${signatureFont}`;
-        ctx.fillStyle = strokeColor;
+        ctx.fillStyle = annotationColor;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(typedSignature, canvas.width / 2, canvas.height / 2);
@@ -1402,7 +1395,7 @@ export default function PDFViewer({ pdfData, allowAnnotations = false, allowSign
                 <div className="border rounded-md bg-white p-2">
                   <SignatureCanvas
                     ref={signatureCanvasRef}
-                    penColor={strokeColor}
+                    penColor={annotationColor}
                     canvasProps={{
                       className: "signature-canvas border border-dashed rounded w-full",
                       width: 500,
@@ -1423,7 +1416,7 @@ export default function PDFViewer({ pdfData, allowAnnotations = false, allowSign
                     onChange={(e) => setTypedSignature(e.target.value)}
                     placeholder="Type your name here"
                     className={`text-xl ${signatureFont}`}
-                    style={{ color: strokeColor, fontFamily: signatureFont }}
+                    style={{ color: annotationColor, fontFamily: signatureFont }}
                   />
                 </div>
                 <div className="space-y-2">

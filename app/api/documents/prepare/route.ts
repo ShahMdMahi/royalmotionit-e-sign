@@ -3,6 +3,21 @@ import { prisma } from "@/prisma/prisma";
 import { DocumentStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
 
+// Define proper type for document field
+interface DocumentField {
+  type: string;
+  label: string;
+  required?: boolean;
+  placeholder?: string;
+  position?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    pageNumber?: number;
+  };
+}
+
 export async function POST(request: Request) {
   try {
     // Check authentication
@@ -71,7 +86,7 @@ export async function POST(request: Request) {
     if (fields && fields.length > 0) {
       try {
         await Promise.all(
-          fields.map(async (field: any) => {
+          fields.map(async (field: DocumentField) => {
             if (!field.position) {
               console.warn(`Field without position skipped: ${field.type} - ${field.label}`);
               return;

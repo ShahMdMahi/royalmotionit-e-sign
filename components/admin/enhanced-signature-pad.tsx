@@ -17,30 +17,14 @@ import { Trash2, Save, Download, Undo, Repeat, Image as ImageIcon, CheckCircle, 
 import HammerJS from "hammerjs";
 import { isMobile, isTablet } from "react-device-detect";
 
-// Fix type declarations for Hammer.js
-interface HammerManager {
-  add(recognizers: any): void;
-  on(event: string, handler: (event: any) => void): void;
-  destroy(): void;
+// Define interfaces for properly typed hammer.js usage
+interface HammerEvent {
+  scale: number;
+  rotation: number;
 }
 
-interface HammerStatic {
-  Manager: {
-    new (element: HTMLElement): HammerManager;
-  };
-  Pinch: {
-    new (): any;
-  };
-  Rotate: {
-    new (): any;
-  };
-  Pan: {
-    new (): any;
-  };
-}
-
-// Use the imported HammerJS as Hammer
-const Hammer: HammerStatic = HammerJS;
+// Use the imported HammerJS directly rather than trying to redefine its types
+// This avoids type conflicts with the actual Hammer.js library
 
 export interface SignatureData {
   id: string;
@@ -137,11 +121,11 @@ export function EnhancedSignaturePad({ onSave, defaultSignature = null, signerId
   useEffect(() => {
     if (signaturePadRef.current && canvasRef.current) {
       // Initialize Hammer.js manager for touch gestures
-      const hammerManager = new Hammer.Manager(canvasRef.current);
+      const hammerManager = new HammerJS.Manager(canvasRef.current);
 
       // Add recognizers
-      const pinch = new Hammer.Pinch();
-      const rotate = new Hammer.Rotate();
+      const pinch = new HammerJS.Pinch();
+      const rotate = new HammerJS.Rotate();
       pinch.recognizeWith(rotate);
       hammerManager.add([pinch, rotate]);
 
