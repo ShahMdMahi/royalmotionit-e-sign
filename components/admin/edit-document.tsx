@@ -131,6 +131,9 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
   const [history, setHistory] = useState<DocumentPrepareData[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
+  // Add this state to track if we're currently restoring from history
+  const [isRestoringFromHistory, setIsRestoringFromHistory] = useState(false);
+
   // PDF annotations
   const [annotations, setAnnotations] = useState<PdfAnnotation[]>([]);
   const [showPdfAnnotations, setShowPdfAnnotations] = useState<boolean>(true);
@@ -276,6 +279,9 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
 
   // Save current state to history when fields change
   useEffect(() => {
+    // Skip history update if this effect is triggered by restoring from history
+    if (isRestoringFromHistory) return;
+
     if (historyIndex >= 0) {
       // If we're not at the end of the history stack, remove future states
       const newHistory = history.slice(0, historyIndex + 1);
@@ -286,7 +292,7 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
       setHistory([{ ...documentData }]);
       setHistoryIndex(0);
     }
-  }, [documentData.fields, documentData, history, historyIndex]);
+  }, [documentData.fields]); // Only trigger on fields change, not all documentData
 
   // Function to add a new field
   const addField = (type: FieldType, position?: { x: number; y: number; width: number; height: number; pageNumber?: number; label?: string }) => {
@@ -438,8 +444,11 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
   const undo = () => {
     if (historyIndex > 0) {
       const newIndex = historyIndex - 1;
+      setIsRestoringFromHistory(true);
       setHistoryIndex(newIndex);
       setDocumentData({ ...history[newIndex] });
+      // Reset the flag after state update
+      setTimeout(() => setIsRestoringFromHistory(false), 0);
     }
   };
 
@@ -447,8 +456,11 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
   const redo = () => {
     if (historyIndex < history.length - 1) {
       const newIndex = historyIndex + 1;
+      setIsRestoringFromHistory(true);
       setHistoryIndex(newIndex);
       setDocumentData({ ...history[newIndex] });
+      // Reset the flag after state update
+      setTimeout(() => setIsRestoringFromHistory(false), 0);
     }
   };
 
