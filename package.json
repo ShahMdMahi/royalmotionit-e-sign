@@ -18,7 +18,8 @@
     "prisma:studio": "prisma studio",
     "prisma:format": "prisma format",
     "prisma:seed": "prisma db seed",
-    "prisma:check": "prisma validate"
+    "prisma:check": "prisma validate",
+    "copy-pdf-worker": "node scripts/copy-pdf-worker.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.9.0",
@@ -53,6 +54,7 @@
     "@react-pdf-viewer/default-layout": "^3.12.0",
     "@react-pdf-viewer/full-screen": "^3.12.0",
     "@react-pdf-viewer/page-navigation": "^3.12.0",
+    "@react-pdf-viewer/scroll-mode": "^3.12.0",
     "@react-pdf-viewer/search": "^3.12.0",
     "@react-pdf-viewer/toolbar": "^3.12.0",
     "@react-pdf-viewer/zoom": "^3.12.0",

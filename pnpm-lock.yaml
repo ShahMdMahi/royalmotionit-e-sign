@@ -104,6 +104,9 @@ importers:
       '@react-pdf-viewer/page-navigation':
         specifier: ^3.12.0
         version: 3.12.0(pdfjs-dist@5.2.133)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@react-pdf-viewer/scroll-mode':
+        specifier: ^3.12.0
+        version: 3.12.0(pdfjs-dist@5.2.133)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-pdf-viewer/search':
         specifier: ^3.12.0
         version: 3.12.0(pdfjs-dist@5.2.133)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)

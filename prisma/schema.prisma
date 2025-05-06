@@ -103,8 +103,8 @@ model Document {
   status        DocumentStatus @default(PENDING)
   signedAt      DateTime?
   expiresAt     DateTime?
-  preparedAt    DateTime?      // Added preparedAt field
-  expiresInDays Int?           // Added expiresInDays field
+  preparedAt    DateTime? // Added preparedAt field
+  expiresInDays Int? // Added expiresInDays field
   signeeId      String?        @db.ObjectId
   authorId      String         @db.ObjectId
   createdAt     DateTime       @default(now())
@@ -114,8 +114,8 @@ model Document {
   dueDate       DateTime?
   message       String?
 
-  author User  @relation("AuthoredDocuments", fields: [authorId], references: [id], onDelete: Cascade)
-  signee User? @relation("SigneedDocuments", fields: [signeeId], references: [id], onDelete: SetNull)
+  author User            @relation("AuthoredDocuments", fields: [authorId], references: [id], onDelete: Cascade)
+  signee User?           @relation("SigneedDocuments", fields: [signeeId], references: [id], onDelete: SetNull)
   fields DocumentField[]
 }
 
@@ -131,11 +131,11 @@ model DocumentField {
   width       Float
   height      Float
   pageNumber  Int
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 }
 
 enum Role {
