@@ -4,6 +4,9 @@ import { Document, User } from "@prisma/client";
 import { getFromR2 } from "@/actions/r2";
 import { PDFViewer } from "../common/pdf-viewer";
 import { useEffect, useState } from "react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
 interface SignleDocumentComponentProps {
   document: Document;
@@ -56,17 +59,100 @@ export function SingleDocumentComponent({ document, author, signee }: SignleDocu
   }, [document.key]);
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-full">Loading document...</div>;
+    return (
+      <Card className="w-full max-w-4xl mx-auto my-8">
+        <CardHeader>
+          <CardTitle>Loading Document...</CardTitle>
+          <CardDescription>Please wait while the document is being loaded.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center items-center h-64">
+            <p>Loading...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   if (error) {
-    return <div className="flex justify-center items-center h-full text-red-500">Error: {error}</div>;
+    return (
+      <Card className="w-full max-w-4xl mx-auto my-8">
+        <CardHeader>
+          <CardTitle>Error Loading Document</CardTitle>
+          <CardDescription>There was an issue retrieving the document.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center items-center h-64 text-red-500">
+            <p>Error: {error}</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   if (!pdfData) {
-    return <div className="flex justify-center items-center h-full">No PDF data to display.</div>;
+    return (
+      <Card className="w-full max-w-4xl mx-auto my-8">
+        <CardHeader>
+          <CardTitle>No Document Data</CardTitle>
+          <CardDescription>The document data could not be displayed.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center items-center h-64">
+            <p>No PDF data to display.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
-  // Pass the Uint8Array directly to PDFViewer
-  return <PDFViewer pdfData={pdfData} />;
+  return (
+    <Card className="w-full max-w-4xl mx-auto my-8">
+      <CardHeader>
+        <CardTitle className="text-2xl font-semibold">{document.title}</CardTitle>
+        <CardDescription>
+          Uploaded by: {author.name} ({author.email}) on {format(new Date(document.createdAt), "PPP")}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="px-0 sm:px-6">
+        {" "}
+        {/* Remove horizontal padding for PDF viewer on small screens */}
+        <div className="aspect-[8.5/11] w-full">
+          {" "}
+          {/* Maintain aspect ratio for PDF */}
+          <PDFViewer pdfData={pdfData} />
+        </div>
+      </CardContent>
+      <CardFooter className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between">
+        <div className="space-y-1">
+          <h4 className="text-sm font-medium">Document Status</h4>
+          <Badge
+            variant={
+              document.status === "APPROVED"
+                ? "success"
+                : document.status === "REJECTED"
+                  ? "destructive"
+                  : document.status === "PENDING"
+                    ? "default" // Changed from "warning" to "default"
+                    : "secondary" // For EXPIRED or any other status
+            }
+          >
+            {document.status}
+          </Badge>
+        </div>
+        {signee && (
+          <div className="space-y-1 text-sm">
+            <h4 className="font-medium">Signee</h4>
+            <p>
+              {signee.name} ({signee.email})
+            </p>
+          </div>
+        )}
+        <div className="space-y-1 text-sm">
+          <h4 className="font-medium">Last Updated</h4>
+          <p>{format(new Date(document.updatedAt), "PPP p")}</p>
+        </div>
+      </CardFooter>
+    </Card>
+  );
 }
