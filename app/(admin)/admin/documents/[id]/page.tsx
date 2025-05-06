@@ -27,7 +27,6 @@ export default async function SignleDocument({ params }: { params: Promise<{ id:
               where: { id: document.signeeId },
             });
           }
-
           return <SingleDocumentComponent document={document} author={author} signee={signee} />;
         }
       }

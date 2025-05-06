@@ -1,6 +1,15 @@
 "use server";
 
-import { PutObjectCommand, PutObjectCommandInput, GetObjectCommand, GetObjectCommandInput, S3ServiceException, DeleteObjectCommand, DeleteObjectCommandInput } from "@aws-sdk/client-s3";
+import {
+  PutObjectCommand,
+  PutObjectCommandInput,
+  GetObjectCommand,
+  GetObjectCommandInput,
+  S3ServiceException,
+  DeleteObjectCommand,
+  DeleteObjectCommandInput,
+  GetObjectCommandOutput,
+} from "@aws-sdk/client-s3";
 import r2Client from "@/lib/r2-client";
 import { setTimeout } from "timers/promises";
 
@@ -14,6 +23,23 @@ type R2Result<T> =
       statusCode?: number;
       retryable?: boolean;
     };
+
+// Define a specific type for the processed GetObject response data
+export interface ProcessedGetObjectData {
+  Body: Uint8Array; // The object's content as a byte array
+  ContentType?: string;
+  ContentLength?: number;
+  ETag?: string;
+  LastModified?: Date;
+  Metadata?: Record<string, string>;
+}
+
+// Define a specific type for the parameters of getFromR2, making Bucket optional
+interface GetFromR2Params extends Omit<GetObjectCommandInput, "Bucket" | "Key"> {
+  // Omit Key as well, then add it as required
+  Bucket?: string;
+  Key: string; // Ensure Key is explicitly required
+}
 
 /**
  * Upload an object to R2 storage
@@ -135,17 +161,7 @@ export async function uploadToR2(params: PutObjectCommandInput, retries = 3): Pr
  * @param params - S3 GetObjectCommandInput parameters
  * @param retries - Number of retry attempts for transient errors (default: 3)
  */
-export async function getFromR2(params: GetObjectCommandInput, retries = 3): Promise<R2Result<any>> {
-  // Validate required parameters
-  // if (!params.Bucket) {
-  //   return {
-  //     success: false,
-  //     error: new Error("Missing bucket parameter"),
-  //     message: "Bucket name is required",
-  //     statusCode: 400,
-  //   };
-  // }
-
+export async function getFromR2(params: GetFromR2Params, retries = 3): Promise<R2Result<ProcessedGetObjectData>> {
   if (!params.Key) {
     return {
       success: false,
@@ -155,29 +171,56 @@ export async function getFromR2(params: GetObjectCommandInput, retries = 3): Pro
     };
   }
 
-  // Make sure Bucket is using environment variable if possible
-  const bucket = params.Bucket || process.env.R2_BUCKET_NAME;
-  if (!bucket) {
-    return {
-      success: false,
-      error: new Error("R2 bucket not configured"),
-      message: "Storage bucket not configured",
-      statusCode: 500,
-    };
-  }
-
   let currentTry = 0;
 
   while (currentTry <= retries) {
     try {
       // Apply bucket from params or environment
-      const requestParams = { ...params, Bucket: bucket };
+      const bucketToUse = params.Bucket || process.env.R2_BUCKET_NAME;
+      if (!bucketToUse) {
+        return {
+          success: false,
+          error: new Error("R2 bucket not configured in params or environment"),
+          message: "Storage bucket not configured",
+          statusCode: 500,
+        };
+      }
 
-      const result = await r2Client.send(new GetObjectCommand(requestParams));
+      const commandInput: GetObjectCommandInput = { ...params, Bucket: bucketToUse };
+
+      const sdkResponse: GetObjectCommandOutput = await r2Client.send(new GetObjectCommand(commandInput));
+
+      // Process the stream into a Uint8Array on the server
+      if (!sdkResponse.Body) {
+        return {
+          success: false,
+          error: new Error("Empty response body from R2"),
+          message: "No content received from storage.",
+          statusCode: 500, // Or appropriate error code
+        };
+      }
+
+      const byteArray = await sdkResponse.Body.transformToByteArray();
+
+      if (byteArray.length === 0) {
+        return {
+          success: false,
+          error: new Error("Empty file content from R2"),
+          message: "Retrieved file is empty.",
+          statusCode: 404, // Or 200 if an empty file is valid but not for PDFs
+        };
+      }
 
       return {
         success: true,
-        data: result,
+        data: {
+          Body: byteArray,
+          ContentType: sdkResponse.ContentType,
+          ContentLength: sdkResponse.ContentLength,
+          ETag: sdkResponse.ETag,
+          LastModified: sdkResponse.LastModified,
+          Metadata: sdkResponse.Metadata,
+        },
         statusCode: 200,
       };
     } catch (error) {
