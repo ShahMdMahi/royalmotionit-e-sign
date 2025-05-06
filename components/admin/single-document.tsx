@@ -6,7 +6,7 @@ import { getFromR2 } from "@/actions/r2";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Download, Loader2, AlertCircle, FileText, Copy, CheckCircle, Clock, Ban, Calendar, Pencil, AlertTriangle, Edit } from "lucide-react";
+import { Download, Loader2, AlertCircle, FileText, Copy, CheckCircle, Clock, Ban, Calendar, AlertTriangle, Edit } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
@@ -19,10 +19,9 @@ interface SingleDocumentComponentProps {
   document: PrismaDocument;
   author: User;
   signee?: User | null;
-  currentUser?: User;
 }
 
-export function SingleDocumentComponent({ document, author, signee, currentUser }: SingleDocumentComponentProps) {
+export function SingleDocumentComponent({ document, author, signee }: SingleDocumentComponentProps) {
   const [pdfData, setPdfData] = useState<ArrayBuffer | null>(null);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -192,9 +191,6 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
         return <Badge variant="outline">{document.documentType}</Badge>;
     }
   };
-
-  const canSign = Boolean(currentUser && signee && currentUser.id === signee.id && document.status === "PENDING");
-  const isReadOnly = !canSign;
 
   return (
     <div className="container py-6 mx-auto max-w-7xl space-y-6">
