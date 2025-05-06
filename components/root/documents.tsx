@@ -1,4 +1,4 @@
-import { Document, DocumentStatus, Role } from "@prisma/client";
+import { Document, Role } from "@prisma/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
