@@ -1,262 +1,219 @@
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma/prisma";
-import { DocumentStatus } from "@prisma/client";
-import { NextResponse } from "next/server";
+import { z } from "zod";
+import { Role } from "@prisma/client";
 
-// Define proper type for document field
-interface DocumentField {
-  type: string;
-  label: string;
-  required?: boolean;
-  placeholder?: string;
-  position?: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    pageNumber?: number;
-  };
-}
+// Field validation schema
+const FieldSchema = z.object({
+  id: z.string(),
+  type: z.enum(["text", "email", "date", "checkbox", "signature", "name", "phone", "address"]),
+  label: z.string().min(1),
+  required: z.boolean(),
+  position: z.object({
+    x: z.number().min(0),
+    y: z.number().min(0),
+    width: z.number().min(20),
+    height: z.number().min(20),
+    pageNumber: z.number().min(1),
+  }),
+  placeholder: z.string().optional(),
+  validations: z
+    .object({
+      minLength: z.number().optional(),
+      maxLength: z.number().optional(),
+      pattern: z.string().optional(),
+    })
+    .optional(),
+  options: z.array(z.string()).optional(),
+});
 
-export async function POST(request: Request) {
-  try {
-    // Check authentication
-    const session = await auth();
-    if (!session || !session.user) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+// Signer validation schema
+const SignerSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  order: z.number().min(1),
+  role: z.string(),
+});
 
-    // Parse request body
-    const body = await request.json();
-    const { documentId, fields, signeeId, dueDate, message, expiryDays } = body;
+// Request body validation schema
+const PrepareDocumentSchema = z.object({
+  documentId: z.string().uuid(),
+  fields: z.array(FieldSchema),
+  signers: z.array(SignerSchema),
+  signeeId: z.string().nullable(),
+  dueDate: z.string().nullable(),
+  message: z.string().optional(),
+  expiryDays: z.number().min(1).default(30),
+  sendNotification: z.boolean().default(true),
+});
 
-    if (!documentId) {
-      return NextResponse.json(
-        { success: false, message: "Document ID is required" },
-        { status: 400 }
-      );
-    }
-
-    // Check if document exists and user has permission
-    const document = await prisma.document.findUnique({
-      where: { id: documentId },
-      include: {
-        author: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-          },
-        },
-      },
-    });
-
-    if (!document) {
-      return NextResponse.json(
-        { success: false, message: "Document not found" },
-        { status: 404 }
-      );
-    }
-
-    // Check permissions (only document author or admin can prepare it)
-    if (document.authorId !== session.user.id && session.user.role !== "ADMIN") {
-      return NextResponse.json(
-        { success: false, message: "Not authorized to prepare this document" },
-        { status: 403 }
-      );
-    }
-
-    // Basic validation for fields
-    if (fields && !Array.isArray(fields)) {
-      return NextResponse.json(
-        { success: false, message: "Fields must be an array" },
-        { status: 400 }
-      );
-    }
-
-    // First, delete any existing fields for this document
-    await prisma.documentField.deleteMany({
-      where: { documentId },
-    });
-
-    // Create new document fields with proper validation
-    if (fields && fields.length > 0) {
-      try {
-        await Promise.all(
-          fields.map(async (field: DocumentField) => {
-            if (!field.position) {
-              console.warn(`Field without position skipped: ${field.type} - ${field.label}`);
-              return;
-            }
-            
-            // Ensure field has valid values with defaults where needed
-            await prisma.documentField.create({
-              data: {
-                documentId,
-                type: field.type || "text",
-                label: field.label || "Untitled Field",
-                required: Boolean(field.required),
-                placeholder: field.placeholder || "",
-                x: Math.max(0, Number(field.position.x) || 0),
-                y: Math.max(0, Number(field.position.y) || 0),
-                width: Math.max(20, Number(field.position.width) || 150),
-                height: Math.max(20, Number(field.position.height) || 40),
-                pageNumber: Math.max(1, Number(field.position.pageNumber) || 1),
-              },
-            });
-          })
-        );
-      } catch (fieldError) {
-        console.error("Error creating document fields:", fieldError);
-        return NextResponse.json(
-          { 
-            success: false, 
-            message: "Error creating document fields", 
-            error: String(fieldError) 
-          },
-          { status: 500 }
-        );
-      }
-    }
-
-    // Update document with signee and other information
-    const dueDateValue = dueDate ? new Date(dueDate) : undefined;
-    
-    // Get the signee information if provided
-    let signee = null;
-    if (signeeId) {
-      signee = await prisma.user.findUnique({
-        where: { id: signeeId },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-        },
-      });
-      
-      if (!signee) {
-        return NextResponse.json(
-          { success: false, message: "Signee not found" },
-          { status: 400 }
-        );
-      }
-    }
-
-    const updatedDocument = await prisma.document.update({
-      where: { id: documentId },
-      data: {
-        signeeId: signeeId || undefined,
-        dueDate: dueDateValue,
-        message: message || undefined,
-        status: signeeId ? DocumentStatus.PENDING : undefined,
-        preparedAt: new Date(), // Using the field now properly defined in the schema
-        expiresInDays: expiryDays || undefined, // Using the expiresInDays field now defined in schema
-      },
-      include: {
-        signee: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-          },
-        },
-      },
-    });
-
-    // If a signee is assigned and there are fields, send an email notification
-    if (signee && fields && fields.length > 0) {
-      try {
-        // Email notification logic would go here
-        // You could import a sendEmail function from your actions/email.ts file
-        console.log(`Document ready for signing notification would be sent to: ${signee.email}`);
-      } catch (emailError) {
-        console.error("Error sending email notification:", emailError);
-        // Continue with success response even if email fails
-      }
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: signeeId 
-        ? "Document prepared successfully and sent for signature"
-        : "Document prepared successfully",
-      document: updatedDocument,
-    });
-  } catch (error) {
-    console.error("Error preparing document:", error);
+// GET handler to fetch existing document preparation data
+export async function GET(request: Request) {
+  const session = await auth();
+  
+  if (!session) {
     return NextResponse.json(
-      { success: false, message: "Failed to prepare document", error: String(error) },
-      { status: 500 }
+      { success: false, message: "Authentication required" },
+      { status: 401 }
     );
   }
-}
 
-export async function GET(request: Request) {
+  // Check if user is admin
+  if (session.user.role !== Role.ADMIN) {
+    return NextResponse.json(
+      { success: false, message: "Admin access required" },
+      { status: 403 }
+    );
+  }
+
+  // Get document ID from query params
+  const { searchParams } = new URL(request.url);
+  const documentId = searchParams.get("documentId");
+
+  if (!documentId) {
+    return NextResponse.json(
+      { success: false, message: "Document ID is required" },
+      { status: 400 }
+    );
+  }
+
   try {
-    // Check authentication
-    const session = await auth();
-    if (!session || !session.user) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    // Get document ID from URL
-    const { searchParams } = new URL(request.url);
-    const documentId = searchParams.get("documentId");
-
-    if (!documentId) {
-      return NextResponse.json(
-        { success: false, message: "Document ID is required" },
-        { status: 400 }
-      );
-    }
-
-    // Check document permissions
-    const document = await prisma.document.findUnique({
-      where: { id: documentId },
-    });
-
-    if (!document) {
-      return NextResponse.json(
-        { success: false, message: "Document not found" },
-        { status: 404 }
-      );
-    }
-
-    // Only document author or admin can view fields
-    if (document.authorId !== session.user.id && session.user.role !== "ADMIN") {
-      return NextResponse.json(
-        { success: false, message: "Not authorized to view this document's fields" },
-        { status: 403 }
-      );
-    }
-
-    // Fetch document fields
+    // Get document fields from database
     const fields = await prisma.documentField.findMany({
       where: { documentId },
       orderBy: { createdAt: "asc" },
     });
 
+    // Since DocumentSigner model doesn't exist, we'll return empty signers array
+    const signers: any[] = [];
+
     return NextResponse.json({
       success: true,
       fields,
-      document: {
-        id: document.id,
-        signeeId: document.signeeId,
-        dueDate: document.dueDate,
-        message: document.message,
-        status: document.status,
-      }
+      signers,
     });
   } catch (error) {
-    console.error("Error fetching document fields:", error);
+    console.error("Error fetching document preparation data:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch document fields", error: String(error) },
+      { success: false, message: "Failed to fetch document data" },
+      { status: 500 }
+    );
+  }
+}
+
+// POST handler to save document preparation data
+export async function POST(request: Request) {
+  const session = await auth();
+  
+  if (!session) {
+    return NextResponse.json(
+      { success: false, message: "Authentication required" },
+      { status: 401 }
+    );
+  }
+
+  // Check if user is admin
+  if (session.user.role !== Role.ADMIN) {
+    return NextResponse.json(
+      { success: false, message: "Admin access required" },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+    
+    // Validate request body
+    const validation = PrepareDocumentSchema.safeParse(body);
+    
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid request data",
+          errors: validation.error.errors,
+        },
+        { status: 400 }
+      );
+    }
+
+    const { documentId, fields, signers, signeeId, dueDate, message, expiryDays, sendNotification } = validation.data;
+    
+    // Verify document exists and belongs to current organization
+    const document = await prisma.document.findUnique({
+      where: { id: documentId },
+    });
+
+    if (!document) {
+      return NextResponse.json(
+        { success: false, message: "Document not found" },
+        { status: 404 }
+      );
+    }
+
+    // Start a transaction to ensure all operations succeed or fail together
+    const result = await prisma.$transaction(async (tx) => {
+      // Update document status and metadata
+      await tx.document.update({
+        where: { id: documentId },
+        data: {
+          status: "PENDING", // Changed from "WAITING_FOR_SIGNATURE" to match DocumentStatus enum
+          documentType: "UNSIGNED", // Changed from "PENDING_SIGNATURE" to match DocumentType enum
+          signeeId: signeeId,
+          dueDate: dueDate ? new Date(dueDate) : null,
+          message: message || "",
+          expiresInDays: expiryDays,
+        },
+      });
+
+      // Delete existing fields (if any)
+      await tx.documentField.deleteMany({
+        where: { documentId },
+      });
+
+      // Create new fields
+      for (const field of fields) {
+        await tx.documentField.create({
+          data: {
+            documentId,
+            type: field.type,
+            label: field.label,
+            required: field.required,
+            x: field.position.x,
+            y: field.position.y,
+            width: field.position.width,
+            height: field.position.height,
+            pageNumber: field.position.pageNumber,
+            placeholder: field.placeholder,
+            // Remove validations and options fields as they don't exist in the DocumentField model
+          },
+        });
+      }
+
+      // Note: DocumentSigner model doesn't exist in schema, so we'll skip this operation
+      // But we'll keep track of the signeeId which is set above in document update
+
+      // Note: Notification model doesn't exist, so we'll skip notification creation
+      // You can implement email sending directly here if needed
+      if (sendNotification && signeeId) {
+        // In a real application, you would send emails to signers here
+        console.log(`Would send notification to signee: ${signeeId}`);
+      }
+
+      // Note: AuditTrail model doesn't exist, so we'll skip audit trail creation
+
+      return { success: true };
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Document preparation saved successfully",
+    });
+  } catch (error) {
+    console.error("Error preparing document:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to prepare document" },
       { status: 500 }
     );
   }

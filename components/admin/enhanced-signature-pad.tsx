@@ -13,6 +13,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Switch } from "@/components/ui/switch";
 import { Trash2, Save, Download, Undo, Repeat, Image as ImageIcon, CheckCircle, RotateCw, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner"; // Changed from react-toastify to sonner
+
+// Extend the SignatureCanvas type to include onEnd property
+interface ExtendedSignatureCanvas extends SignatureCanvas {
+  onEnd: (event: any) => void;
+}
 
 export interface SignatureData {
   id: string;
@@ -24,6 +30,7 @@ export interface SignatureData {
   createdAt: Date;
   name?: string;
   creatorId?: string;
+  fieldId?: string;
 }
 
 interface EnhancedSignaturePadProps {
@@ -128,6 +135,66 @@ export function EnhancedSignaturePad({ onSave, defaultSignature = null, signerId
       }
     }
   }, [signatureColor, strokeWidth, defaultSignature]);
+
+  // Add animated signature guidance
+  useEffect(() => {
+    if (!readOnly && !defaultSignature && signaturePadRef.current) {
+      // Add signature guidance animation
+      const showGuidance = () => {
+        const canvas = signaturePadRef.current?.getCanvas();
+        if (!canvas) return;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        // Save current state
+        ctx.save();
+
+        // Animated dotted line
+        const drawDottedLine = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.beginPath();
+          ctx.setLineDash([5, 5]);
+          ctx.moveTo(canvas.width * 0.1, canvas.height * 0.6);
+          ctx.lineTo(canvas.width * 0.9, canvas.height * 0.6);
+          ctx.strokeStyle = "rgba(37, 99, 235, 0.4)";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Add a subtle hint
+          ctx.font = "14px Arial";
+          ctx.textAlign = "center";
+          ctx.fillStyle = "rgba(37, 99, 235, 0.6)";
+          ctx.fillText("Sign here", canvas.width / 2, canvas.height * 0.5);
+        };
+
+        drawDottedLine();
+
+        // Clear the guidance when user starts to draw
+        if (signaturePadRef.current) {
+          // Use a more TypeScript-friendly approach
+          const sigCanvas = signaturePadRef.current as unknown as ExtendedSignatureCanvas;
+          const originalOnEnd = sigCanvas.onEnd;
+
+          // Store the original function temporarily
+          const handleClearGuidance = (points: any) => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.restore();
+
+            // Reset to original handler after first use
+            sigCanvas.onEnd = originalOnEnd;
+          };
+
+          // Override the onEnd handler temporarily
+          sigCanvas.onEnd = handleClearGuidance;
+        }
+      };
+
+      // Show guidance after a short delay
+      const timer = setTimeout(showGuidance, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [readOnly, defaultSignature]);
 
   // Save current state to history when drawing
   const handleBeginStroke = () => {
@@ -391,6 +458,43 @@ export function EnhancedSignaturePad({ onSave, defaultSignature = null, signerId
     input.click();
   };
 
+  // Add function to apply signature directly to PDF field
+  const applyToPdfField = (fieldId: string) => {
+    if (!onSave || isEmpty) return;
+
+    // Create signature image data
+    let imageData = "";
+
+    if (signatureType === "draw" && signaturePadRef.current && !signaturePadRef.current.isEmpty()) {
+      imageData = signaturePadRef.current.toDataURL("image/png");
+    } else if (signatureType === "type" && typedSignature.trim()) {
+      imageData = createTypedSignatureImage();
+    }
+
+    if (imageData) {
+      const signatureData: SignatureData = {
+        id: defaultSignature?.id || `signature-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        type: signatureType,
+        imageData,
+        textContent: signatureType === "type" ? typedSignature : undefined,
+        font: signatureType === "type" ? signatureFont : undefined,
+        color: signatureColor,
+        createdAt: new Date(),
+        name: signatureName || signerName || "",
+        creatorId: signerId,
+        fieldId, // Add reference to PDF field
+      };
+
+      onSave(signatureData);
+      setIsSaved(true);
+
+      // Show success feedback
+      toast.success("Signature applied to document");
+    } else {
+      toast.error("Please create a signature first");
+    }
+  };
+
   return (
     <Card className="w-full max-w-[600px] mx-auto bg-card">
       <CardHeader>
@@ -648,13 +752,7 @@ export function EnhancedSignaturePad({ onSave, defaultSignature = null, signerId
           <div className="border rounded-md bg-white p-4 flex justify-center items-center min-h-[200px]">
             {defaultSignature.type === "draw" && defaultSignature.imageData ? (
               <div className="relative w-full h-[180px] flex items-center justify-center">
-                <Image 
-                  src={defaultSignature.imageData} 
-                  alt="Signature" 
-                  style={{ objectFit: "contain" }}
-                  fill
-                  sizes="(max-width: 600px) 100vw, 600px"
-                />
+                <Image src={defaultSignature.imageData} alt="Signature" style={{ objectFit: "contain" }} fill sizes="(max-width: 600px) 100vw, 600px" />
               </div>
             ) : defaultSignature.type === "type" && defaultSignature.textContent ? (
               <div

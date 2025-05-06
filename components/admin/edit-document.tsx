@@ -25,7 +25,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Checkbox } from "@/components/ui/checkbox";
 
 // Import the PDFViewer and PDFViewerProps dynamically
-import type { PDFViewerProps, PdfAnnotation } from "@/components/admin/pdf-viewer";
+import type { PDFViewerProps } from "@/components/admin/pdf-viewer";
 
 const PDFViewer = dynamic<PDFViewerProps>(() => import("@/components/admin/pdf-viewer"), {
   ssr: false,
@@ -134,14 +134,18 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
   // Add this state to track if we're currently restoring from history
   const [isRestoringFromHistory, setIsRestoringFromHistory] = useState(false);
 
-  // PDF annotations
-  const [annotations, setAnnotations] = useState<PdfAnnotation[]>([]);
-  const [showPdfAnnotations, setShowPdfAnnotations] = useState<boolean>(true);
-
-  // Field management state
+  // Remove PDF annotations state
   const [activeSignerId, setActiveSignerId] = useState<string>("all");
   const [activeField, setActiveField] = useState<string | null>(null);
   const [fieldModalOpen, setFieldModalOpen] = useState(false);
+  const [fieldPreview, setFieldPreview] = useState<{ x: number; y: number; visible: boolean }>({ x: 0, y: 0, visible: false });
+  const [activeFieldSize, setActiveFieldSize] = useState<{ width: number; height: number }>({ width: 150, height: 40 });
+
+  // Document metadata
+  const [documentMetadata, setDocumentMetadata] = useState({
+    title: document.title || document.fileName || "Untitled Document",
+    description: document.description || ""
+  });
 
   const documentFields = [
     { type: "text", label: "Text", description: "Single-line text", icon: <TextCursor className="h-4 w-4" /> },
@@ -464,13 +468,6 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
     }
   };
 
-  // Handle PDF annotations
-  const handleSaveAnnotations = async (annotations: PdfAnnotation[]) => {
-    setAnnotations(annotations);
-    toast.success("Annotations saved");
-    return Promise.resolve();
-  };
-
   // Save document preparation
   const saveDocumentPreparation = async () => {
     try {
@@ -500,7 +497,6 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
           message: documentData.message,
           expiryDays: documentData.expiryDays,
           sendNotification: documentData.sendNotification,
-          annotations: showPdfAnnotations ? annotations : []
         }),
       });
 
@@ -1146,18 +1142,6 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
 
                       <Separator className="my-4" />
 
-                      {/* Annotation toggle */}
-                      <div className="flex items-center justify-between mx-1 mb-4">
-                        <Label htmlFor="annotations" className="text-sm font-medium">
-                          Enable PDF annotations
-                        </Label>
-                        <Switch
-                          id="annotations" 
-                          checked={showPdfAnnotations}
-                          onCheckedChange={setShowPdfAnnotations}
-                        />
-                      </div>
-
                       <div className="space-y-2">
                         <h3 className="text-sm font-medium px-1">Fields on document</h3>
                         <Separator />
@@ -1255,12 +1239,9 @@ export function EditDocumentComponent({ document, users = [] }: { document: Docu
                     <>
                       <PDFViewer 
                         pdfData={pdfData} 
-                        allowAnnotations={showPdfAnnotations} 
-                        allowSignature={true}
                         readOnly={false} 
                         onPageChange={handlePageChange} 
                         onDocumentLoad={handleDocumentLoaded}
-                        onSaveAnnotations={handleSaveAnnotations}
                       />
 
                       {/* Field overlays */}
