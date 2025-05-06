@@ -7,26 +7,13 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Download, Loader2, AlertCircle, FileText, Copy, CheckCircle, Clock, Ban, Calendar, Pencil, AlertTriangle, Edit } from "lucide-react";
-import dynamic from "next/dynamic";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import type { PDFViewerProps, PdfAnnotation } from "@/components/admin/pdf-viewer";
 import { useRouter } from "next/navigation";
-
-// Dynamically import the PDF components to avoid SSR issues
-const PDFViewer = dynamic<PDFViewerProps>(() => import("@/components/admin/pdf-viewer"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex flex-col items-center justify-center h-[500px] w-full">
-      <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
-      <p className="text-sm text-muted-foreground">Loading PDF viewer...</p>
-    </div>
-  ),
-});
 
 interface SingleDocumentComponentProps {
   document: PrismaDocument;
@@ -53,11 +40,13 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
       }
 
       try {
+        console.log("Starting R2 fetch for PDF with key:", document.key);
         const result = await getFromR2({
           Bucket: process.env.R2_BUCKET_NAME || "",
           Key: document.key,
         });
 
+        console.log("R2 fetch result:", result);
         if (!result.success) {
           setPdfError(result.message || "Failed to load document");
           setIsLoading(false);
@@ -66,9 +55,11 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
 
         // Process the response
         if (result.data.Body) {
+          console.log("R2 response includes Body:", typeof result.data.Body);
           // Check if it's an async iterable (ReadableStream)
           if (Symbol.asyncIterator in result.data.Body) {
             try {
+              console.log("Processing async iterable from R2");
               // Read the stream
               const chunks = [];
               for await (const chunk of result.data.Body) {
@@ -80,6 +71,7 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
               for (const chunk of chunks) {
                 totalLength += chunk.length;
               }
+              console.log("Total bytes from stream:", totalLength);
 
               // Combine chunks into a single Uint8Array
               const combinedArray = new Uint8Array(totalLength);
@@ -90,6 +82,7 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
               }
 
               // Set the result
+              console.log("Setting PDF data, length:", combinedArray.buffer.byteLength);
               setPdfData(combinedArray.buffer);
               setIsLoading(false);
               return;
@@ -99,6 +92,8 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
               setIsLoading(false);
               return;
             }
+          } else {
+            console.log("R2 Body is not an async iterable:", result.data.Body);
           }
 
           // Handle other data formats
@@ -131,29 +126,6 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
     a.click();
     window.document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
-
-  // Handle signatures
-  const handleSaveAnnotations = async (annotations: PdfAnnotation[]) => {
-    // In a real app this would save to API/database
-    console.log("Saving annotations:", annotations);
-    if (annotations.some((a) => a.type === "signature")) {
-      toast.success("Signature successfully added to document");
-    } else {
-      toast.success("Annotations saved successfully");
-    }
-    return Promise.resolve();
-  };
-
-  const handleSignDocument = () => {
-    setActiveTab("document");
-    toast("Place your signature on the document", {
-      description: "Click where you want to place your signature and then save it.",
-      action: {
-        label: "Got it",
-        onClick: () => {},
-      },
-    });
   };
 
   const handleCopyLink = () => {
@@ -259,13 +231,6 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
                 <Download className="mr-2 h-4 w-4" />
                 Download
               </Button>
-
-              {canSign && (
-                <Button size="sm" onClick={handleSignDocument}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Sign Document
-                </Button>
-              )}
             </div>
           </div>
         </CardHeader>
@@ -286,16 +251,17 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
               {isLoading ? (
                 <div className="flex flex-col py-8 my-8 items-center justify-center h-full w-full">
                   <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
-                  <p className="text-sm text-muted-foreground">Loading document...</p>
+                  <div className="text-sm text-muted-foreground">Loading document...</div>
                 </div>
               ) : pdfError ? (
                 <div className="flex flex-col py-8 my-8 items-center justify-center h-full w-full p-4">
                   <AlertCircle className="h-10 w-10 text-destructive mb-2" />
-                  <p className="text-sm text-destructive font-medium">Failed to load document</p>
-                  <p className="text-xs text-muted-foreground text-center mt-1">{pdfError}</p>
+                  <div className="text-sm text-destructive font-medium">Failed to load document</div>
+                  <div className="text-xs text-muted-foreground text-center mt-1">{pdfError}</div>
                 </div>
               ) : (
-                <PDFViewer pdfData={pdfData} allowAnnotations={canSign} allowSignature={canSign} readOnly={isReadOnly} onSaveAnnotations={handleSaveAnnotations} />
+                // PDF Viewer Component
+                <></>
               )}
             </div>
           </TabsContent>
@@ -370,12 +336,12 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
                         <AvatarFallback>{author.name?.charAt(0) || "A"}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="text-sm font-medium flex items-center">
+                        <div className="text-sm font-medium flex items-center">
                           {author.name || "Unknown"}
                           <Badge variant="outline" className="ml-2 text-xs">
                             Author
                           </Badge>
-                        </p>
+                        </div>
                         <p className="text-xs text-muted-foreground">{author.email}</p>
                       </div>
                     </div>
@@ -387,12 +353,12 @@ export function SingleDocumentComponent({ document, author, signee, currentUser 
                           <AvatarFallback>{signee.name?.charAt(0) || "S"}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="text-sm font-medium flex items-center">
+                          <div className="text-sm font-medium flex items-center">
                             {signee.name}
                             <Badge variant="outline" className="ml-2 text-xs">
                               Signee
                             </Badge>
-                          </p>
+                          </div>
                           <p className="text-xs text-muted-foreground">{signee.email}</p>
                         </div>
                       </div>

@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-import { EditDocumentComponent } from "@/components/admin/edit-document";
 import { prisma } from "@/prisma/prisma";
 import { DocumentType, Role } from "@prisma/client";
 import { redirect } from "next/navigation";
@@ -23,7 +22,7 @@ export default async function EditDocument({ params }: { params: Promise<{ id: s
 
       if (document) {
         if (document.documentType === DocumentType.UNSIGNED) {
-          return <EditDocumentComponent document={document} users={users} />;
+          return <div>Document is unsigned {JSON.stringify(users)}</div>;
         } else {
           redirect(`/admin/documents/${id}`);
         }
