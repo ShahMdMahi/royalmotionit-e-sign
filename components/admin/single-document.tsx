@@ -130,14 +130,6 @@ export function SingleDocumentComponent({ document, author, signee }: SignleDocu
                   <p className="font-semibold">File Name:</p>
                   <p className="text-muted-foreground">{document.fileName || "N/A"}</p>
                 </div>
-                {document.url && (
-                  <div className="sm:col-span-2">
-                    <p className="font-semibold">Document URL:</p>
-                    <a href={document.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">
-                      {document.url}
-                    </a>
-                  </div>
-                )}
                 <div>
                   <p className="font-semibold">Title:</p>
                   <p className="text-muted-foreground">{document.title}</p>
