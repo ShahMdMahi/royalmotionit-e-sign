@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NameChangeForm } from "./name-change-form";
 import { PasswordChangeForm } from "./password-change-form";
-import { auth } from "@/auth";
 import { Session } from "next-auth";
 import { User as UserIcon, Calendar, Mail, Hash } from "lucide-react";
 

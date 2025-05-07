@@ -58,7 +58,7 @@ export function SingleDocumentComponent({ document, author, signee }: SignleDocu
 
   if (isLoading) {
     return (
-      <Card className="w-full max-w-5xl mx-auto my-8">
+      <Card className="w-full max-w-7xl mx-auto my-8">
         <CardHeader>
           <CardTitle>Loading Document...</CardTitle>
           <CardDescription>Please wait while the document is being loaded.</CardDescription>
@@ -74,7 +74,7 @@ export function SingleDocumentComponent({ document, author, signee }: SignleDocu
 
   if (error && !pdfData) {
     return (
-      <Card className="w-full max-w-5xl mx-auto my-8">
+      <Card className="w-full max-w-7xl mx-auto my-8">
         <CardHeader>
           <CardTitle>Error Loading Document</CardTitle>
           <CardDescription>There was an issue retrieving the document.</CardDescription>
@@ -89,7 +89,7 @@ export function SingleDocumentComponent({ document, author, signee }: SignleDocu
   }
 
   return (
-    <Card className="w-full max-w-5xl mx-auto my-8">
+    <Card className="w-full max-w-7xl mx-auto my-8">
       <CardHeader>
         <CardTitle className="text-2xl font-semibold">{document.title}</CardTitle>
         <CardDescription>Review the document or check its details below.</CardDescription>
@@ -244,24 +244,8 @@ export function SingleDocumentComponent({ document, author, signee }: SignleDocu
                     <p className="text-muted-foreground">{format(new Date(document.dueDate), "PPP")}</p>
                   </div>
                 )}
-                {document.expiresInDays !== null && typeof document.expiresInDays === "number" && (
-                  <div>
-                    <p className="font-semibold">Expires In:</p>
-                    <p className="text-muted-foreground">{document.expiresInDays} day(s)</p>
-                  </div>
-                )}
               </div>
             </div>
-
-            {document.message && (
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium">Associated Message</h3>
-                <Separator />
-                <div className="text-sm p-4 bg-muted/50 rounded-md border">
-                  <p className="text-muted-foreground whitespace-pre-wrap">{document.message}</p>
-                </div>
-              </div>
-            )}
           </TabsContent>
         </Tabs>
       </CardContent>
