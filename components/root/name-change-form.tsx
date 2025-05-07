@@ -15,10 +15,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { changeName } from "@/actions/user";
 import { toast } from "sonner";
 import { PasswordInput } from "@/components/ui/password-input";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 type FormData = z.infer<typeof ChangeNameSchema>;
 
 export function NameChangeForm() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -60,16 +63,21 @@ export function NameChangeForm() {
     });
   };
 
-  // Show success message after successful form submission
-  if (state.success && !isLoading) {
-    toast.success(state.message || "Name updated successfully!");
-    reset();
-  }
+  useEffect(() => {
+    if (state.success && !isLoading) {
+      toast.success(state.message || "Name updated successfully!");
+      reset();
+      setTimeout(() => {
+        router.refresh();
+      }, 100);
+    }
+  }, [state.success, isLoading]);
 
-  // Show error message if there's a failure
-  if (state.message && !state.success && !isLoading) {
-    toast.error(state.message);
-  }
+  useEffect(() => {
+    if (state.message && !state.success && !isLoading) {
+      toast.error(state.message);
+    }
+  }, [state.message, state.success, isLoading]);
 
   return (
     <Card className="overflow-hidden shadow-lg rounded-lg card-hover border-border">

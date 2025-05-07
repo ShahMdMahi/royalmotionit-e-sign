@@ -4,6 +4,7 @@ import { ChangeNameSchema, ChangePasswordSchema } from "@/schema";
 import { prisma } from "@/prisma/prisma";
 import bcryptjs from "bcryptjs";
 import { auth } from "@/auth";
+import { revalidatePath } from "next/cache";
 
 // Types for form states
 type ChangeNameFormState = {
