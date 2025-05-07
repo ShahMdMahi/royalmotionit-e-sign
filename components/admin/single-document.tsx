@@ -112,7 +112,7 @@ export function SingleDocumentComponent({ document, author, signee }: SignleDocu
               </div>
             )}
             {pdfData && (
-              <div className="aspect-[8.5/9] w-full border rounded-md overflow-hidden">
+              <div className="aspect-[1/1] w-full border rounded-md overflow-hidden">
                 <PDFViewer pdfData={pdfData} />
               </div>
             )}
