@@ -1,4 +1,4 @@
-import { Document, Role } from "@prisma/client";
+import { Document, Role, DocumentType } from "@prisma/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,10 +35,17 @@ export function DocumentsComponent({ userRole, authorDocuments, signeeDocuments 
                     <Card key={doc.id}>
                       <CardHeader>
                         <CardTitle className="truncate">{doc.title}</CardTitle>
-                        <CardDescription>Status: {doc.status}</CardDescription>
+                        <CardDescription>Description: {doc.description ? doc.description : "No description available"}</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-muted-foreground">Created: {new Date(doc.createdAt).toLocaleDateString()}</p>
+                        <p className="text-sm text-muted-foreground">Status: {doc.status}</p>
+                        <p className="text-sm text-muted-foreground">Type: {doc.documentType}</p>
+                        <p className="text-sm text-muted-foreground">Created: {new Date(doc.createdAt).toLocaleString("en-BD", { timeZone: "Asia/Dhaka" })}</p>
+                        <p className="text-sm text-muted-foreground">Updated: {new Date(doc.updatedAt).toLocaleString("en-BD", { timeZone: "Asia/Dhaka" })}</p>
+                        {doc.preparedAt && <p className="text-sm text-muted-foreground">Prepared: {new Date(doc.preparedAt).toLocaleString("en-BD", { timeZone: "Asia/Dhaka" })}</p>}
+                        {doc.expiresAt && <p className="text-sm text-muted-foreground">Expires: {new Date(doc.expiresAt).toLocaleString("en-BD", { timeZone: "Asia/Dhaka" })}</p>}
+                        {doc.dueDate && <p className="text-sm text-muted-foreground">Due: {new Date(doc.dueDate).toLocaleString("en-BD", { timeZone: "Asia/Dhaka" })}</p>}
+                        {doc.signedAt && <p className="text-sm text-muted-foreground">Signed: {new Date(doc.signedAt).toLocaleString("en-BD", { timeZone: "Asia/Dhaka" })}</p>}
                       </CardContent>
                       <CardFooter className="flex justify-end space-x-2">
                         <Button variant="outline" size="sm" asChild>
@@ -50,10 +57,6 @@ export function DocumentsComponent({ userRole, authorDocuments, signeeDocuments 
                   ))}
                 </div>
               </CardContent>
-              <CardFooter>
-                {/* Optionally, add a button to create a new document */}
-                {/* <Button>Create New Document</Button> */}
-              </CardFooter>
             </Card>
           </TabsContent>
         )}
@@ -70,16 +73,27 @@ export function DocumentsComponent({ userRole, authorDocuments, signeeDocuments 
                   <Card key={doc.id}>
                     <CardHeader>
                       <CardTitle className="truncate">{doc.title}</CardTitle>
-                      <CardDescription>Status: {doc.status}</CardDescription>
+                      <CardDescription>Description: {doc.description ? doc.description : "No description available"}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-muted-foreground">Received: {new Date(doc.updatedAt).toLocaleDateString()}</p>
-                      {/* You might want to display who the author is if available */}
+                      <p className="text-sm text-muted-foreground">Status: {doc.status}</p>
+                      <p className="text-sm text-muted-foreground">Type: {doc.documentType}</p>
+                      <p className="text-sm text-muted-foreground">Received: {new Date(doc.updatedAt).toLocaleString("en-BD", { timeZone: "Asia/Dhaka" })}</p>
+                      {doc.preparedAt && <p className="text-sm text-muted-foreground">Prepared: {new Date(doc.preparedAt).toLocaleString("en-BD", { timeZone: "Asia/Dhaka" })}</p>}
+                      {doc.expiresAt && <p className="text-sm text-muted-foreground">Expires: {new Date(doc.expiresAt).toLocaleString("en-BD", { timeZone: "Asia/Dhaka" })}</p>}
+                      {doc.dueDate && <p className="text-sm text-muted-foreground">Due: {new Date(doc.dueDate).toLocaleString("en-BD", { timeZone: "Asia/Dhaka" })}</p>}
+                      {doc.signedAt && <p className="text-sm text-muted-foreground">Signed: {new Date(doc.signedAt).toLocaleString("en-BD", { timeZone: "Asia/Dhaka" })}</p>}
                     </CardContent>
                     <CardFooter className="flex justify-end space-x-2">
-                      <Button size="sm" asChild>
-                        <Link href={`/documents/${doc.id}?action=sign`}>Sign</Link>
-                      </Button>
+                      {doc.documentType === DocumentType.UNSIGNED ? (
+                        <Button size="sm" asChild>
+                          <Link href={`/documents/${doc.id}?action=sign`}>Sign</Link>
+                        </Button>
+                      ) : (
+                        <Button size="sm" disabled>
+                          Signed
+                        </Button>
+                      )}
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/documents/${doc.id}`}>View</Link>
                       </Button>
