@@ -193,7 +193,7 @@ export function SingleDocumentComponent({ document, author, signee }: SignleDocu
           </TabsContent>
 
           <TabsContent value="details" className="pt-0 border-t">
-            <ScrollArea className="max-h-[80vh]">
+            <ScrollArea className="h-full">
               <div className="p-6 space-y-8">
                 {/* Document Information */}
                 <div className="space-y-3">
