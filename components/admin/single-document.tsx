@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { FileText, AlertTriangle, Check, Clock, Calendar, User as UserIcon, Mail, Hash, FileSignature, Info, Shield } from "lucide-react";
+import { FileText, AlertTriangle, Check, Clock, Calendar, User as UserIcon, Mail, Hash, FileSignature, Info, Shield, Edit } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -400,10 +400,12 @@ export function SingleDocumentComponent({ document, author, signee }: SignleDocu
       </CardContent>
       <CardFooter className="border-t p-4 flex justify-end gap-3">
         <Button variant="outline" size="sm">
-          <FileText className="size-4 mr-2" /> Download
+          <FileText className="size-4 mr-2" />
+          Download
         </Button>
         <Button size="sm">
-          <FileSignature className="size-4 mr-2" /> View Signatures
+          <Edit className="size-4 mr-2" />
+          Edit
         </Button>
       </CardFooter>
     </Card>

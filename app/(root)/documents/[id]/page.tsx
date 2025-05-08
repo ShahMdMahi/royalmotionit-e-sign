@@ -20,6 +20,22 @@ export default async function SingleDocument({ params }: { params: Promise<{ id:
         if (!document) {
           toast.error("Document not found or you do not have access to it.");
           redirect("/documents");
+          return;
+        }
+
+        if (document.authorId && document.signeeId) {
+          const author = await prisma.user.findUnique({
+            where: { id: document.authorId },
+          });
+          const signee = await prisma.user.findUnique({
+            where: { id: document.signeeId },
+          });
+
+          if (author && signee) {
+            return <SingleDocumentComponent document={document} author={author} signee={signee} />;
+          } else if (author) {
+            return <SingleDocumentComponent document={document} author={author} />;
+          }
         }
 
         return <SingleDocumentComponent document={document} />;
