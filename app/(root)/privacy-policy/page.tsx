@@ -189,7 +189,7 @@ export default function PrivacyPolicy() {
             <div>
               <h3 className="text-xl font-medium mb-2">Legal Requirements</h3>
               <p className="text-muted-foreground">
-                We may disclose your information where we believe disclosure is necessary or required by law, regulation, to enforce our policies, or to protect our or others' rights, property, or
+                We may disclose your information where we believe disclosure is necessary or required by law, regulation, to enforce our policies, or to protect our or others&apos; rights, property, or
                 safety.
               </p>
             </div>
@@ -316,7 +316,7 @@ export default function PrivacyPolicy() {
 
         <p>
           We may update this privacy policy from time to time to reflect changes in our practices or for other operational, legal, or regulatory reasons. We will post the updated policy on this page
-          with a revised "Last Updated" date.
+          with a revised &quot;Last Updated&quot; date.
         </p>
 
         <p className="text-muted-foreground">

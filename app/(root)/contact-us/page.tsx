@@ -17,7 +17,7 @@ export default async function Contact() {
       {/* Header Section */}
       <section className="text-center space-y-4 max-w-3xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text">Get in Touch</h1>
-        <p className="text-lg text-muted-foreground">Have questions about our e-signature solution? We'd love to hear from you. Our team is ready to assist with any inquiries.</p>
+        <p className="text-lg text-muted-foreground">Have questions about our e-signature solution? We&apos;d love to hear from you. Our team is ready to assist with any inquiries.</p>
       </section>
 
       {/* Contact Information Cards */}
@@ -28,7 +28,7 @@ export default async function Contact() {
             <CardTitle>Email Us</CardTitle>
           </CardHeader>
           <CardContent>
-            <CardDescription className="mb-2">Send us an email and we'll get back to you within 24 hours.</CardDescription>
+            <CardDescription className="mb-2">Send us an email and we&apos;ll get back to you within 24 hours.</CardDescription>
             <a href="mailto:contact@royalmotionit.com" className="text-primary font-medium">
               contact@royalmotionit.com
             </a>
@@ -226,7 +226,7 @@ export default async function Contact() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                We're always open to strategic partnerships! Please select "Partnership Opportunity" in the inquiry type field and provide details about your proposal.
+                We&apos;re always open to strategic partnerships! Please select &quot;Partnership Opportunity&quot; in the inquiry type field and provide details about your proposal.
               </p>
             </CardContent>
           </Card>

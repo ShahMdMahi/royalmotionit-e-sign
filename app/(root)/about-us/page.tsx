@@ -236,7 +236,7 @@ export default function AboutUs() {
               </div>
 
               <blockquote className="italic text-muted-foreground">
-                "Royal Sign has transformed how our legal team handles contracts. The platform is intuitive, secure, and has cut our document processing time by 75%. The audit trail feature gives us
+                &quot;Royal Sign has transformed how our legal team handles contracts. The platform is intuitive, secure, and has cut our document processing time by 75%. The audit trail feature gives us
                 peace of mind for compliance.&quot;
               </blockquote>
 

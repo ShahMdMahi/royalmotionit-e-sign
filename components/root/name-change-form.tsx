@@ -71,13 +71,10 @@ export function NameChangeForm() {
         router.refresh();
       }, 100);
     }
-  }, [state.success, isLoading]);
-
-  useEffect(() => {
     if (state.message && !state.success && !isLoading) {
       toast.error(state.message);
     }
-  }, [state.message, state.success, isLoading]);
+  }, [state.success, state.message, isLoading, reset, router]);
 
   return (
     <Card className="overflow-hidden shadow-lg rounded-lg card-hover border-border">
