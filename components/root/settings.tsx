@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Session } from "next-auth";
-import { Globe, Mail, User } from "lucide-react";
+import { Mail, User } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NameChangeForm } from "./name-change-form";
 import { PasswordChangeForm } from "./password-change-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,7 +21,6 @@ interface SettingsComponentProps {
 
 export function SettingsComponent({ session, notification }: SettingsComponentProps) {
   const [emailNotifications, setEmailNotifications] = useState<boolean>(notification);
-  const [language, setLanguage] = useState("english");
 
   const userName = session.user?.name || "User";
   const userEmail = session.user?.email || "";
@@ -83,10 +81,6 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
               <User className="size-4" />
               <span>Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="preferences" className="gap-2">
-              <Globe className="size-4" />
-              <span>Preferences</span>
-            </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-2">
               <Mail className="size-4" />
               <span>Notifications</span>
@@ -119,43 +113,6 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
 
             {/* Password Change Form */}
             <PasswordChangeForm />
-          </div>
-        </TabsContent>
-
-        {/* Preferences Tab - Language Settings */}
-        <TabsContent value="preferences" className="space-y-6">
-          <div className="grid grid-cols-1 gap-8">
-            <Alert>
-              <AlertDescription className="text-sm">Configure your preferred language</AlertDescription>
-            </Alert>
-
-            <Card className="overflow-hidden shadow-lg rounded-lg card-hover border-border">
-              <CardHeader className="p-6 border-b border-border">
-                <CardTitle className="text-xl font-semibold flex items-center gap-2">
-                  <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Globe className="size-4 text-primary" />
-                  </div>
-                  Language Settings
-                </CardTitle>
-                <CardDescription>Choose your preferred language</CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-6">
-                  <div className="grid gap-3">
-                    <Label htmlFor="language">Language</Label>
-                    <Select value={language} onValueChange={setLanguage}>
-                      <SelectTrigger id="language">
-                        <SelectValue placeholder="Select language" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="english">English</SelectItem>
-                        <SelectItem value="bangla">Bangla</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </TabsContent>
 
