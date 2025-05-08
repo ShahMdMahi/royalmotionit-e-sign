@@ -8,66 +8,66 @@ import { logoutUser } from "@/actions/auth";
 
 export function DashboardComponent() {
   return (
-    <div className="container py-8 max-w-7xl mx-auto">
-      <div className="flex flex-col gap-8">
+    <div className="container py-10 max-w-7xl mx-auto">
+      <div className="flex flex-col gap-10">
         {/* Header Section */}
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tighter">Welcome to Your Dashboard</h1>
-          <p className="text-muted-foreground">Manage and track all your documents and signature requests.</p>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tighter md:text-4xl">Welcome to Your Dashboard</h1>
+          <p className="text-muted-foreground text-lg">Manage and track all your documents and signature requests.</p>
         </div>
 
-        {/* First Row - Main User Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <Link href="/documents" className="w-full">
-            <Card className="h-full card-hover border-border hover:border-primary/50">
-              <CardContent className="flex flex-col items-center justify-center gap-4 pt-6 pb-6">
-                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <FileText className="size-6 text-primary" />
+        {/* Main User Actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <Link href="/documents" className="w-full group">
+            <Card className="h-full border-border shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:border-primary/50 group-hover:-translate-y-1">
+              <CardContent className="flex flex-col items-center justify-center gap-5 p-6">
+                <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <FileText className="size-7 text-primary" />
                 </div>
-                <div className="space-y-1 text-center">
-                  <h3 className="text-lg font-medium">My Documents</h3>
+                <div className="space-y-2 text-center">
+                  <h3 className="text-xl font-medium">My Documents</h3>
                   <p className="text-sm text-muted-foreground">Access and manage your documents</p>
                 </div>
               </CardContent>
             </Card>
           </Link>
 
-          <Link href="/profile" className="w-full">
-            <Card className="h-full card-hover border-border hover:border-primary/50">
-              <CardContent className="flex flex-col items-center justify-center gap-4 pt-6 pb-6">
-                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="size-6 text-primary" />
+          <Link href="/profile" className="w-full group">
+            <Card className="h-full border-border shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:border-primary/50 group-hover:-translate-y-1">
+              <CardContent className="flex flex-col items-center justify-center gap-5 p-6">
+                <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <User className="size-7 text-primary" />
                 </div>
-                <div className="space-y-1 text-center">
-                  <h3 className="text-lg font-medium">My Profile</h3>
+                <div className="space-y-2 text-center">
+                  <h3 className="text-xl font-medium">My Profile</h3>
                   <p className="text-sm text-muted-foreground">View and update your account details</p>
                 </div>
               </CardContent>
             </Card>
           </Link>
 
-          <Link href="/settings" className="w-full">
-            <Card className="h-full card-hover border-border hover:border-primary/50">
-              <CardContent className="flex flex-col items-center justify-center gap-4 pt-6 pb-6">
-                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Settings className="size-6 text-primary" />
+          <Link href="/settings" className="w-full group">
+            <Card className="h-full border-border shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:border-primary/50 group-hover:-translate-y-1">
+              <CardContent className="flex flex-col items-center justify-center gap-5 p-6">
+                <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <Settings className="size-7 text-primary" />
                 </div>
-                <div className="space-y-1 text-center">
-                  <h3 className="text-lg font-medium">My Settings</h3>
+                <div className="space-y-2 text-center">
+                  <h3 className="text-xl font-medium">My Settings</h3>
                   <p className="text-sm text-muted-foreground">Customize your preferences</p>
                 </div>
               </CardContent>
             </Card>
           </Link>
 
-          <form action={logoutUser} className="w-full">
-            <Card className="h-full card-hover border-border hover:border-destructive/50 cursor-pointer">
-              <CardContent className="flex flex-col items-center justify-center gap-4 pt-6 pb-6">
-                <div className="size-12 rounded-full bg-destructive/10 flex items-center justify-center">
-                  <LogOut className="size-6 text-destructive" />
+          <form action={logoutUser} className="w-full group">
+            <Card className="h-full border-border cursor-pointer shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:border-destructive/50 group-hover:-translate-y-1">
+              <CardContent className="flex flex-col items-center justify-center gap-5 p-6">
+                <div className="size-14 rounded-full bg-destructive/10 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <LogOut className="size-7 text-destructive" />
                 </div>
-                <div className="space-y-1 text-center">
-                  <Button type="submit" variant="ghost" className="font-medium h-auto p-0">
+                <div className="space-y-2 text-center">
+                  <Button type="submit" variant="ghost" className="text-xl font-medium h-auto p-0 hover:text-destructive">
                     Logout
                   </Button>
                   <p className="text-sm text-muted-foreground">Sign out from your account</p>

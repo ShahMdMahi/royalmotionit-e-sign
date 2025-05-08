@@ -4,7 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NameChangeForm } from "./name-change-form";
 import { PasswordChangeForm } from "./password-change-form";
 import { Session } from "next-auth";
-import { User as UserIcon, Calendar, Mail, Hash } from "lucide-react";
+import { User as UserIcon, Calendar, Hash, GanttChart } from "lucide-react";
+import { PageHeader } from "@/components/common/page-header";
 
 interface ProfileComponentProps {
   user: User;
@@ -21,68 +22,126 @@ export function ProfileComponent({ user, session }: ProfileComponentProps) {
       .substring(0, 2);
   };
 
+  // Format date in a user-friendly way
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   return (
-    <div className="container mx-auto p-4 space-y-8">
+    <div className="container mx-auto p-6 md:p-8 space-y-10 max-w-7xl">
       {/* Profile header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Profile</h1>
-          <p className="text-muted-foreground">Manage your profile details</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Avatar className="h-10 w-10 border-2 border-primary/30">
-            <AvatarImage src={user.image ?? undefined} alt={user.name ?? "U"} />
-            <AvatarFallback className="bg-primary/10 text-primary font-medium">{getInitials(user.name ?? "U")}</AvatarFallback>
-          </Avatar>
-          <div className="leading-tight">
-            <p className="font-medium">{user.name}</p>
-            <p className="text-xs text-muted-foreground">{user.email}</p>
-            <p className="text-xs text-muted-foreground">{user.id}</p>
+      <PageHeader
+        title="My Profile"
+        description="Manage your personal profile details"
+        showUserInfo={true}
+        userName={user.name ?? "User"}
+        userEmail={user.email ?? ""}
+        userId={user.id}
+        userImage={user.image}
+        icon={
+          <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <UserIcon className="size-6 text-primary" />
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Profile Details Card */}
-      <Card className="overflow-hidden shadow-lg rounded-lg card-hover border-border">
-        <CardHeader className="p-6 border-b border-border">
-          <CardTitle className="text-xl font-semibold flex items-center gap-2">
-            <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <UserIcon className="size-4 text-primary" />
+      <Card className="overflow-hidden shadow-lg rounded-xl border-border transition-all duration-300 hover:shadow-xl">
+        <CardHeader className="p-6 border-b border-border bg-muted/10">
+          <CardTitle className="text-xl font-semibold flex items-center gap-3">
+            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <UserIcon className="size-5 text-primary" />
             </div>
             Profile Details
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row items-center space-y-6 sm:space-y-0 sm:space-x-8">
-            <Avatar className="w-28 h-28 border-2 border-primary rounded-full shadow-md">
-              <AvatarImage src={user.image ?? undefined} alt={user.name ?? "User"} />
-              <AvatarFallback className="text-xl font-bold text-primary bg-primary/10">{getInitials(user.name ?? "U")}</AvatarFallback>
-            </Avatar>
-            <div className="grid gap-4 flex-1">
-              <div className="flex items-center gap-2 text-lg">
-                <UserIcon className="size-5 text-primary" />
-                <span className="font-medium">Name:</span>
-                <span className="text-muted-foreground">{user.name ?? "No name provided"}</span>
+          <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
+            <div className="flex flex-col items-center gap-4">
+              <Avatar className="w-36 h-36 border-2 border-primary shadow-md">
+                <AvatarImage src={user.image ?? undefined} alt={user.name ?? "User"} className="object-cover" />
+                <AvatarFallback className="text-3xl font-bold text-primary bg-primary/10">{getInitials(user.name ?? "U")}</AvatarFallback>
+              </Avatar>
+              <div className="text-center">
+                <h2 className="text-xl font-semibold">{user.name || "No name provided"}</h2>
+                <p className="text-sm text-muted-foreground">{user.email}</p>
               </div>
-              <div className="flex items-center gap-2 text-lg">
-                <Mail className="size-5 text-primary" />
-                <span className="font-medium">Email:</span>
-                <span className="text-muted-foreground">{user.email ?? "No email provided"}</span>
+            </div>
+
+            <div className="flex-1 grid gap-6 w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-4 bg-card/50 rounded-lg border border-border shadow-sm">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <UserIcon className="size-4 text-primary" />
+                    </div>
+                    <span className="font-medium text-lg">Personal Details</span>
+                  </div>
+                  <div className="space-y-3 pl-11">
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Name</p>
+                      <p className="font-medium">{user.name ?? "No name provided"}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Email</p>
+                      <p className="font-medium">{user.email ?? "No email provided"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-card/50 rounded-lg border border-border shadow-sm">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <GanttChart className="size-4 text-primary" />
+                    </div>
+                    <span className="font-medium text-lg">Account Status</span>
+                  </div>
+                  <div className="space-y-3 pl-11">
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Email Verified</p>
+                      <p className="font-medium">{user.emailVerified ? "Yes" : "No"}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Account Type</p>
+                      <p className="font-medium">{session.user.isOauth ? "Social Login" : "Email & Password"}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-lg">
-                <Hash className="size-5 text-primary" />
-                <span className="font-medium">ID:</span>
-                <span className="text-muted-foreground">{user.id ?? "No ID provided"}</span>
+
+              <div className="p-4 bg-card/50 rounded-lg border border-border shadow-sm">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Calendar className="size-4 text-primary" />
+                  </div>
+                  <span className="font-medium text-lg">Important Dates</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-11">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Account Created</p>
+                    <p className="font-medium">{user.createdAt ? formatDate(user.createdAt) : "Unknown"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Last Updated</p>
+                    <p className="font-medium">{user.updatedAt ? formatDate(user.updatedAt) : "Unknown"}</p>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-lg">
-                <Calendar className="size-5 text-primary" />
-                <span className="font-medium">Created At:</span>
-                <span className="text-muted-foreground">{user.createdAt?.toLocaleDateString() ?? "No date provided"}</span>
-              </div>
-              <div className="flex items-center gap-2 text-lg">
-                <Calendar className="size-5 text-primary" />
-                <span className="font-medium">Updated At:</span>
-                <span className="text-muted-foreground">{user.updatedAt?.toLocaleDateString() ?? "No date provided"}</span>
+
+              <div className="p-4 bg-muted/10 rounded-lg border border-border shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Hash className="size-4 text-primary" />
+                  </div>
+                  <div className="space-y-1 flex-1">
+                    <p className="text-sm text-muted-foreground">User ID</p>
+                    <p className="font-medium text-sm break-all">{user.id}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

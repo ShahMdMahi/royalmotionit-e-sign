@@ -26,7 +26,7 @@ export default async function Documents() {
           },
         });
 
-        return <DocumentsComponent userRole={session.user.role as Role} authorDocuments={authorDocuments} signeeDocuments={signeeDocuments} />;
+        return <DocumentsComponent userRole={session.user.role as Role} user={session.user} authorDocuments={authorDocuments} signeeDocuments={signeeDocuments} />;
       } else {
         const signeeDocuments = await prisma.document.findMany({
           where: {
@@ -35,7 +35,7 @@ export default async function Documents() {
         });
 
         // Pass an empty array for authorDocuments for non-admin users
-        return <DocumentsComponent userRole={session.user.role as Role} authorDocuments={[]} signeeDocuments={signeeDocuments} />;
+        return <DocumentsComponent userRole={session.user.role as Role} user={session.user} authorDocuments={[]} signeeDocuments={signeeDocuments} />;
       }
     }
   } else {

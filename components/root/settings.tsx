@@ -2,17 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { Session } from "next-auth";
-import { Mail, User } from "lucide-react";
+import { Mail, User, Settings as SettingsIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { NameChangeForm } from "./name-change-form";
 import { PasswordChangeForm } from "./password-change-form";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { changeNotificationSettings } from "@/actions/user";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/common/page-header";
 
 interface SettingsComponentProps {
   session: Session;
@@ -25,16 +25,6 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
   const userName = session.user?.name || "User";
   const userEmail = session.user?.email || "";
   const userImage = session.user?.image || "";
-
-  // Helper function to get user initials for avatar fallback
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((part) => part[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2);
-  };
 
   useEffect(() => {
     const updateNotificationSettings = async () => {
@@ -54,35 +44,32 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
   }, [emailNotifications, notification]);
 
   return (
-    <div className="container mx-auto p-4 space-y-8">
+    <div className="container mx-auto p-6 md:p-8 space-y-10 max-w-7xl">
       {/* Settings header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Account Settings</h1>
-          <p className="text-muted-foreground">Manage your account settings and preferences</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Avatar className="h-10 w-10 border-2 border-primary/30">
-            <AvatarImage src={userImage} alt={userName} />
-            <AvatarFallback className="bg-primary/10 text-primary font-medium">{getInitials(userName)}</AvatarFallback>
-          </Avatar>
-          <div className="leading-tight">
-            <p className="font-medium">{userName}</p>
-            <p className="text-xs text-muted-foreground">{userEmail}</p>
-            <p className="text-xs text-muted-foreground">{session.user.id}</p>
+      <PageHeader
+        title="Account Settings"
+        description="Manage your account settings and preferences"
+        showUserInfo={true}
+        userName={userName}
+        userEmail={userEmail}
+        userId={session.user.id}
+        userImage={userImage}
+        icon={
+          <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <SettingsIcon className="size-6 text-primary" />
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Settings tabs */}
       <Tabs defaultValue="profile" className="w-full">
-        <div className="mb-6 overflow-x-auto">
-          <TabsList className="mb-8 w-full justify-start">
-            <TabsTrigger value="profile" className="gap-2">
+        <div className="mb-8 border-b border-border/80 overflow-x-auto">
+          <TabsList className="w-full md:w-auto justify-start bg-transparent h-12">
+            <TabsTrigger value="profile" className="gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
               <User className="size-4" />
               <span>Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="gap-2">
+            <TabsTrigger value="notifications" className="gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
               <Mail className="size-4" />
               <span>Notifications</span>
             </TabsTrigger>
@@ -90,22 +77,22 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
         </div>
 
         {/* Profile Tab - Name and Password Change */}
-        <TabsContent value="profile" className="space-y-6">
-          <div className="grid grid-cols-1 gap-8">
-            <Alert>
-              <AlertDescription className="text-sm">Update your profile information and password</AlertDescription>
-            </Alert>
+        <TabsContent value="profile" className="space-y-8">
+          <Alert className="bg-primary/5 border-primary/20">
+            <AlertDescription className="text-sm text-foreground">Update your profile information and password</AlertDescription>
+          </Alert>
 
+          <div className="grid grid-cols-1 gap-8">
             {/* Name Change Form */}
-            <Card className="overflow-hidden shadow-lg rounded-lg card-hover border-border">
-              <CardHeader className="p-6 border-b border-border">
-                <CardTitle className="text-xl font-semibold flex items-center gap-2">
-                  <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="size-4 text-primary" />
+            <Card className="overflow-hidden shadow-lg rounded-xl border-border transition-all duration-300 hover:shadow-xl hover:border-primary/30">
+              <CardHeader className="p-6 border-b border-border bg-muted/10">
+                <CardTitle className="text-xl font-semibold flex items-center gap-3">
+                  <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="size-5 text-primary" />
                   </div>
                   Profile Information
                 </CardTitle>
-                <CardDescription>Update your name</CardDescription>
+                <CardDescription className="text-base">Update your name</CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <NameChangeForm />
@@ -118,30 +105,32 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
         </TabsContent>
 
         {/* Notifications Tab - Email Notifications */}
-        <TabsContent value="notifications" className="space-y-6">
-          <div className="grid grid-cols-1 gap-8">
-            <Alert>
-              <AlertDescription className="text-sm">Control email notification settings</AlertDescription>
-            </Alert>
+        <TabsContent value="notifications" className="space-y-8">
+          <Alert className="bg-primary/5 border-primary/20">
+            <AlertDescription className="text-sm text-foreground">Control email notification settings</AlertDescription>
+          </Alert>
 
-            <Card className="overflow-hidden shadow-lg rounded-lg card-hover border-border">
-              <CardHeader className="p-6 border-b border-border">
-                <CardTitle className="text-xl font-semibold flex items-center gap-2">
-                  <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Mail className="size-4 text-primary" />
+          <div className="grid grid-cols-1 gap-8">
+            <Card className="overflow-hidden shadow-lg rounded-xl border-border transition-all duration-300 hover:shadow-xl hover:border-primary/30">
+              <CardHeader className="p-6 border-b border-border bg-muted/10">
+                <CardTitle className="text-xl font-semibold flex items-center gap-3">
+                  <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Mail className="size-5 text-primary" />
                   </div>
                   Email Notifications
                 </CardTitle>
-                <CardDescription>Manage email notification preferences</CardDescription>
+                <CardDescription className="text-base">Manage email notification preferences</CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label htmlFor="email-notif">Email Notifications</Label>
-                      <p className="text-sm text-muted-foreground">Receive notifications about activity via email</p>
+                  <div className="flex items-center justify-between p-4 bg-card/50 rounded-lg border border-border shadow-sm">
+                    <div className="space-y-1">
+                      <Label htmlFor="email-notif" className="text-lg font-medium">
+                        Email Notifications
+                      </Label>
+                      <p className="text-sm text-muted-foreground">Receive notifications about document activities via email</p>
                     </div>
-                    <Switch id="email-notif" checked={emailNotifications} onCheckedChange={setEmailNotifications} />
+                    <Switch id="email-notif" checked={emailNotifications} onCheckedChange={setEmailNotifications} className="scale-125 data-[state=checked]:bg-primary" />
                   </div>
                 </div>
               </CardContent>
