@@ -38,7 +38,7 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
       }
     };
 
-    if (session.user.notification !== emailNotifications) {
+    if (notification !== emailNotifications) {
       updateNotificationSettings();
     }
   }, [emailNotifications, notification]);

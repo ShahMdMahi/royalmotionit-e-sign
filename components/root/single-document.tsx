@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileText, AlertTriangle, Check, Clock, Calendar, User as UserIcon, Mail, Hash, FileSignature, Info, Shield, Download, ArrowLeft, Share2 } from "lucide-react";
+import { FileText, AlertTriangle, Check, Clock, Calendar, User as UserIcon, Mail, Hash, FileSignature, Info, Shield, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 interface SingleDocumentComponentProps {
@@ -420,7 +420,8 @@ export function SingleDocumentComponent({ document, author, signee, backLink = "
       <CardFooter className="border-t p-4 flex flex-wrap justify-between gap-3">
         <Button variant="outline" size="sm" asChild>
           <Link href={backLink}>
-            <ArrowLeft className="size-4 mr-2" />Back to Documents
+            <ArrowLeft className="size-4 mr-2" />
+            Back to Documents
           </Link>
         </Button>
 
