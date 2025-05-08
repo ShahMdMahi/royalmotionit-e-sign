@@ -3,6 +3,7 @@ import { SingleDocumentComponent } from "@/components/admin/single-document";
 import { prisma } from "@/prisma/prisma";
 import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
+import { toast } from "sonner";
 
 export default async function SignleDocument({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -32,6 +33,7 @@ export default async function SignleDocument({ params }: { params: Promise<{ id:
       }
     } catch (error) {
       console.error("Error fetching document:", error);
+      toast.error("Error fetching document. Please try again later.");
       redirect("/admin/documents");
     }
   } else {

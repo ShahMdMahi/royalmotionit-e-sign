@@ -37,6 +37,8 @@ export default async function Documents() {
         // Pass an empty array for authorDocuments for non-admin users
         return <DocumentsComponent userRole={session.user.role as Role} user={session.user} authorDocuments={[]} signeeDocuments={signeeDocuments} />;
       }
+    } else {
+      redirect("/auth/login");
     }
   } else {
     redirect("/auth/login");

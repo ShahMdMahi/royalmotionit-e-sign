@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { FileSignature, Eye, Pencil, Calendar, Clock, AlertCircle, CheckCircle2, TimerOff, Plus, FileText } from "lucide-react";
+import { FileSignature, Eye, Calendar, Clock, AlertCircle, CheckCircle2, TimerOff, FileText } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { User } from "next-auth";
 
@@ -70,12 +70,6 @@ export function DocumentsComponent({ userRole, user, authorDocuments, signeeDocu
                     <CardTitle className="text-xl font-semibold">Authored by You</CardTitle>
                     <CardDescription className="text-base">These are documents you have uploaded or created.</CardDescription>
                   </div>
-                  <Button className="w-full md:w-auto gap-2" asChild>
-                    <Link href="/documents/create">
-                      <Plus className="size-4" />
-                      Create Document
-                    </Link>
-                  </Button>
                 </div>
               </CardHeader>
               <CardContent className="p-6 space-y-8">
@@ -83,12 +77,6 @@ export function DocumentsComponent({ userRole, user, authorDocuments, signeeDocu
                   <div className="text-center py-12 bg-muted/5 rounded-lg border border-dashed border-border">
                     <FileSignature className="mx-auto size-12 text-muted-foreground mb-3 opacity-80" />
                     <p className="text-muted-foreground text-lg">You have not authored any documents yet.</p>
-                    <Button variant="outline" className="mt-4 gap-2" asChild>
-                      <Link href="/documents/create">
-                        <Plus className="size-4" />
-                        Create Your First Document
-                      </Link>
-                    </Button>
                   </div>
                 )}
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -173,14 +161,6 @@ export function DocumentsComponent({ userRole, user, authorDocuments, signeeDocu
                             View
                           </Link>
                         </Button>
-                        {doc.status === "PENDING" && (
-                          <Button size="sm" asChild className="w-full sm:w-auto">
-                            <Link href={`/documents/${doc.id}/edit`}>
-                              <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                              Edit
-                            </Link>
-                          </Button>
-                        )}
                       </CardFooter>
                     </Card>
                   ))}
