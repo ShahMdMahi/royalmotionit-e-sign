@@ -12,8 +12,36 @@ interface ProfileComponentProps {
 }
 
 export function ProfileComponent({ user, session }: ProfileComponentProps) {
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   return (
     <div className="container mx-auto p-4 space-y-8">
+      {/* Profile header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Profile</h1>
+          <p className="text-muted-foreground">Manage your profile details</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Avatar className="h-10 w-10 border-2 border-primary/30">
+            <AvatarImage src={user.image ?? undefined} alt={user.name ?? "U"} />
+            <AvatarFallback className="bg-primary/10 text-primary font-medium">{getInitials(user.name ?? "U")}</AvatarFallback>
+          </Avatar>
+          <div className="leading-tight">
+            <p className="font-medium">{user.name}</p>
+            <p className="text-xs text-muted-foreground">{user.email}</p>
+            <p className="text-xs text-muted-foreground">{user.id}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Profile Details Card */}
       <Card className="overflow-hidden shadow-lg rounded-lg card-hover border-border">
         <CardHeader className="p-6 border-b border-border">
@@ -28,32 +56,32 @@ export function ProfileComponent({ user, session }: ProfileComponentProps) {
           <div className="flex flex-col sm:flex-row items-center space-y-6 sm:space-y-0 sm:space-x-8">
             <Avatar className="w-28 h-28 border-2 border-primary rounded-full shadow-md">
               <AvatarImage src={user.image ?? undefined} alt={user.name ?? "User"} />
-              <AvatarFallback className="text-xl font-bold text-primary bg-primary/10">{user.name?.[0]?.toUpperCase() ?? "U"}</AvatarFallback>
+              <AvatarFallback className="text-xl font-bold text-primary bg-primary/10">{getInitials(user.name ?? "U")}</AvatarFallback>
             </Avatar>
             <div className="grid gap-4 flex-1">
               <div className="flex items-center gap-2 text-lg">
                 <UserIcon className="size-5 text-primary" />
-                <span className="font-medium">Name:</span> 
+                <span className="font-medium">Name:</span>
                 <span className="text-muted-foreground">{user.name ?? "No name provided"}</span>
               </div>
               <div className="flex items-center gap-2 text-lg">
                 <Mail className="size-5 text-primary" />
-                <span className="font-medium">Email:</span> 
+                <span className="font-medium">Email:</span>
                 <span className="text-muted-foreground">{user.email ?? "No email provided"}</span>
               </div>
               <div className="flex items-center gap-2 text-lg">
                 <Hash className="size-5 text-primary" />
-                <span className="font-medium">ID:</span> 
+                <span className="font-medium">ID:</span>
                 <span className="text-muted-foreground">{user.id ?? "No ID provided"}</span>
               </div>
               <div className="flex items-center gap-2 text-lg">
                 <Calendar className="size-5 text-primary" />
-                <span className="font-medium">Created At:</span> 
+                <span className="font-medium">Created At:</span>
                 <span className="text-muted-foreground">{user.createdAt?.toLocaleDateString() ?? "No date provided"}</span>
               </div>
               <div className="flex items-center gap-2 text-lg">
                 <Calendar className="size-5 text-primary" />
-                <span className="font-medium">Updated At:</span> 
+                <span className="font-medium">Updated At:</span>
                 <span className="text-muted-foreground">{user.updatedAt?.toLocaleDateString() ?? "No date provided"}</span>
               </div>
             </div>

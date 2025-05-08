@@ -69,6 +69,7 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
           <div className="leading-tight">
             <p className="font-medium">{userName}</p>
             <p className="text-xs text-muted-foreground">{userEmail}</p>
+            <p className="text-xs text-muted-foreground">{session.user.id}</p>
           </div>
         </div>
       </div>
