@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useActionState, useTransition } from "react";
+import { useState, useActionState, useTransition, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@/schema";
@@ -62,18 +62,18 @@ export function LoginForm({ isGoogleAuthActive, isRegistrationActive }: { isGoog
     });
   };
 
-  // Show success message after successful form submission
-  if (state.success && !isLoading) {
-    toast.success("Login successful! Redirecting to dashboard...");
-    setTimeout(() => {
-      router.push("/dashboard");
-    }, 100);
-  }
+  useEffect(() => {
+    if (state.success && !isLoading) {
+      toast.success("Login successful! Redirecting to dashboard...");
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 100);
+    }
 
-  // Show error message if there's a failure
-  if (state.message && !state.success && !isLoading) {
-    toast.error(state.message);
-  }
+    if (state.message && !state.success && !isLoading) {
+      toast.error(state.message);
+    }
+  }, [state.success, state.message, isLoading, router]);
 
   return (
     <div className="w-full max-w-md mx-auto">
