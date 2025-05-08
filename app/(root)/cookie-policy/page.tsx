@@ -23,7 +23,7 @@ export default function CookiePolicy() {
         <Card className="bg-secondary/30 border">
           <CardContent className="p-6 md:p-8">
             <p className="mb-4">
-              This Cookie Policy explains how RoyalMotionIT ("we", "us", or "our") uses cookies and similar technologies when you visit our Royal Sign e-signature platform and associated websites. It
+              This Cookie Policy explains how RoyalMotionIT (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) uses cookies and similar technologies when you visit our Royal Sign e-signature platform and associated websites. It
               explains what these technologies are and why we use them, as well as your rights to control our use of them.
             </p>
             <p className="text-muted-foreground text-sm">Last updated: May 8, 2025</p>
@@ -156,7 +156,7 @@ export default function CookiePolicy() {
             <li>• Hotjar (user experience analysis)</li>
           </ul>
           <p className="text-sm mt-4 text-muted-foreground">
-            Each third party has its own privacy and cookie policies. We encourage you to read these providers' privacy policies to understand their practices.
+            Each third party has its own privacy and cookie policies. We encourage you to read these providers&apos; privacy policies to understand their practices.
           </p>
         </div>
       </section>
@@ -168,7 +168,7 @@ export default function CookiePolicy() {
           <h2 className="text-3xl font-bold gradient-text">Managing Your Cookies</h2>
         </div>
 
-        <p>Most web browsers allow you to control cookies through their settings preferences. Here's how you can manage cookies in popular browsers:</p>
+        <p>Most web browsers allow you to control cookies through their settings preferences. Here&apos;s how you can manage cookies in popular browsers:</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <Card className="card-hover border">

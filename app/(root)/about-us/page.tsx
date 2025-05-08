@@ -133,7 +133,7 @@ export default function AboutUs() {
       <section className="max-w-5xl mx-auto space-y-8">
         <div className="text-center space-y-4">
           <h2 className="text-3xl font-bold gradient-text">Our Leadership Team</h2>
-          <p className="text-muted-foreground mx-auto max-w-2xl">Meet the experienced professionals guiding Royal Sign's vision and growth</p>
+          <p className="text-muted-foreground mx-auto max-w-2xl">Meet the experienced professionals guiding Royal Sign&apos;s vision and growth</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -237,7 +237,7 @@ export default function AboutUs() {
 
               <blockquote className="italic text-muted-foreground">
                 "Royal Sign has transformed how our legal team handles contracts. The platform is intuitive, secure, and has cut our document processing time by 75%. The audit trail feature gives us
-                peace of mind for compliance."
+                peace of mind for compliance.&quot;
               </blockquote>
 
               <div className="flex items-center gap-3">
@@ -263,8 +263,8 @@ export default function AboutUs() {
               </div>
 
               <blockquote className="italic text-muted-foreground">
-                "As a small business owner, I needed an e-signature solution that was affordable yet professional. Royal Sign delivers on both fronts, plus their customer service is exceptional. I
-                can't imagine running my business without it now."
+                &quot;As a small business owner, I needed an e-signature solution that was affordable yet professional. Royal Sign delivers on both fronts, plus their customer service is exceptional.
+                I can&apos;t imagine running my business without it now.&quot;
               </blockquote>
 
               <div className="flex items-center gap-3">
@@ -289,7 +289,9 @@ export default function AboutUs() {
         </div>
 
         <div className="text-center max-w-2xl mx-auto">
-          <p>We're always looking for talented individuals to join our mission. At Royal Sign, you'll work on challenging projects that make a real impact in the digital transformation space.</p>
+          <p>
+            We&apos;re always looking for talented individuals to join our mission. At Royal Sign, you&apos;ll work on challenging projects that make a real impact in the digital transformation space.
+          </p>
         </div>
 
         <div className="bg-secondary/30 rounded-xl p-8 mt-8 border">
@@ -349,7 +351,7 @@ export default function AboutUs() {
         <div className="space-y-6">
           <h2 className="text-3xl font-bold">Get in Touch</h2>
 
-          <p>Have questions about Royal Sign? We'd love to hear from you and discuss how we can help transform your document workflows.</p>
+          <p>Have questions about Royal Sign? We&apos;d love to hear from you and discuss how we can help transform your document workflows.</p>
 
           <div className="flex flex-wrap gap-4">
             <Button variant="secondary" className="bg-white hover:bg-white/90 text-primary" asChild>

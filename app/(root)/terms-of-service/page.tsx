@@ -23,7 +23,7 @@ export default function TermsOfService() {
         <Card className="bg-secondary/30 border">
           <CardContent className="p-6 md:p-8">
             <p className="mb-4">
-              These Terms of Service ("Terms") govern your access to and use of Royal Sign, an e-signature platform ("Service") provided by RoyalMotionIT ("we", "us", or "our"). By accessing or using
+              These Terms of Service (&quot;Terms&quot;) govern your access to and use of Royal Sign, an e-signature platform (&quot;Service&quot;) provided by RoyalMotionIT (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;). By accessing or using
               our Service, you agree to be bound by these Terms. If you disagree with any part of the Terms, you may not access the Service.
             </p>
             <p className="text-muted-foreground text-sm">Last updated: May 8, 2025</p>
@@ -89,7 +89,7 @@ export default function TermsOfService() {
                 <h3 className="text-xl font-medium mb-2">2. Acceptable Use</h3>
                 <p className="text-muted-foreground">
                   You may use the Service only for lawful purposes and in accordance with these Terms. You agree not to use the Service for any illegal or unauthorized purpose, including but not
-                  limited to fraud, misrepresentation, or violating any third party's legal rights.
+                  limited to fraud, misrepresentation, or violating any third party&apos;s legal rights.
                 </p>
               </div>
 
@@ -250,7 +250,7 @@ export default function TermsOfService() {
         <h2 className="text-3xl font-bold gradient-text">Changes to Terms</h2>
 
         <p>
-          We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days' notice prior to any new terms taking
+          We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days&apos; notice prior to any new terms taking
           effect. What constitutes a material change will be determined at our sole discretion.
         </p>
 
