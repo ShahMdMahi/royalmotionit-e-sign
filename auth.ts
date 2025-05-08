@@ -15,6 +15,8 @@ declare module "next-auth" {
       name?: string | null;
       email?: string | null;
       image?: string | null;
+      emailVerified?: Date | null;
+      notification?: boolean;
     };
   }
 }
@@ -23,6 +25,8 @@ declare module "next-auth/jwt" {
   interface JWT {
     isOauth?: boolean;
     role?: string;
+    notification?: boolean;
+    emailVerified?: Date | null;
   }
 }
 
@@ -76,6 +80,8 @@ export const {
       token.email = existingUser.email;
       token.image = existingUser.image;
       token.role = existingUser.role;
+      token.emailVerified = existingUser.emailVerified;
+      token.notification = existingUser.notification;
 
       return token;
     },
@@ -84,6 +90,8 @@ export const {
         session.user.id = token.sub;
         session.user.isOauth = token.isOauth as boolean;
         session.user.role = token.role as string;
+        session.user.notification = token.notification as boolean;
+        session.user.emailVerified = token.emailVerified as Date | null;
       }
       return session;
     },

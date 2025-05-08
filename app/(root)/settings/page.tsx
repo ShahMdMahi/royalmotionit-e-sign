@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
+import { SettingsComponent } from "@/components/root/settings";
 
 export const metadata: Metadata = {
   title: "Settings - Royal Sign - RoyalMotionIT",
@@ -10,13 +11,7 @@ export const metadata: Metadata = {
 export default async function Settings() {
   const session = await auth();
   if (session) {
-    return (
-      <div>
-        <div>Welcome</div>
-        <div>User Settings</div>
-        <div>Additional Content Here</div>
-      </div>
-    );
+    return <SettingsComponent session={session} notification={session.user.notification ?? false} />;
   } else {
     redirect("/auth/login");
   }

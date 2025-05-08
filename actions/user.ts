@@ -25,6 +25,11 @@ type ChangePasswordFormState = {
   success?: boolean;
 };
 
+type ChangeNotificationSettingsState = {
+  message?: string | null;
+  success?: boolean;
+};
+
 /**
  * Change user's name
  */
@@ -188,6 +193,45 @@ export async function changePassword(prevState: ChangePasswordFormState, formDat
     console.error("Password change error:", error);
     return {
       message: "An error occurred while changing your password. Please try again.",
+      success: false,
+    };
+  }
+}
+
+/**
+ * Change notification settings
+ */
+export async function changeNotificationSettings(status: boolean): Promise<ChangeNotificationSettingsState> {
+  try {
+    const session = await auth();
+
+    if (!session || !session.user || !session.user.id) {
+      return {
+        message: "You must be logged in to change your notification settings.",
+        success: false,
+      };
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: session.user.id },
+      data: { notification: status },
+    });
+
+    if (!updatedUser) {
+      return {
+        message: "Failed to update notification settings.",
+        success: false,
+      };
+    }
+
+    return {
+      message: "Notification settings updated successfully.",
+      success: true,
+    };
+  } catch (error) {
+    console.error("Notification settings error:", error);
+    return {
+      message: "An error occurred while changing your notification settings. Please try again.",
       success: false,
     };
   }
