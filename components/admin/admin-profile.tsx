@@ -3,7 +3,7 @@
 import { Session } from "next-auth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Hash, UserIcon, Settings, Shield, Users, FileSignature } from "lucide-react";
+import { Calendar, Hash, UserIcon, Shield } from "lucide-react";
 
 interface AdminProfileComponentProps {
   session: Session;
@@ -107,7 +107,7 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
                     </div>
                     <div className="grid grid-cols-[120px_1fr] gap-1">
                       <span className="text-muted-foreground">Permissions:</span>
-                      <span className="font-medium">Create, Read, Update, Delete</span>
+                      <span className="font-medium">All Permissions</span>
                     </div>
                     <div className="grid grid-cols-[120px_1fr] gap-1">
                       <span className="text-muted-foreground">Status:</span>
@@ -164,7 +164,7 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
       </Card>
 
       {/* Admin Activity Summary */}
-      <Card className="overflow-hidden shadow-lg rounded-xl border-border transition-all duration-300 hover:shadow-xl">
+      {/* <Card className="overflow-hidden shadow-lg rounded-xl border-border transition-all duration-300 hover:shadow-xl">
         <CardHeader className="p-6 border-b border-border bg-muted/10">
           <CardTitle className="text-xl font-semibold flex items-center gap-3">
             <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -204,7 +204,7 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {!userData.isOauth && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
