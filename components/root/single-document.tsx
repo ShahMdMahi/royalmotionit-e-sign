@@ -139,9 +139,9 @@ export function SingleDocumentComponent({ document, author, signee, backLink = "
         </CardContent>
         <CardFooter className="border-t p-4 flex justify-between">
           <Button variant="outline" size="sm" asChild>
-            <a href={backLink}>
+            <Link href={backLink}>
               <ArrowLeft className="size-4 mr-2" /> Back
-            </a>
+            </Link>
           </Button>
         </CardFooter>
       </Card>

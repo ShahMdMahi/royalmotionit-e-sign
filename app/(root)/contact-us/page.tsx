@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Contact Us - Royal Sign",
@@ -239,7 +240,7 @@ export default async function Contact() {
           <h2 className="text-3xl font-bold">Ready to Experience Royal Sign?</h2>
           <p className="text-lg">Try our e-signature platform free for 14 days. No credit card required.</p>
           <Button size="lg" className="px-12 bg-white hover:bg-white/90 text-primary" asChild>
-            <a href="/auth/register">Start Free Trial</a>
+            <Link href="/auth/register">Start Free Trial</Link>
           </Button>
         </div>
       </section>

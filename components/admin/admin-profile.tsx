@@ -4,6 +4,7 @@ import { Session } from "next-auth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, Hash, UserIcon, Shield } from "lucide-react";
+import Link from "next/link";
 
 interface AdminProfileComponentProps {
   session: Session;
@@ -215,9 +216,9 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
             <CardContent className="p-6">
               <p className="text-muted-foreground mb-4">You can change your name using the profile settings</p>
               <div className="flex justify-end">
-                <a href="/admin/settings" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
+                <Link href="/admin/settings" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
                   Go to Settings
-                </a>
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -229,9 +230,9 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
             <CardContent className="p-6">
               <p className="text-muted-foreground mb-4">You can change your password using the profile settings</p>
               <div className="flex justify-end">
-                <a href="/admin/settings" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
+                <Link href="/admin/settings" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
                   Go to Settings
-                </a>
+                </Link>
               </div>
             </CardContent>
           </Card>
