@@ -16,7 +16,7 @@ export default async function AdminSettings() {
   } else if (session.user.role === Role.USER) {
     redirect("/dashboard");
   } else if (session.user.role === Role.ADMIN) {
-    return <AdminSettingsComponent session={session} />;
+    return <AdminSettingsComponent />;
   } else {
     redirect("/");
   }

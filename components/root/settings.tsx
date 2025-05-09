@@ -45,6 +45,7 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
         toast.error(response.message || "Failed to update notification settings.");
       }
     } catch (error) {
+      console.error("Error updating notification settings:", error);
       // Revert state if request failed
       setEmailNotifications(!newStatus);
       toast.error("An unexpected error occurred. Please try again.");

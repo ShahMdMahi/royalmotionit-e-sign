@@ -13,11 +13,8 @@ import { PasswordChangeForm } from "../common/password-change-form";
 import { NameChangeForm } from "../common/name-change-form";
 import { updateIsRegistrationActive, updateIsGoogleAuthActive, getIsRegistrationActive, getIsGoogleAuthActive } from "@/actions/edge-config";
 
-interface AdminSettingsComponentProps {
-  session: Session;
-}
 
-export function AdminSettingsComponent({ session }: AdminSettingsComponentProps) {
+export function AdminSettingsComponent() {
   const [registrationEnabled, setRegistrationEnabled] = useState<boolean>(false);
   const [googleAuthEnabled, setGoogleAuthEnabled] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
