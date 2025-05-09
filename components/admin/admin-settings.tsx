@@ -2,7 +2,7 @@
 
 import { Session } from "next-auth";
 import { useState, useEffect } from "react";
-import { User, Mail, Globe, ShieldCheck } from "lucide-react";
+import { User, Globe, ShieldCheck } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -15,20 +15,14 @@ import { updateIsRegistrationActive, updateIsGoogleAuthActive, getIsRegistration
 
 interface AdminSettingsComponentProps {
   session: Session;
-  notification?: boolean;
 }
 
-export function AdminSettingsComponent({ session, notification = false }: AdminSettingsComponentProps) {
-  const [emailNotifications, setEmailNotifications] = useState<boolean>(notification);
+export function AdminSettingsComponent({ session }: AdminSettingsComponentProps) {
   const [registrationEnabled, setRegistrationEnabled] = useState<boolean>(false);
   const [googleAuthEnabled, setGoogleAuthEnabled] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRegistrationUpdating, setIsRegistrationUpdating] = useState<boolean>(false);
   const [isGoogleAuthUpdating, setIsGoogleAuthUpdating] = useState<boolean>(false);
-
-  const userName = session.user?.name || "Admin";
-  const userEmail = session.user?.email || "";
-  const userImage = session.user?.image || "";
 
   // Fetch registration and Google auth status with retry logic
   useEffect(() => {
@@ -77,6 +71,7 @@ export function AdminSettingsComponent({ session, notification = false }: AdminS
         setRegistrationEnabled(!newStatus);
       }
     } catch (error) {
+      console.error("Error updating registration settings:", error);
       toast.error("An unexpected error occurred.");
       // Revert the state if API call failed
       setRegistrationEnabled(!newStatus);
@@ -98,6 +93,7 @@ export function AdminSettingsComponent({ session, notification = false }: AdminS
         setGoogleAuthEnabled(!newStatus);
       }
     } catch (error) {
+      console.error("Error updating Google auth settings:", error);
       toast.error("An unexpected error occurred.");
       // Revert the state if API call failed
       setGoogleAuthEnabled(!newStatus);
