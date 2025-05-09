@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
+import { AdminSettingsComponent } from "@/components/admin/admin-settings";
 
 export const metadata: Metadata = {
   title: "Settings - Admin - Royal Sign - RoyalMotionIT",
@@ -15,14 +16,7 @@ export default async function AdminSettings() {
   } else if (session.user.role === Role.USER) {
     redirect("/dashboard");
   } else if (session.user.role === Role.ADMIN) {
-    return (
-      <div>
-        <h1>Settings</h1>
-        <p>Welcome {session.user.email}</p>
-        <p>{JSON.stringify(session)}</p>
-        <p>{JSON.stringify(session?.user)}</p>
-      </div>
-    );
+    return <AdminSettingsComponent session={session} />;
   } else {
     redirect("/");
   }

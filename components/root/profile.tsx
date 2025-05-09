@@ -1,8 +1,8 @@
 import { User } from "@prisma/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { NameChangeForm } from "./name-change-form";
-import { PasswordChangeForm } from "./password-change-form";
+import { NameChangeForm } from "../common/name-change-form";
+import { PasswordChangeForm } from "../common/password-change-form";
 import { Session } from "next-auth";
 import { User as UserIcon, Calendar, Hash, GanttChart } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";

@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { NameChangeForm } from "./name-change-form";
-import { PasswordChangeForm } from "./password-change-form";
+import { NameChangeForm } from "../common/name-change-form";
+import { PasswordChangeForm } from "../common/password-change-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { changeNotificationSettings } from "@/actions/user";
 import { toast } from "sonner";
@@ -21,27 +21,37 @@ interface SettingsComponentProps {
 
 export function SettingsComponent({ session, notification }: SettingsComponentProps) {
   const [emailNotifications, setEmailNotifications] = useState<boolean>(notification);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
   const userName = session.user?.name || "User";
   const userEmail = session.user?.email || "";
   const userImage = session.user?.image || "";
 
-  useEffect(() => {
-    const updateNotificationSettings = async () => {
-      const response = await changeNotificationSettings(emailNotifications);
-      if (response.success || response.message) {
-        toast.success(response.message || "Notification settings updated successfully.");
-      }
+  // Handle notification setting changes
+  const handleNotificationChange = async (newStatus: boolean) => {
+    if (isUpdating) return;
 
-      if (!response.success) {
+    setIsUpdating(true);
+    setEmailNotifications(newStatus); // Optimistically update UI
+
+    try {
+      const response = await changeNotificationSettings(newStatus);
+
+      if (response.success) {
+        toast.success(response.message || "Notification settings updated successfully.");
+      } else {
+        // Revert state if request failed
+        setEmailNotifications(!newStatus);
         toast.error(response.message || "Failed to update notification settings.");
       }
-    };
-
-    if (notification !== emailNotifications) {
-      updateNotificationSettings();
+    } catch (error) {
+      // Revert state if request failed
+      setEmailNotifications(!newStatus);
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsUpdating(false);
     }
-  }, [emailNotifications, notification]);
+  };
 
   return (
     <div className="container mx-auto p-6 md:p-8 space-y-10 max-w-7xl">
@@ -130,7 +140,8 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
                       </Label>
                       <p className="text-sm text-muted-foreground">Receive notifications about document activities via email</p>
                     </div>
-                    <Switch id="email-notif" checked={emailNotifications} onCheckedChange={setEmailNotifications} className="scale-125 data-[state=checked]:bg-primary" />
+                    <Switch id="email-notif" checked={emailNotifications} onCheckedChange={handleNotificationChange} disabled={isUpdating} className="scale-125 data-[state=checked]:bg-primary" />
+                    {isUpdating && <span className="ml-2 text-xs text-muted-foreground animate-pulse">Updating...</span>}
                   </div>
                 </div>
               </CardContent>

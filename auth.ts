@@ -10,13 +10,15 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string;
-      isOauth: boolean;
       role: string;
+      isOauth?: boolean;
       name?: string | null;
       email?: string | null;
       image?: string | null;
       emailVerified?: Date | null;
       notification?: boolean;
+      createdAt?: Date;
+      updatedAt?: Date;
     };
   }
 }
@@ -27,6 +29,8 @@ declare module "next-auth/jwt" {
     role?: string;
     notification?: boolean;
     emailVerified?: Date | null;
+    createdAt?: Date;
+    updatedAt?: Date;
   }
 }
 
@@ -82,6 +86,8 @@ export const {
       token.role = existingUser.role;
       token.emailVerified = existingUser.emailVerified;
       token.notification = existingUser.notification;
+      token.createdAt = existingUser.createdAt;
+      token.updatedAt = existingUser.updatedAt;
 
       return token;
     },
@@ -92,6 +98,8 @@ export const {
         session.user.role = token.role as string;
         session.user.notification = token.notification as boolean;
         session.user.emailVerified = token.emailVerified as Date | null;
+        session.user.createdAt = token.createdAt as Date;
+        session.user.updatedAt = token.updatedAt as Date;
       }
       return session;
     },
