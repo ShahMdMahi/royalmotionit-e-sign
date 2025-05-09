@@ -1,6 +1,5 @@
 "use client";
 
-import { Session } from "next-auth";
 import { useState, useEffect } from "react";
 import { User, Globe, ShieldCheck } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -12,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { PasswordChangeForm } from "../common/password-change-form";
 import { NameChangeForm } from "../common/name-change-form";
 import { updateIsRegistrationActive, updateIsGoogleAuthActive, getIsRegistrationActive, getIsGoogleAuthActive } from "@/actions/edge-config";
-
 
 export function AdminSettingsComponent() {
   const [registrationEnabled, setRegistrationEnabled] = useState<boolean>(false);
