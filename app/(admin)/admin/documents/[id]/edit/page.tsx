@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { EditDocumentComponent } from "@/components/admin/edit-document";
 import { prisma } from "@/prisma/prisma";
 import { DocumentType, Role } from "@prisma/client";
 import { redirect } from "next/navigation";
@@ -14,15 +15,9 @@ export default async function EditDocument({ params }: { params: Promise<{ id: s
     try {
       const document = await prisma.document.findUnique({ where: { id } });
 
-      // Fetch all users (for selecting signees)
-      const users = await prisma.user.findMany({
-        where: { role: Role.USER }, // Only regular users can be signees
-        orderBy: { name: "asc" },
-      });
-
       if (document) {
         if (document.documentType === DocumentType.UNSIGNED) {
-          return <div>Document is unsigned {JSON.stringify(users)}</div>;
+          return <EditDocumentComponent document={document} />;
         } else {
           redirect(`/admin/documents/${id}`);
         }

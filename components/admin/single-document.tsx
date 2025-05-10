@@ -1,6 +1,6 @@
 "use client";
 
-import { Document, User, DocumentField } from "@prisma/client";
+import { Document, User, DocumentField, DocumentType } from "@prisma/client";
 import { getFromR2 } from "@/actions/r2";
 import { PDFViewer } from "../common/pdf-viewer";
 import { useEffect, useState } from "react";
@@ -14,14 +14,15 @@ import { FileText, AlertTriangle, Check, Clock, Calendar, User as UserIcon, Mail
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
 
-interface SignleDocumentComponentProps {
+interface SingleDocumentComponentProps {
   document: Document & { fields?: DocumentField[] };
   author: User;
   signee: User | null;
 }
 
-export function SingleDocumentComponent({ document, author, signee }: SignleDocumentComponentProps) {
+export function SingleDocumentComponent({ document, author, signee }: SingleDocumentComponentProps) {
   const [pdfData, setPdfData] = useState<Uint8Array | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -399,14 +400,14 @@ export function SingleDocumentComponent({ document, author, signee }: SignleDocu
         </Tabs>
       </CardContent>
       <CardFooter className="border-t p-4 flex justify-end gap-3">
-        <Button variant="outline" size="sm">
-          <FileText className="size-4 mr-2" />
-          Download
-        </Button>
-        <Button size="sm">
-          <Edit className="size-4 mr-2" />
-          Edit
-        </Button>
+        {document.documentType === DocumentType.UNSIGNED && (
+          <Button size="sm">
+            <Link href={`/admin/documents/${document.id}/edit`} className="flex items-center">
+              <Edit className="size-4 mr-2" />
+              Edit
+            </Link>
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
