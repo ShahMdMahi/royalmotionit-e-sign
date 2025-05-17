@@ -2,11 +2,21 @@ import { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Lock, User, FileText, Network, Share2, Shield, AlertCircle, RefreshCcw } from "lucide-react";
+import {
+  Lock,
+  User,
+  FileText,
+  Network,
+  Share2,
+  Shield,
+  AlertCircle,
+  RefreshCcw,
+} from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Privacy Policy - Royal Sign",
-  description: "Learn how Royal Sign collects, uses, and protects your personal information in our e-signature platform.",
+  description:
+    "Learn how Royal Sign collects, uses, and protects your personal information in our e-signature platform.",
 };
 
 export default function PrivacyPolicy() {
@@ -14,8 +24,12 @@ export default function PrivacyPolicy() {
     <div className="container mx-auto px-4 py-12 space-y-16">
       {/* Header Section */}
       <section className="text-center space-y-4 max-w-3xl mx-auto">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text">Privacy Policy</h1>
-        <p className="text-lg text-muted-foreground">How we collect, use, and protect your information</p>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text">
+          Privacy Policy
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          How we collect, use, and protect your information
+        </p>
       </section>
 
       {/* Intro Section */}
@@ -23,10 +37,16 @@ export default function PrivacyPolicy() {
         <Card className="bg-secondary/30 border">
           <CardContent className="p-6 md:p-8">
             <p className="mb-4">
-              At Royal Sign, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our e-signature platform and
-              related services. Please read this policy carefully. If you do not agree with the terms of this privacy policy, please do not access the service.
+              At Royal Sign, we take your privacy seriously. This Privacy Policy
+              explains how we collect, use, disclose, and safeguard your
+              information when you use our e-signature platform and related
+              services. Please read this policy carefully. If you do not agree
+              with the terms of this privacy policy, please do not access the
+              service.
             </p>
-            <p className="text-muted-foreground text-sm">Last updated: May 8, 2025</p>
+            <p className="text-muted-foreground text-sm">
+              Last updated: May 8, 2025
+            </p>
           </CardContent>
         </Card>
       </section>
@@ -35,10 +55,16 @@ export default function PrivacyPolicy() {
       <section className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <User className="h-8 w-8 text-primary flex-shrink-0" />
-          <h2 className="text-3xl font-bold gradient-text">Information We Collect</h2>
+          <h2 className="text-3xl font-bold gradient-text">
+            Information We Collect
+          </h2>
         </div>
 
-        <p>We collect personal information that you voluntarily provide to us when you register with us, express interest in obtaining information about our services, or otherwise contact us.</p>
+        <p>
+          We collect personal information that you voluntarily provide to us
+          when you register with us, express interest in obtaining information
+          about our services, or otherwise contact us.
+        </p>
 
         <div className="space-y-6 mt-4">
           <Card className="overflow-hidden card-hover border">
@@ -51,7 +77,9 @@ export default function PrivacyPolicy() {
                 <li>Contact information (name, email address, phone number)</li>
                 <li>Account credentials (username, password)</li>
                 <li>Business information (company name, job title)</li>
-                <li>Payment information (billing address, credit card details)</li>
+                <li>
+                  Payment information (billing address, credit card details)
+                </li>
                 <li>Identity verification information</li>
                 <li>Electronic signatures and related document data</li>
               </ul>
@@ -60,15 +88,26 @@ export default function PrivacyPolicy() {
 
           <Card className="overflow-hidden card-hover border">
             <CardHeader className="bg-primary/5 py-3">
-              <CardTitle className="text-lg">Automatically Collected Information</CardTitle>
+              <CardTitle className="text-lg">
+                Automatically Collected Information
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-2 text-muted-foreground">
-              <p>We automatically collect certain information when you visit our website or use our service:</p>
+              <p>
+                We automatically collect certain information when you visit our
+                website or use our service:
+              </p>
               <ul className="list-disc pl-6 space-y-1">
-                <li>Device and usage information (IP address, browser type, operating system)</li>
+                <li>
+                  Device and usage information (IP address, browser type,
+                  operating system)
+                </li>
                 <li>Access times and pages viewed</li>
                 <li>Location information</li>
-                <li>Information collected through cookies and tracking technologies</li>
+                <li>
+                  Information collected through cookies and tracking
+                  technologies
+                </li>
               </ul>
             </CardContent>
           </Card>
@@ -79,10 +118,15 @@ export default function PrivacyPolicy() {
       <section className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <FileText className="h-8 w-8 text-primary flex-shrink-0" />
-          <h2 className="text-3xl font-bold gradient-text">How We Use Your Information</h2>
+          <h2 className="text-3xl font-bold gradient-text">
+            How We Use Your Information
+          </h2>
         </div>
 
-        <p>We use the information we collect for various business purposes, including:</p>
+        <p>
+          We use the information we collect for various business purposes,
+          including:
+        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
           <Card className="h-full card-hover border">
@@ -163,25 +207,37 @@ export default function PrivacyPolicy() {
       <section className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <Share2 className="h-8 w-8 text-primary flex-shrink-0" />
-          <h2 className="text-3xl font-bold gradient-text">Information Sharing and Disclosure</h2>
+          <h2 className="text-3xl font-bold gradient-text">
+            Information Sharing and Disclosure
+          </h2>
         </div>
 
-        <p>We may share your information with third parties in the following situations:</p>
+        <p>
+          We may share your information with third parties in the following
+          situations:
+        </p>
 
         <Card className="card-hover border">
           <CardContent className="p-6 space-y-6">
             <div>
               <h3 className="text-xl font-medium mb-2">Service Providers</h3>
               <p className="text-muted-foreground">
-                We may share your information with third-party vendors, service providers, contractors, or agents who perform services for us or on our behalf and require access to such information to
-                perform these services. They are prohibited from using your personal information for any other purpose.
+                We may share your information with third-party vendors, service
+                providers, contractors, or agents who perform services for us or
+                on our behalf and require access to such information to perform
+                these services. They are prohibited from using your personal
+                information for any other purpose.
               </p>
             </div>
 
             <div>
-              <h3 className="text-xl font-medium mb-2">Business Transactions</h3>
+              <h3 className="text-xl font-medium mb-2">
+                Business Transactions
+              </h3>
               <p className="text-muted-foreground">
-                If we are involved in a merger, acquisition, financing due diligence, reorganization, bankruptcy, or sale of company assets, your information may be transferred as part of such a
+                If we are involved in a merger, acquisition, financing due
+                diligence, reorganization, bankruptcy, or sale of company
+                assets, your information may be transferred as part of such a
                 transaction.
               </p>
             </div>
@@ -189,14 +245,19 @@ export default function PrivacyPolicy() {
             <div>
               <h3 className="text-xl font-medium mb-2">Legal Requirements</h3>
               <p className="text-muted-foreground">
-                We may disclose your information where we believe disclosure is necessary or required by law, regulation, to enforce our policies, or to protect our or others&apos; rights, property, or
+                We may disclose your information where we believe disclosure is
+                necessary or required by law, regulation, to enforce our
+                policies, or to protect our or others&apos; rights, property, or
                 safety.
               </p>
             </div>
 
             <div>
               <h3 className="text-xl font-medium mb-2">With Your Consent</h3>
-              <p className="text-muted-foreground">We may share your information with third parties when you have given us consent to do so.</p>
+              <p className="text-muted-foreground">
+                We may share your information with third parties when you have
+                given us consent to do so.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -210,8 +271,10 @@ export default function PrivacyPolicy() {
         </div>
 
         <p>
-          We have implemented appropriate technical and organizational security measures designed to protect the security of any personal information we process. However, despite our safeguards, no
-          security system is impenetrable.
+          We have implemented appropriate technical and organizational security
+          measures designed to protect the security of any personal information
+          we process. However, despite our safeguards, no security system is
+          impenetrable.
         </p>
 
         <div className="bg-muted p-6 rounded-lg mt-4 border">
@@ -235,57 +298,82 @@ export default function PrivacyPolicy() {
       <section className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <User className="h-8 w-8 text-primary flex-shrink-0" />
-          <h2 className="text-3xl font-bold gradient-text">Your Privacy Rights</h2>
+          <h2 className="text-3xl font-bold gradient-text">
+            Your Privacy Rights
+          </h2>
         </div>
 
-        <p>Depending on your location, you may have certain rights regarding your personal information:</p>
+        <p>
+          Depending on your location, you may have certain rights regarding your
+          personal information:
+        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
           <Card className="overflow-hidden border-l-4 border-l-primary/80 card-hover border">
             <CardContent className="p-4">
               <h4 className="font-medium mb-2">Right to Access</h4>
-              <p className="text-sm text-muted-foreground">You have the right to request information about the personal data we hold about you.</p>
+              <p className="text-sm text-muted-foreground">
+                You have the right to request information about the personal
+                data we hold about you.
+              </p>
             </CardContent>
           </Card>
 
           <Card className="overflow-hidden border-l-4 border-l-primary/80 card-hover border">
             <CardContent className="p-4">
               <h4 className="font-medium mb-2">Right to Rectification</h4>
-              <p className="text-sm text-muted-foreground">You have the right to request that we correct any information you believe is inaccurate.</p>
+              <p className="text-sm text-muted-foreground">
+                You have the right to request that we correct any information
+                you believe is inaccurate.
+              </p>
             </CardContent>
           </Card>
 
           <Card className="overflow-hidden border-l-4 border-l-primary/80 card-hover border">
             <CardContent className="p-4">
               <h4 className="font-medium mb-2">Right to Erasure</h4>
-              <p className="text-sm text-muted-foreground">You have the right to request that we erase your personal data, under certain conditions.</p>
+              <p className="text-sm text-muted-foreground">
+                You have the right to request that we erase your personal data,
+                under certain conditions.
+              </p>
             </CardContent>
           </Card>
 
           <Card className="overflow-hidden border-l-4 border-l-primary/80 card-hover border">
             <CardContent className="p-4">
               <h4 className="font-medium mb-2">Right to Restrict Processing</h4>
-              <p className="text-sm text-muted-foreground">You have the right to request that we restrict the processing of your personal data, under certain conditions.</p>
+              <p className="text-sm text-muted-foreground">
+                You have the right to request that we restrict the processing of
+                your personal data, under certain conditions.
+              </p>
             </CardContent>
           </Card>
 
           <Card className="overflow-hidden border-l-4 border-l-primary/80 card-hover border">
             <CardContent className="p-4">
               <h4 className="font-medium mb-2">Right to Data Portability</h4>
-              <p className="text-sm text-muted-foreground">You have the right to request that we transfer the data we have collected to another organization, under certain conditions.</p>
+              <p className="text-sm text-muted-foreground">
+                You have the right to request that we transfer the data we have
+                collected to another organization, under certain conditions.
+              </p>
             </CardContent>
           </Card>
 
           <Card className="overflow-hidden border-l-4 border-l-primary/80 card-hover border">
             <CardContent className="p-4">
               <h4 className="font-medium mb-2">Right to Object</h4>
-              <p className="text-sm text-muted-foreground">You have the right to object to our processing of your personal data, under certain conditions.</p>
+              <p className="text-sm text-muted-foreground">
+                You have the right to object to our processing of your personal
+                data, under certain conditions.
+              </p>
             </CardContent>
           </Card>
         </div>
 
         <p className="text-muted-foreground mt-4">
-          To exercise any of these rights, please contact us using the information provided at the end of this policy. We will respond to your request within 30 days.
+          To exercise any of these rights, please contact us using the
+          information provided at the end of this policy. We will respond to
+          your request within 30 days.
         </p>
       </section>
 
@@ -293,17 +381,25 @@ export default function PrivacyPolicy() {
       <section className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <Network className="h-8 w-8 text-primary flex-shrink-0" />
-          <h2 className="text-3xl font-bold gradient-text">International Data Transfers</h2>
+          <h2 className="text-3xl font-bold gradient-text">
+            International Data Transfers
+          </h2>
         </div>
 
         <p>
-          Our servers are located in the United States. If you are accessing our service from outside the United States, please be aware that your information may be transferred to, stored, and
-          processed by us in our facilities and by third parties with whom we may share your personal information.
+          Our servers are located in the United States. If you are accessing our
+          service from outside the United States, please be aware that your
+          information may be transferred to, stored, and processed by us in our
+          facilities and by third parties with whom we may share your personal
+          information.
         </p>
 
         <p className="text-muted-foreground">
-          If you are located in the European Economic Area (EEA) or the United Kingdom, we ensure that any transfers of your personal data will be protected by appropriate safeguards, including the
-          use of standard contractual clauses approved by the European Commission or other suitable safeguards.
+          If you are located in the European Economic Area (EEA) or the United
+          Kingdom, we ensure that any transfers of your personal data will be
+          protected by appropriate safeguards, including the use of standard
+          contractual clauses approved by the European Commission or other
+          suitable safeguards.
         </p>
       </section>
 
@@ -311,17 +407,23 @@ export default function PrivacyPolicy() {
       <section className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <RefreshCcw className="h-8 w-8 text-primary flex-shrink-0" />
-          <h2 className="text-3xl font-bold gradient-text">Changes to This Privacy Policy</h2>
+          <h2 className="text-3xl font-bold gradient-text">
+            Changes to This Privacy Policy
+          </h2>
         </div>
 
         <p>
-          We may update this privacy policy from time to time to reflect changes in our practices or for other operational, legal, or regulatory reasons. We will post the updated policy on this page
-          with a revised &quot;Last Updated&quot; date.
+          We may update this privacy policy from time to time to reflect changes
+          in our practices or for other operational, legal, or regulatory
+          reasons. We will post the updated policy on this page with a revised
+          &quot;Last Updated&quot; date.
         </p>
 
         <p className="text-muted-foreground">
-          We encourage you to review this policy periodically to stay informed about our information practices and the choices available to you. Your continued use of the service after any changes
-          constitutes your acceptance of these changes.
+          We encourage you to review this policy periodically to stay informed
+          about our information practices and the choices available to you. Your
+          continued use of the service after any changes constitutes your
+          acceptance of these changes.
         </p>
       </section>
 
@@ -330,7 +432,10 @@ export default function PrivacyPolicy() {
         <div className="space-y-6">
           <h2 className="text-3xl font-bold">Contact Us</h2>
 
-          <p>If you have any questions or concerns about this Privacy Policy, please contact our Data Protection Officer:</p>
+          <p>
+            If you have any questions or concerns about this Privacy Policy,
+            please contact our Data Protection Officer:
+          </p>
 
           <div className="bg-background/40 p-4 rounded-lg">
             <p>Data Protection Officer</p>
@@ -339,7 +444,10 @@ export default function PrivacyPolicy() {
             <p>Silicon Valley, CA 94123</p>
             <p className="mt-2">
               Email:{" "}
-              <a href="mailto:privacy@royalmotionit.com" className="text-primary">
+              <a
+                href="mailto:privacy@royalmotionit.com"
+                className="text-primary"
+              >
                 privacy@royalmotionit.com
               </a>
             </p>
@@ -352,15 +460,27 @@ export default function PrivacyPolicy() {
           </div>
 
           <div className="flex flex-wrap gap-4">
-            <Button variant="secondary" className="bg-white hover:bg-white/90 text-primary" asChild>
+            <Button
+              variant="secondary"
+              className="bg-white hover:bg-white/90 text-primary"
+              asChild
+            >
               <Link href="/contact-us">Contact Us</Link>
             </Button>
 
-            <Button variant="outline" className="bg-transparent border-white text-white hover:bg-white/20" asChild>
+            <Button
+              variant="outline"
+              className="bg-transparent border-white text-white hover:bg-white/20"
+              asChild
+            >
               <Link href="/terms-of-service">Terms of Service</Link>
             </Button>
 
-            <Button variant="outline" className="bg-transparent border-white text-white hover:bg-white/20" asChild>
+            <Button
+              variant="outline"
+              className="bg-transparent border-white text-white hover:bg-white/20"
+              asChild
+            >
               <Link href="/cookie-policy">Cookie Policy</Link>
             </Button>
           </div>

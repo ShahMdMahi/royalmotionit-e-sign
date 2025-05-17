@@ -3,9 +3,12 @@ import { SingleDocumentComponent } from "@/components/admin/single-document";
 import { prisma } from "@/prisma/prisma";
 import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
-import { toast } from "sonner";
 
-export default async function SignleDocument({ params }: { params: Promise<{ id: string }> }) {
+export default async function SingleDocument({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const session = await auth();
   if (!session) {
     redirect("/auth/login");
@@ -14,26 +17,31 @@ export default async function SignleDocument({ params }: { params: Promise<{ id:
   } else if (session.user.role === Role.ADMIN) {
     const id = (await params).id;
     try {
-      const document = await prisma.document.findUnique({ where: { id: id } });
+      const document = await prisma.document.findUnique({
+        where: { id: id },
+        include: { signers: true },
+      });
 
-      if (document) {
-        const author = await prisma.user.findUnique({
-          where: { id: document.authorId },
-        });
-
-        if (author) {
-          let signee = null;
-          if (document?.signeeId) {
-            signee = await prisma.user.findUnique({
-              where: { id: document.signeeId },
-            });
-          }
-          return <SingleDocumentComponent document={document} author={author} signee={signee} />;
-        }
+      if (!document) {
+        console.error(`Document with ID ${id} not found`);
+        redirect("/admin/documents");
       }
+
+      const author = await prisma.user.findUnique({
+        where: { id: document.authorId },
+      });
+
+      if (!author) {
+        console.error(
+          `Author with ID ${document.authorId} not found for document ${id}`,
+        );
+        redirect("/admin/documents");
+      }
+
+      // All checks passed, render the component
+      return <SingleDocumentComponent document={document} author={author} />;
     } catch (error) {
       console.error("Error fetching document:", error);
-      toast.error("Error fetching document. Please try again later.");
       redirect("/admin/documents");
     }
   } else {

@@ -35,7 +35,8 @@ export interface ProcessedGetObjectData {
 }
 
 // Define a specific type for the parameters of getFromR2, making Bucket optional
-interface GetFromR2Params extends Omit<GetObjectCommandInput, "Bucket" | "Key"> {
+interface GetFromR2Params
+  extends Omit<GetObjectCommandInput, "Bucket" | "Key"> {
   // Omit Key as well, then add it as required
   Bucket?: string;
   Key: string; // Ensure Key is explicitly required
@@ -46,7 +47,10 @@ interface GetFromR2Params extends Omit<GetObjectCommandInput, "Bucket" | "Key"> 
  * @param params - S3 PutObjectCommandInput parameters
  * @param retries - Number of retry attempts for transient errors (default: 3)
  */
-export async function uploadToR2(params: PutObjectCommandInput, retries = 3): Promise<R2Result<any>> {
+export async function uploadToR2(
+  params: PutObjectCommandInput,
+  retries = 3,
+): Promise<R2Result<any>> {
   // Validate required parameters
   if (!params.Bucket) {
     return {
@@ -137,7 +141,10 @@ export async function uploadToR2(params: PutObjectCommandInput, retries = 3): Pr
         return {
           success: false,
           error,
-          message: error instanceof Error ? `Upload error: ${error.message}` : "Unknown upload error",
+          message:
+            error instanceof Error
+              ? `Upload error: ${error.message}`
+              : "Unknown upload error",
           statusCode: 500,
         };
       }
@@ -161,7 +168,10 @@ export async function uploadToR2(params: PutObjectCommandInput, retries = 3): Pr
  * @param params - S3 GetObjectCommandInput parameters
  * @param retries - Number of retry attempts for transient errors (default: 3)
  */
-export async function getFromR2(params: GetFromR2Params, retries = 3): Promise<R2Result<ProcessedGetObjectData>> {
+export async function getFromR2(
+  params: GetFromR2Params,
+  retries = 3,
+): Promise<R2Result<ProcessedGetObjectData>> {
   if (!params.Key) {
     return {
       success: false,
@@ -186,9 +196,14 @@ export async function getFromR2(params: GetFromR2Params, retries = 3): Promise<R
         };
       }
 
-      const commandInput: GetObjectCommandInput = { ...params, Bucket: bucketToUse };
+      const commandInput: GetObjectCommandInput = {
+        ...params,
+        Bucket: bucketToUse,
+      };
 
-      const sdkResponse: GetObjectCommandOutput = await r2Client.send(new GetObjectCommand(commandInput));
+      const sdkResponse: GetObjectCommandOutput = await r2Client.send(
+        new GetObjectCommand(commandInput),
+      );
 
       // Process the stream into a Uint8Array on the server
       if (!sdkResponse.Body) {
@@ -269,7 +284,10 @@ export async function getFromR2(params: GetFromR2Params, retries = 3): Promise<R
         return {
           success: false,
           error,
-          message: error instanceof Error ? `Retrieval error: ${error.message}` : "Unknown retrieval error",
+          message:
+            error instanceof Error
+              ? `Retrieval error: ${error.message}`
+              : "Unknown retrieval error",
           statusCode: 500,
         };
       }
@@ -291,7 +309,10 @@ export async function getFromR2(params: GetFromR2Params, retries = 3): Promise<R
  * @param params - S3 DeleteObjectCommandInput parameters
  * @param retries - Number of retry attempts for transient errors (default: 3)
  */
-export async function deleteFromR2(params: DeleteObjectCommandInput, retries = 3): Promise<R2Result<any>> {
+export async function deleteFromR2(
+  params: DeleteObjectCommandInput,
+  retries = 3,
+): Promise<R2Result<any>> {
   // Validate required parameters
   if (!params.Bucket) {
     return {
@@ -329,7 +350,9 @@ export async function deleteFromR2(params: DeleteObjectCommandInput, retries = 3
       // Apply bucket from params or environment
       const requestParams = { ...params, Bucket: bucket };
 
-      const result = await r2Client.send(new DeleteObjectCommand(requestParams));
+      const result = await r2Client.send(
+        new DeleteObjectCommand(requestParams),
+      );
 
       return {
         success: true,
@@ -379,7 +402,10 @@ export async function deleteFromR2(params: DeleteObjectCommandInput, retries = 3
         return {
           success: false,
           error,
-          message: error instanceof Error ? `Delete error: ${error.message}` : "Unknown delete error",
+          message:
+            error instanceof Error
+              ? `Delete error: ${error.message}`
+              : "Unknown delete error",
           statusCode: 500,
         };
       }
@@ -404,7 +430,13 @@ export async function deleteFromR2(params: DeleteObjectCommandInput, retries = 3
  * @param fileName - Original file name (for Content-Disposition)
  * @param retries - Number of retry attempts
  */
-export async function uploadFileToR2(file: Buffer | null, key: string, contentType: string, fileName: string, retries = 3): Promise<R2Result<any>> {
+export async function uploadFileToR2(
+  file: Buffer | null,
+  key: string,
+  contentType: string,
+  fileName: string,
+  retries = 3,
+): Promise<R2Result<any>> {
   // Input validation
   if (!file || file.length === 0) {
     return {
@@ -465,7 +497,7 @@ export async function uploadFileToR2(file: Buffer | null, key: string, contentTy
         ContentType: contentType || "application/octet-stream",
         ContentDisposition: `inline; filename="${sanitizedFileName}"`,
       },
-      retries
+      retries,
     );
 
     if (!result.success) {

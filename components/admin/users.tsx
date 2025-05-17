@@ -1,11 +1,24 @@
 "use client";
 
 import { User } from "@prisma/client";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Edit, Search, Users } from "lucide-react";
 import Link from "next/link";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
@@ -25,8 +38,12 @@ export function UsersComponent({ users }: { users: User[] }) {
   });
   // Calculate user stats
   const totalUsers = users.length;
-  const adminUsers = users.filter((user) => user.role?.toLowerCase() === "admin").length;
-  const regularUsers = users.filter((user) => user.role?.toLowerCase() === "user").length;
+  const adminUsers = users.filter(
+    (user) => user.role?.toLowerCase() === "admin",
+  ).length;
+  const regularUsers = users.filter(
+    (user) => user.role?.toLowerCase() === "user",
+  ).length;
 
   return (
     <div className="container py-8 max-w-7xl mx-auto">
@@ -34,8 +51,12 @@ export function UsersComponent({ users }: { users: User[] }) {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tighter">User Management</h1>
-            <p className="text-muted-foreground">View and manage all users in the system.</p>
+            <h1 className="text-3xl font-bold tracking-tighter">
+              User Management
+            </h1>
+            <p className="text-muted-foreground">
+              View and manage all users in the system.
+            </p>
           </div>
           <Button className="flex items-center gap-2">
             <Users className="size-4" />
@@ -47,7 +68,9 @@ export function UsersComponent({ users }: { users: User[] }) {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card className="card-hover border-border">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Users</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Users
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
@@ -61,7 +84,9 @@ export function UsersComponent({ users }: { users: User[] }) {
 
           <Card className="card-hover border-border">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Admin Users</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Admin Users
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
@@ -75,7 +100,9 @@ export function UsersComponent({ users }: { users: User[] }) {
 
           <Card className="card-hover border-border">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Regular Users</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Regular Users
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
@@ -94,7 +121,9 @@ export function UsersComponent({ users }: { users: User[] }) {
             <CardTitle className="text-lg flex items-center gap-2">
               <Users className="size-5 text-primary" /> All Users
             </CardTitle>
-            <CardDescription>Manage user accounts and permissions</CardDescription>
+            <CardDescription>
+              Manage user accounts and permissions
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {" "}
@@ -102,7 +131,13 @@ export function UsersComponent({ users }: { users: User[] }) {
             <div className="mb-6 flex items-center gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input type="search" placeholder="Search by name, email, ID or role..." className="pl-9" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                <Input
+                  type="search"
+                  placeholder="Search by name, email, ID or role..."
+                  className="pl-9"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
               <Button variant="outline" className="flex items-center gap-2">
                 <Users className="size-4" />
@@ -128,18 +163,26 @@ export function UsersComponent({ users }: { users: User[] }) {
                         <TableCell>
                           {" "}
                           <div className="flex items-center gap-2">
-                            <div className={`size-2 rounded-full ${user.emailVerified ? "bg-emerald-500" : "bg-slate-300"}`}></div>
+                            <div
+                              className={`size-2 rounded-full ${user.emailVerified ? "bg-emerald-500" : "bg-slate-300"}`}
+                            ></div>
                             {user.name || "No name"}
                           </div>
                         </TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>
                           {user.role?.toLowerCase() === "admin" ? (
-                            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 capitalize">
+                            <Badge
+                              variant="outline"
+                              className="bg-amber-50 text-amber-700 border-amber-200 capitalize"
+                            >
                               Admin
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="bg-slate-100 text-slate-700 border-slate-200 capitalize">
+                            <Badge
+                              variant="outline"
+                              className="bg-slate-100 text-slate-700 border-slate-200 capitalize"
+                            >
                               User
                             </Badge>
                           )}
@@ -158,7 +201,11 @@ export function UsersComponent({ users }: { users: User[] }) {
                 </Table>
               </div>
             ) : (
-              <div className="flex items-center justify-center p-8 text-muted-foreground border rounded-md">{searchTerm ? "No users found matching your search" : "No users found"}</div>
+              <div className="flex items-center justify-center p-8 text-muted-foreground border rounded-md">
+                {searchTerm
+                  ? "No users found matching your search"
+                  : "No users found"}
+              </div>
             )}
           </CardContent>
         </Card>

@@ -1,20 +1,32 @@
 // Script to copy PDF.js worker to public directory
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 // Define paths
 const sourcePaths = [
   // Try both JS and MJS versions
-  path.join(process.cwd(), 'node_modules', 'pdfjs-dist', 'build', 'pdf.worker.min.js'),
-  path.join(process.cwd(), 'node_modules', 'pdfjs-dist', 'build', 'pdf.worker.min.mjs')
+  path.join(
+    process.cwd(),
+    "node_modules",
+    "pdfjs-dist",
+    "build",
+    "pdf.worker.min.js",
+  ),
+  path.join(
+    process.cwd(),
+    "node_modules",
+    "pdfjs-dist",
+    "build",
+    "pdf.worker.min.mjs",
+  ),
 ];
 
-const publicDir = path.join(process.cwd(), 'public');
+const publicDir = path.join(process.cwd(), "public");
 
 // Ensure public directory exists
 if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
-  console.log('Created public directory');
+  console.log("Created public directory");
 }
 
 // Try to copy the worker files
@@ -23,7 +35,7 @@ for (const sourcePath of sourcePaths) {
   if (fs.existsSync(sourcePath)) {
     const filename = path.basename(sourcePath);
     const destPath = path.join(publicDir, filename);
-    
+
     try {
       fs.copyFileSync(sourcePath, destPath);
       console.log(`Successfully copied ${filename} to public directory`);
@@ -35,6 +47,8 @@ for (const sourcePath of sourcePaths) {
 }
 
 if (!copied) {
-  console.error('Could not find PDF.js worker file in node_modules. Make sure pdfjs-dist is installed.');
+  console.error(
+    "Could not find PDF.js worker file in node_modules. Make sure pdfjs-dist is installed.",
+  );
   process.exit(1);
 }

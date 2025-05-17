@@ -1,49 +1,69 @@
-Context:
-I’m working on a Next.js 15 App Router project called Royal Sign. My package.json already includes:
+# Royal Sign: PDF E-Signature Platform Implementation
 
-- PDF rendering: @react-pdf-viewer/core, pdfjs-dist, react-pdf
-- Drag & drop: @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/modifiers, @dnd-kit/utilities
-- PDF manipulation: pdf-lib, canvas
-- UI & animation: framer-motion, radix-ui, tailwindcss, lucide-react
-- Form state & validation: react-hook-form, zod, @hookform/resolvers
-- Signature capture: react-signature-canvas
-- Storage & API: @vercel/blob, @aws-sdk/client-s3 (configured for Cloudflare R2), next-auth, @prisma/client, prisma
-- Utilities: uuid, date-fns, lodash.debounce (optional), react-resize-detector
+## Tech Stack Details
 
-I need to upgrade my existing implementation so users can:
+- **Framework:** Next.js 15 with App Router + TurboPack
+- **UI Components:**
+  - **shadcn/ui** component system (built on Radix UI primitives)
+  - Tailwind CSS v4 for styling
+  - `framer-motion` v12 for animations
+  - `lucide-react` for iconography
+  - `sonner` for toast notifications
+- **PDF Processing:**
+  - `@react-pdf-viewer/core` + plugins for viewing
+  - `pdf-lib` for PDF manipulation and generation
+  - `pdfjs-dist` as the underlying engine
+  - `canvas` for rendering
+- **Drag & Drop:** Full `@dnd-kit` ecosystem (core, sortable, modifiers, utilities)
+- **Forms & Validation:**
+  - `react-hook-form` integrated with shadcn/ui components
+  - `zod` for schema validation with `@hookform/resolvers`
+- **State Management:** Client-side state with React hooks and context
+- **Database:** Prisma ORM with MongoDB
+- **Authentication:** NextAuth v5 beta with Prisma adapter
+- **Storage:**
+  - Cloudflare R2 via `@aws-sdk/client-s3`
+  - `@vercel/blob` for additional storage needs
+- **Signature Capture:** `react-signature-canvas`
+- **Special Utilities:**
+  - `uuid` for unique identifiers
+  - `date-fns` v4 for date operations
+  - `react-resize-detector` for responsive components
 
-1. Drag any of these field types from a sidebar—Signature, Initial, Stamp, Company, Full Name, Email, Sign Date, Text Input, Checkbox, Dropdown, Radio Buttons, Attachment, Image, Formula, Payment—onto any page of a rendered PDF.
-2. Snap-to-grid placement: when dropping or moving a field, it should align to a configurable grid (e.g. 10 px increments) for precise layouts.
-3. Capture precise x/y coordinates relative to that page and store each field’s metadata (`id`, `type`, `page`, `x`, `y`, `width`, `height`, `assignedTo`) in my existing Zustand (or React Query) store.
-4. Click a placed field to open a properties panel (using Radix Dialog/Popover) for “Required,” “Assigned signer,” default value, label text, validation rules, and conditional visibility.
-5. Render placed fields as absolutely positioned, resizable, and movable boxes over the PDF with smooth GPU-accelerated transforms (via Framer Motion or interact.js).
-6. Support multi-page documents by storing each field’s page index and only rendering it on that page; implement lazy-loading and fast pagination via @react-pdf-viewer/page-navigation.
-7. Provide a signing mode where a recipient sees only their assigned fields as interactive inputs (text via react-hook-form, date pickers, signature canvas, file upload, checkboxes).
-8. On “Finish,” use pdf-lib to embed all filled data and signature images into the original PDF at exact positions and sizes on the correct pages, producing a single, flattened signed PDF with vector-quality output and minimal file size.
-9. Persist and load field data JSON to/from R2 storage using the AWS S3 SDK in my Next.js API routes, backed by Prisma/Postgres, so layouts survive reloads and are shareable.
-10. Enhance performance and UX beyond Zoho Sign by using:
-    • GPU-accelerated animations (Framer Motion)  
-    • Smooth drag-resize interactions (interact.js or @dnd-kit modifiers)  
-    • Optional OCR-based auto-field detection (Tesseract.js)  
-    • Debounced state updates (lodash.debounce)
+## Implementation Requirements
 
-Additional Dependencies to Install:
+I need a complete PDF e-signature solution with these key features:
 
-- `interactjs` (for snap-to-grid & advanced dragging/resizing)
-- `tesseract.js` (for OCR field detection, optional)
+1. **Document Preparation Interface:**
 
-Deliverables:
+   - Dynamic field palette built with shadcn/ui components
+   - Drag-and-drop field placement with @dnd-kit and grid snapping
+   - Field types: Signature, Initial, Text, Date, Checkbox, Dropdown, etc.
+   - Multi-page document support with efficient navigation
 
-- Pseudocode or diff snippets showing how to:
-  1. Wrap each PDF page in a grid-aware drop-target area.
-  2. Handle drag-end events to calculate and store grid-aligned coordinates.
-  3. Render, drag, resize, and click to configure placed fields with smooth animations.
-  4. Filter fields by assignee and render interactive inputs during signing with isolated state.
-  5. Inject all filled data into the PDF via pdf-lib to produce a final signed copy.
-  6. Use the AWS S3 SDK to persist/load field metadata JSON to/from R2.
-- Example code for the properties panel using Radix UI and react-hook-form.
-- A brief test plan covering:
-  • Dragging/dropping each field type with grid snapping  
-  • Editing properties  
-  • Signing as a recipient  
-  • Downloading the final PDF  
+2. **Field Properties System:**
+
+   - shadcn/ui Dialog/Sheet component for field configuration
+   - Assignment of fields to specific signers with color coding
+   - Field validation rules using zod schemas
+   - Conditional logic support (show/hide based on other fields)
+
+3. **Signing Experience:**
+
+   - Role-specific views showing only assigned fields
+   - Interactive form components for data entry
+   - Signature/initial capture with react-signature-canvas
+   - Mobile-responsive signing experience
+
+4. **PDF Processing:**
+
+   - Non-destructive field overlay during editing
+   - Final PDF generation with embedded data using pdf-lib
+   - Support for attachments and form submission
+
+5. **Data Layer:**
+   - MongoDB persistence via Prisma for document metadata
+   - R2 storage for document files and assets
+   - User authentication and role management
+
+Please provide implementation guidance that leverages shadcn/ui components effectively, follows best practices for the Next.js App Router, and creates a polished, production-ready e-signature solution.

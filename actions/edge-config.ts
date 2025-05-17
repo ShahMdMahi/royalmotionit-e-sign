@@ -23,24 +23,29 @@ export async function getIsRegistrationActive(): Promise<boolean> {
   }
 }
 
-export async function updateIsRegistrationActive(status: boolean): Promise<{ success: boolean; error?: string; message?: string }> {
+export async function updateIsRegistrationActive(
+  status: boolean,
+): Promise<{ success: boolean; error?: string; message?: string }> {
   try {
-    const response = await fetch(`https://api.vercel.com/v1/edge-config/${edgeConfigId}/items`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${process.env.VERCEL_ACCESS_TOKEN}`,
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `https://api.vercel.com/v1/edge-config/${edgeConfigId}/items`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${process.env.VERCEL_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items: [
+            {
+              operation: "update",
+              key: "REGISTRATION_ACTIVE",
+              value: status,
+            },
+          ],
+        }),
       },
-      body: JSON.stringify({
-        items: [
-          {
-            operation: "update",
-            key: "REGISTRATION_ACTIVE",
-            value: status,
-          },
-        ],
-      }),
-    });
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -48,10 +53,16 @@ export async function updateIsRegistrationActive(status: boolean): Promise<{ suc
       return { success: false, error: errorText };
     }
 
-    return { success: true, message: `Registration status updated successfully to ${status}` };
+    return {
+      success: true,
+      message: `Registration status updated successfully to ${status}`,
+    };
   } catch (error) {
     console.error("Error checking registration status:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
   }
 }
 
@@ -74,24 +85,29 @@ export async function getIsGoogleAuthActive(): Promise<boolean> {
   }
 }
 
-export async function updateIsGoogleAuthActive(status: boolean): Promise<{ success: boolean; error?: string; message?: string }> {
+export async function updateIsGoogleAuthActive(
+  status: boolean,
+): Promise<{ success: boolean; error?: string; message?: string }> {
   try {
-    const response = await fetch(`https://api.vercel.com/v1/edge-config/${edgeConfigId}/items`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${process.env.VERCEL_ACCESS_TOKEN}`,
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `https://api.vercel.com/v1/edge-config/${edgeConfigId}/items`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${process.env.VERCEL_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items: [
+            {
+              operation: "update",
+              key: "GOOGLE_AUTH_ACTIVE",
+              value: status,
+            },
+          ],
+        }),
       },
-      body: JSON.stringify({
-        items: [
-          {
-            operation: "update",
-            key: "GOOGLE_AUTH_ACTIVE",
-            value: status,
-          },
-        ],
-      }),
-    });
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -99,10 +115,16 @@ export async function updateIsGoogleAuthActive(status: boolean): Promise<{ succe
       return { success: false, error: errorText };
     }
 
-    return { success: true, message: `Google Auth status updated successfully to ${status}` };
+    return {
+      success: true,
+      message: `Google Auth status updated successfully to ${status}`,
+    };
   } catch (error) {
     console.error("Error checking Google Auth status:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
   }
 }
 
@@ -125,24 +147,29 @@ export async function getIsMaintenanceModeActive(): Promise<boolean> {
   }
 }
 
-export async function updateIsMaintenanceModeActive(status: boolean): Promise<{ success: boolean; error?: string; message?: string }> {
+export async function updateIsMaintenanceModeActive(
+  status: boolean,
+): Promise<{ success: boolean; error?: string; message?: string }> {
   try {
-    const response = await fetch(`https://api.vercel.com/v1/edge-config/${edgeConfigId}/items`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${process.env.VERCEL_ACCESS_TOKEN}`,
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `https://api.vercel.com/v1/edge-config/${edgeConfigId}/items`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${process.env.VERCEL_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items: [
+            {
+              operation: "update",
+              key: "MAINTENANCE_MODE_ACTIVE",
+              value: status,
+            },
+          ],
+        }),
       },
-      body: JSON.stringify({
-        items: [
-          {
-            operation: "update",
-            key: "MAINTENANCE_MODE_ACTIVE",
-            value: status,
-          },
-        ],
-      }),
-    });
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -150,9 +177,15 @@ export async function updateIsMaintenanceModeActive(status: boolean): Promise<{ 
       return { success: false, error: errorText };
     }
 
-    return { success: true, message: `Maintenance mode status updated successfully to ${status}` };
+    return {
+      success: true,
+      message: `Maintenance mode status updated successfully to ${status}`,
+    };
   } catch (error) {
     console.error("Error checking maintenance mode status:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
   }
 }

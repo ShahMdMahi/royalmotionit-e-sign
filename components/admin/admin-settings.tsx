@@ -3,21 +3,35 @@
 import { useState, useEffect } from "react";
 import { User, Globe, ShieldCheck } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { PasswordChangeForm } from "../common/password-change-form";
 import { NameChangeForm } from "../common/name-change-form";
-import { updateIsRegistrationActive, updateIsGoogleAuthActive, getIsRegistrationActive, getIsGoogleAuthActive } from "@/actions/edge-config";
+import {
+  updateIsRegistrationActive,
+  updateIsGoogleAuthActive,
+  getIsRegistrationActive,
+  getIsGoogleAuthActive,
+} from "@/actions/edge-config";
 
 export function AdminSettingsComponent() {
-  const [registrationEnabled, setRegistrationEnabled] = useState<boolean>(false);
+  const [registrationEnabled, setRegistrationEnabled] =
+    useState<boolean>(false);
   const [googleAuthEnabled, setGoogleAuthEnabled] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isRegistrationUpdating, setIsRegistrationUpdating] = useState<boolean>(false);
-  const [isGoogleAuthUpdating, setIsGoogleAuthUpdating] = useState<boolean>(false);
+  const [isRegistrationUpdating, setIsRegistrationUpdating] =
+    useState<boolean>(false);
+  const [isGoogleAuthUpdating, setIsGoogleAuthUpdating] =
+    useState<boolean>(false);
 
   // Fetch registration and Google auth status with retry logic
   useEffect(() => {
@@ -35,13 +49,17 @@ export function AdminSettingsComponent() {
         if (retryCount < maxRetries) {
           // Wait for exponential backoff time before retrying (1s, 2s, 4s)
           const backoffTime = Math.pow(2, retryCount) * 1000;
-          toast.error(`Failed to load settings. Retrying in ${backoffTime / 1000}s...`);
+          toast.error(
+            `Failed to load settings. Retrying in ${backoffTime / 1000}s...`,
+          );
 
           setTimeout(() => {
             fetchSettings(retryCount + 1, maxRetries);
           }, backoffTime);
         } else {
-          toast.error("Failed to load settings after multiple attempts. Please refresh the page.");
+          toast.error(
+            "Failed to load settings after multiple attempts. Please refresh the page.",
+          );
         }
       } finally {
         if (retryCount === 0 || retryCount === maxRetries) {
@@ -59,9 +77,13 @@ export function AdminSettingsComponent() {
     try {
       const response = await updateIsRegistrationActive(newStatus);
       if (response.success) {
-        toast.success(response.message || "Registration settings updated successfully.");
+        toast.success(
+          response.message || "Registration settings updated successfully.",
+        );
       } else {
-        toast.error(response.error || "Failed to update registration settings.");
+        toast.error(
+          response.error || "Failed to update registration settings.",
+        );
         // Revert the state if API call failed
         setRegistrationEnabled(!newStatus);
       }
@@ -81,9 +103,14 @@ export function AdminSettingsComponent() {
     try {
       const response = await updateIsGoogleAuthActive(newStatus);
       if (response.success) {
-        toast.success(response.message || "Google authentication settings updated successfully.");
+        toast.success(
+          response.message ||
+            "Google authentication settings updated successfully.",
+        );
       } else {
-        toast.error(response.error || "Failed to update Google authentication settings.");
+        toast.error(
+          response.error || "Failed to update Google authentication settings.",
+        );
         // Revert the state if API call failed
         setGoogleAuthEnabled(!newStatus);
       }
@@ -114,8 +141,12 @@ export function AdminSettingsComponent() {
       {/* Settings header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tighter">Admin Settings</h1>
-          <p className="text-muted-foreground">Manage admin account settings and website configurations</p>
+          <h1 className="text-3xl font-bold tracking-tighter">
+            Admin Settings
+          </h1>
+          <p className="text-muted-foreground">
+            Manage admin account settings and website configurations
+          </p>
         </div>
         <div className="flex items-center gap-3 bg-primary/5 px-4 py-2 rounded-lg border border-primary/10">
           <ShieldCheck className="size-5 text-primary" />
@@ -127,11 +158,17 @@ export function AdminSettingsComponent() {
       <Tabs defaultValue="profile" className="w-full">
         <div className="mb-8 border-b border-border/80 overflow-x-auto">
           <TabsList className="w-full md:w-auto justify-start bg-transparent h-12">
-            <TabsTrigger value="profile" className="gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
+            <TabsTrigger
+              value="profile"
+              className="gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+            >
               <User className="size-4" />
               <span>Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="website" className="gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
+            <TabsTrigger
+              value="website"
+              className="gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+            >
               <Globe className="size-4" />
               <span>Website</span>
             </TabsTrigger>
@@ -141,7 +178,9 @@ export function AdminSettingsComponent() {
         {/* Profile Tab - Name and Password Change */}
         <TabsContent value="profile" className="space-y-8">
           <Alert className="bg-primary/5 border-primary/20">
-            <AlertDescription className="text-sm text-foreground">Update your profile information and password</AlertDescription>
+            <AlertDescription className="text-sm text-foreground">
+              Update your profile information and password
+            </AlertDescription>
           </Alert>
 
           <div className="grid grid-cols-1 gap-8">
@@ -154,14 +193,21 @@ export function AdminSettingsComponent() {
                   </div>
                   Profile Information
                 </CardTitle>
-                <CardDescription className="text-base">Update your profile</CardDescription>
+                <CardDescription className="text-base">
+                  Update your profile
+                </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <NameChangeForm />
                 <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">You can update your name and profile information here. Changes will be reflected across the platform.</p>
+                  <p className="text-sm text-muted-foreground">
+                    You can update your name and profile information here.
+                    Changes will be reflected across the platform.
+                  </p>
                   <div className="flex justify-end">
-                    <div className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 cursor-pointer">Update Profile</div>
+                    <div className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 cursor-pointer">
+                      Update Profile
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -176,14 +222,21 @@ export function AdminSettingsComponent() {
                   </div>
                   Security
                 </CardTitle>
-                <CardDescription className="text-base">Update your security</CardDescription>
+                <CardDescription className="text-base">
+                  Update your security
+                </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <PasswordChangeForm />
                 <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">You can update your password here. Make sure to use a strong, unique password.</p>
+                  <p className="text-sm text-muted-foreground">
+                    You can update your password here. Make sure to use a
+                    strong, unique password.
+                  </p>
                   <div className="flex justify-end">
-                    <div className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 cursor-pointer">Change Password</div>
+                    <div className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 cursor-pointer">
+                      Change Password
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -194,7 +247,9 @@ export function AdminSettingsComponent() {
         {/* Website Tab - Registration and Google Auth Controls */}
         <TabsContent value="website" className="space-y-8">
           <Alert className="bg-primary/5 border-primary/20">
-            <AlertDescription className="text-sm text-foreground">Control website registration and authentication settings</AlertDescription>
+            <AlertDescription className="text-sm text-foreground">
+              Control website registration and authentication settings
+            </AlertDescription>
           </Alert>
 
           <div className="grid grid-cols-1 gap-8">
@@ -206,26 +261,39 @@ export function AdminSettingsComponent() {
                   </div>
                   Website Settings
                 </CardTitle>
-                <CardDescription className="text-base">Manage registration and authentication options</CardDescription>
+                <CardDescription className="text-base">
+                  Manage registration and authentication options
+                </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-6">
                   {isLoading ? (
                     <div className="py-4 text-center">
                       <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-                      <p className="mt-2 text-sm text-muted-foreground">Loading settings...</p>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Loading settings...
+                      </p>
                     </div>
                   ) : (
                     <>
                       <div className="flex items-center justify-between space-x-2">
                         <div className="space-y-0.5">
-                          <Label htmlFor="registration" className="text-base font-medium">
+                          <Label
+                            htmlFor="registration"
+                            className="text-base font-medium"
+                          >
                             Website Registration
                           </Label>
-                          <p className="text-sm text-muted-foreground">Allow users to register new accounts on the website</p>
+                          <p className="text-sm text-muted-foreground">
+                            Allow users to register new accounts on the website
+                          </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          {isRegistrationUpdating && <span className="text-xs text-muted-foreground animate-pulse">Updating...</span>}
+                          {isRegistrationUpdating && (
+                            <span className="text-xs text-muted-foreground animate-pulse">
+                              Updating...
+                            </span>
+                          )}
                           <Switch
                             id="registration"
                             checked={registrationEnabled}
@@ -238,21 +306,39 @@ export function AdminSettingsComponent() {
 
                       <div className="flex items-center justify-between space-x-2">
                         <div className="space-y-0.5">
-                          <Label htmlFor="google-auth" className="text-base font-medium">
+                          <Label
+                            htmlFor="google-auth"
+                            className="text-base font-medium"
+                          >
                             Google Authentication
                           </Label>
-                          <p className="text-sm text-muted-foreground">Allow users to sign in with Google accounts</p>
+                          <p className="text-sm text-muted-foreground">
+                            Allow users to sign in with Google accounts
+                          </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          {isGoogleAuthUpdating && <span className="text-xs text-muted-foreground animate-pulse">Updating...</span>}
-                          <Switch id="google-auth" checked={googleAuthEnabled} onCheckedChange={handleGoogleAuthToggle} className="data-[state=checked]:bg-primary" disabled={isGoogleAuthUpdating} />
+                          {isGoogleAuthUpdating && (
+                            <span className="text-xs text-muted-foreground animate-pulse">
+                              Updating...
+                            </span>
+                          )}
+                          <Switch
+                            id="google-auth"
+                            checked={googleAuthEnabled}
+                            onCheckedChange={handleGoogleAuthToggle}
+                            className="data-[state=checked]:bg-primary"
+                            disabled={isGoogleAuthUpdating}
+                          />
                         </div>
                       </div>
 
                       <div className="pt-4 border-t border-border/50">
                         <Alert className="bg-amber-50 border-amber-200">
                           <AlertDescription className="text-sm text-amber-800">
-                            <strong>Note:</strong> Changes to these settings will impact all users of the platform. Please ensure you understand the consequences before making changes.
+                            <strong>Note:</strong> Changes to these settings
+                            will impact all users of the platform. Please ensure
+                            you understand the consequences before making
+                            changes.
                           </AlertDescription>
                         </Alert>
                       </div>

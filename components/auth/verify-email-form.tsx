@@ -15,7 +15,9 @@ interface VerifyEmailProps {
 
 export function VerifyEmailForm({ token }: VerifyEmailProps) {
   const [isLoading, setIsLoading] = useState(true);
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "loading",
+  );
   const [message, setMessage] = useState("");
   const router = useRouter();
 
@@ -42,7 +44,9 @@ export function VerifyEmailForm({ token }: VerifyEmailProps) {
         }
       } catch {
         setStatus("error");
-        setMessage("An error occurred during verification. Please try again later.");
+        setMessage(
+          "An error occurred during verification. Please try again later.",
+        );
         toast.error("An unexpected error occurred. Please try again.");
       } finally {
         setIsLoading(false);
@@ -56,14 +60,22 @@ export function VerifyEmailForm({ token }: VerifyEmailProps) {
     <div className="w-full max-w-md mx-auto">
       <div className="text-center mb-4">
         <h1 className="text-xl font-bold">Email Verification</h1>
-        <p className="text-muted-foreground text-sm">{status === "loading" ? "Verifying your email address..." : status === "success" ? "Your email has been verified" : "Verification failed"}</p>
+        <p className="text-muted-foreground text-sm">
+          {status === "loading"
+            ? "Verifying your email address..."
+            : status === "success"
+              ? "Your email has been verified"
+              : "Verification failed"}
+        </p>
       </div>
 
       <div className="space-y-3">
         {status === "loading" && (
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
             <Loader2 className="h-12 w-12 text-primary animate-spin" />
-            <p className="text-center text-muted-foreground">Verifying your email address. Please wait...</p>
+            <p className="text-center text-muted-foreground">
+              Verifying your email address. Please wait...
+            </p>
           </div>
         )}
 
@@ -73,7 +85,9 @@ export function VerifyEmailForm({ token }: VerifyEmailProps) {
               <CheckCircle2 className="h-12 w-12 text-primary" />
             </div>
             <p className="text-center font-medium">{message}</p>
-            <p className="text-center text-muted-foreground text-sm">You&apos;ll be redirected to the login page in a few seconds.</p>
+            <p className="text-center text-muted-foreground text-sm">
+              You&apos;ll be redirected to the login page in a few seconds.
+            </p>
           </div>
         )}
 
@@ -84,7 +98,10 @@ export function VerifyEmailForm({ token }: VerifyEmailProps) {
               <AlertDescription className="text-xs">{message}</AlertDescription>
             </Alert>
             <div className="text-center text-muted-foreground text-sm mt-2">
-              <p>If you continue to experience issues, please contact our support team.</p>
+              <p>
+                If you continue to experience issues, please contact our support
+                team.
+              </p>
             </div>
           </div>
         )}
@@ -92,7 +109,10 @@ export function VerifyEmailForm({ token }: VerifyEmailProps) {
 
       {status === "error" ? (
         <div className="space-y-3 mt-6">
-          <Button onClick={() => router.push("/auth/login")} className="w-full h-8 text-sm">
+          <Button
+            onClick={() => router.push("/auth/login")}
+            className="w-full h-8 text-sm"
+          >
             Return to Login
           </Button>
           <div className="text-center text-xs pt-2">
@@ -105,7 +125,11 @@ export function VerifyEmailForm({ token }: VerifyEmailProps) {
       ) : (
         status === "success" && (
           <div className="mt-6">
-            <Button onClick={() => router.push("/auth/login")} className="w-full h-8 text-sm" disabled={isLoading}>
+            <Button
+              onClick={() => router.push("/auth/login")}
+              className="w-full h-8 text-sm"
+              disabled={isLoading}
+            >
               Continue to Login
             </Button>
           </div>

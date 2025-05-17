@@ -19,7 +19,9 @@ interface VerificationTokenResponse extends BaseResponse {
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to find a verification token in the database by its identifier. If the token is found, it returns the token data; otherwise, it returns an error message.
  */
-export async function getVerificationTokenByIdentifier(identifier: string): Promise<VerificationTokenResponse> {
+export async function getVerificationTokenByIdentifier(
+  identifier: string,
+): Promise<VerificationTokenResponse> {
   try {
     const verificationToken = await prisma.verificationToken.findFirst({
       where: {
@@ -59,7 +61,11 @@ export async function getVerificationTokenByIdentifier(identifier: string): Prom
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to create a new verification token in the database. It returns the created token data.
  */
-export async function createVerificationToken(tokenData: { identifier: string; token: string; expires: Date }): Promise<VerificationTokenResponse> {
+export async function createVerificationToken(tokenData: {
+  identifier: string;
+  token: string;
+  expires: Date;
+}): Promise<VerificationTokenResponse> {
   try {
     const createdToken = await prisma.verificationToken.create({
       data: {
@@ -91,7 +97,9 @@ export async function createVerificationToken(tokenData: { identifier: string; t
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to delete a verification token from the database by its identifier. If the deletion is successful, it returns a success message; otherwise, it returns an error message.
  */
-export async function deleteVerificationToken(identifier: string): Promise<BaseResponse> {
+export async function deleteVerificationToken(
+  identifier: string,
+): Promise<BaseResponse> {
   try {
     const deleteResult = await prisma.verificationToken.deleteMany({
       where: {

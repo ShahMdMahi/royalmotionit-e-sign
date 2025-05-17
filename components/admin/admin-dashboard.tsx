@@ -3,7 +3,14 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { FileSignature, Users, User, Settings, LayoutDashboard, LogOut } from "lucide-react";
+import {
+  FileSignature,
+  Users,
+  User,
+  Settings,
+  LayoutDashboard,
+  LogOut,
+} from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { logoutUser } from "@/actions/auth";
 
@@ -13,8 +20,13 @@ export function AdminDashboardComponent() {
       <div className="flex flex-col gap-8">
         {/* Header Section */}
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tighter">Welcome to the Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage your organization, documents, and users from this central dashboard.</p>
+          <h1 className="text-3xl font-bold tracking-tighter">
+            Welcome to the Admin Dashboard
+          </h1>
+          <p className="text-muted-foreground">
+            Manage your organization, documents, and users from this central
+            dashboard.
+          </p>
         </div>
 
         {/* First Row - Main Admin Features */}
@@ -29,7 +41,9 @@ export function AdminDashboardComponent() {
                   </div>
                   <div className="space-y-1 text-center">
                     <h3 className="text-lg font-medium">Documents</h3>
-                    <p className="text-sm text-muted-foreground">Manage all organization documents</p>
+                    <p className="text-sm text-muted-foreground">
+                      Manage all organization documents
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -43,7 +57,9 @@ export function AdminDashboardComponent() {
                   </div>
                   <div className="space-y-1 text-center">
                     <h3 className="text-lg font-medium">Users</h3>
-                    <p className="text-sm text-muted-foreground">View and manage user accounts</p>
+                    <p className="text-sm text-muted-foreground">
+                      View and manage user accounts
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -57,7 +73,9 @@ export function AdminDashboardComponent() {
                   </div>
                   <div className="space-y-1 text-center">
                     <h3 className="text-lg font-medium">Admin Profile</h3>
-                    <p className="text-sm text-muted-foreground">Your admin account details</p>
+                    <p className="text-sm text-muted-foreground">
+                      Your admin account details
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -71,7 +89,9 @@ export function AdminDashboardComponent() {
                   </div>
                   <div className="space-y-1 text-center">
                     <h3 className="text-lg font-medium">Admin Settings</h3>
-                    <p className="text-sm text-muted-foreground">Configure admin preferences</p>
+                    <p className="text-sm text-muted-foreground">
+                      Configure admin preferences
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -94,7 +114,9 @@ export function AdminDashboardComponent() {
                   </div>
                   <div className="space-y-1 text-center">
                     <h3 className="text-lg font-medium">User Dashboard</h3>
-                    <p className="text-sm text-muted-foreground">Access regular user view</p>
+                    <p className="text-sm text-muted-foreground">
+                      Access regular user view
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -108,7 +130,9 @@ export function AdminDashboardComponent() {
                   </div>
                   <div className="space-y-1 text-center">
                     <h3 className="text-lg font-medium">User Profile</h3>
-                    <p className="text-sm text-muted-foreground">View your user profile</p>
+                    <p className="text-sm text-muted-foreground">
+                      View your user profile
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -122,7 +146,9 @@ export function AdminDashboardComponent() {
                   </div>
                   <div className="space-y-1 text-center">
                     <h3 className="text-lg font-medium">User Settings</h3>
-                    <p className="text-sm text-muted-foreground">Access user settings</p>
+                    <p className="text-sm text-muted-foreground">
+                      Access user settings
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -138,7 +164,9 @@ export function AdminDashboardComponent() {
                     <Button variant="ghost" className="font-medium h-auto p-0">
                       Logout
                     </Button>
-                    <p className="text-sm text-muted-foreground">Sign out of your account</p>
+                    <p className="text-sm text-muted-foreground">
+                      Sign out of your account
+                    </p>
                   </div>
                 </CardContent>
               </Card>

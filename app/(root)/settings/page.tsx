@@ -11,7 +11,12 @@ export const metadata: Metadata = {
 export default async function Settings() {
   const session = await auth();
   if (session) {
-    return <SettingsComponent session={session} notification={session.user.notification ?? false} />;
+    return (
+      <SettingsComponent
+        session={session}
+        notification={session.user.notification ?? false}
+      />
+    );
   } else {
     redirect("/auth/login");
   }

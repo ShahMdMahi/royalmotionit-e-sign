@@ -1,11 +1,23 @@
 "use server";
-import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from "@/schema";
+import {
+  registerSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from "@/schema";
 import { prisma } from "@/prisma/prisma";
 import bcryptjs from "bcryptjs";
 import { signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
-import { generateResetPasswordToken, generateVerificationToken } from "@/lib/token";
-import { sendAccountVerificationEmail, sendResetPasswordEmail, sendWelcomeEmail } from "@/actions/email";
+import {
+  generateResetPasswordToken,
+  generateVerificationToken,
+} from "@/lib/token";
+import {
+  sendAccountVerificationEmail,
+  sendResetPasswordEmail,
+  sendWelcomeEmail,
+} from "@/actions/email";
 import { get } from "@vercel/edge-config";
 
 // Types for form states
@@ -50,11 +62,15 @@ type ResetPasswordFormState = {
 /**
  * Register a new user
  */
-export async function registerUser(prevState: RegisterFormState, formData: FormData): Promise<RegisterFormState> {
+export async function registerUser(
+  prevState: RegisterFormState,
+  formData: FormData,
+): Promise<RegisterFormState> {
   const isRegistrationActive = await get("REGISTRATION_ACTIVE");
   if (!isRegistrationActive) {
     return {
-      message: "Registration is not active. Contact support for more information.",
+      message:
+        "Registration is not active. Contact support for more information.",
       success: false,
     };
   }
@@ -124,7 +140,11 @@ export async function registerUser(prevState: RegisterFormState, formData: FormD
 
     // Send a verification email
     if (verificationToken.verificationToken?.token) {
-      await sendAccountVerificationEmail(`${firstName} ${lastName}`, emailLower, verificationToken.verificationToken?.token);
+      await sendAccountVerificationEmail(
+        `${firstName} ${lastName}`,
+        emailLower,
+        verificationToken.verificationToken?.token,
+      );
     }
 
     return {
@@ -143,7 +163,10 @@ export async function registerUser(prevState: RegisterFormState, formData: FormD
 /**
  * Authenticate a user
  */
-export async function loginUser(prevState: LoginFormState, formData: FormData): Promise<LoginFormState> {
+export async function loginUser(
+  prevState: LoginFormState,
+  formData: FormData,
+): Promise<LoginFormState> {
   // Validate form fields
   const validatedFields = loginSchema.safeParse({
     email: formData.get("email"),
@@ -227,7 +250,8 @@ export async function loginUser(prevState: LoginFormState, formData: FormData): 
           };
         case "AccessDenied":
           return {
-            message: "Access denied. Please check your permissions or verify your email.",
+            message:
+              "Access denied. Please check your permissions or verify your email.",
             success: false,
           };
         default:
@@ -247,7 +271,10 @@ export async function loginUser(prevState: LoginFormState, formData: FormData): 
 /**
  * Forgot a user's password
  */
-export async function forgotPassword(prevState: ForgotPasswordFormState, formData: FormData): Promise<ForgotPasswordFormState> {
+export async function forgotPassword(
+  prevState: ForgotPasswordFormState,
+  formData: FormData,
+): Promise<ForgotPasswordFormState> {
   // Validate form fields
   const validatedFields = forgotPasswordSchema.safeParse({
     email: formData.get("email"),
@@ -294,12 +321,17 @@ export async function forgotPassword(prevState: ForgotPasswordFormState, formDat
       const verificationToken = await generateVerificationToken(emailLower);
 
       if (verificationToken.verificationToken?.token) {
-        await sendAccountVerificationEmail(user.name, emailLower, verificationToken.verificationToken?.token);
+        await sendAccountVerificationEmail(
+          user.name,
+          emailLower,
+          verificationToken.verificationToken?.token,
+        );
       }
 
       return {
         errors: { email: ["Email not verified"] },
-        message: "Verify your email to reset your password. Verification email sent.",
+        message:
+          "Verify your email to reset your password. Verification email sent.",
         success: false,
       };
     }
@@ -309,7 +341,11 @@ export async function forgotPassword(prevState: ForgotPasswordFormState, formDat
 
     // Send a password reset email
     if (resetPasswordToken.resetPasswordToken?.token) {
-      await sendResetPasswordEmail(user.name, emailLower, resetPasswordToken.resetPasswordToken?.token);
+      await sendResetPasswordEmail(
+        user.name,
+        emailLower,
+        resetPasswordToken.resetPasswordToken?.token,
+      );
     }
 
     return {
@@ -328,7 +364,11 @@ export async function forgotPassword(prevState: ForgotPasswordFormState, formDat
 /**
  * Reset a user's password
  */
-export async function resetPassword(token: string, prevState: ResetPasswordFormState, formData: FormData): Promise<ResetPasswordFormState> {
+export async function resetPassword(
+  token: string,
+  prevState: ResetPasswordFormState,
+  formData: FormData,
+): Promise<ResetPasswordFormState> {
   // Validate form fields
   const validatedFields = resetPasswordSchema.safeParse({
     password: formData.get("password"),
@@ -410,12 +450,18 @@ export async function logoutUser(): Promise<void> {
 /**
  * Authenticate with Google
  */
-export async function googleAuth(): Promise<{ redirectUrl?: string; message?: string }> {
+export async function googleAuth(): Promise<{
+  redirectUrl?: string;
+  message?: string;
+}> {
   try {
     const isGoogleAuthActive = await get("GOOGLE_AUTH_ACTIVE");
     if (!isGoogleAuthActive) {
       console.error("Google authentication is not enabled.");
-      return { message: "Google authentication is not enabled. Contact support for more information." };
+      return {
+        message:
+          "Google authentication is not enabled. Contact support for more information.",
+      };
     }
     const result = await signIn("google", {
       redirect: false,
@@ -446,7 +492,9 @@ export async function googleAuth(): Promise<{ redirectUrl?: string; message?: st
 /**
  * Verify User Email
  */
-export async function verifyUserEmail(token: string): Promise<{ success: boolean; message: string }> {
+export async function verifyUserEmail(
+  token: string,
+): Promise<{ success: boolean; message: string }> {
   try {
     const verificationToken = await prisma.verificationToken.findFirst({
       where: { token },

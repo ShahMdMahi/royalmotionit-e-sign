@@ -22,20 +22,42 @@ export default async function Documents() {
         });
         const signeeDocuments = await prisma.document.findMany({
           where: {
-            signeeId: session.user.id,
+            signers: {
+              some: {
+                email: session.user.email ?? "", // Handle potential null email
+              },
+            },
           },
         });
 
-        return <DocumentsComponent userRole={session.user.role as Role} user={session.user} authorDocuments={authorDocuments} signeeDocuments={signeeDocuments} />;
+        return (
+          <DocumentsComponent
+            userRole={session.user.role as Role}
+            user={session.user}
+            authorDocuments={authorDocuments}
+            signeeDocuments={signeeDocuments}
+          />
+        );
       } else {
         const signeeDocuments = await prisma.document.findMany({
           where: {
-            signeeId: session.user.id,
+            signers: {
+              some: {
+                email: session.user.email ?? "", // Handle potential null email
+              },
+            },
           },
         });
 
         // Pass an empty array for authorDocuments for non-admin users
-        return <DocumentsComponent userRole={session.user.role as Role} user={session.user} authorDocuments={[]} signeeDocuments={signeeDocuments} />;
+        return (
+          <DocumentsComponent
+            userRole={session.user.role as Role}
+            user={session.user}
+            authorDocuments={[]}
+            signeeDocuments={signeeDocuments}
+          />
+        );
       }
     } else {
       redirect("/auth/login");

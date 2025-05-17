@@ -23,7 +23,6 @@ model User {
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
   authoredDocuments Document[] @relation("AuthoredDocuments")
-  signeedDocuments  Document[] @relation("SigneedDocuments")
 }
 
 model Account {
@@ -98,14 +97,15 @@ model Document {
   title        String
   description  String?
   pathname     String?
-  url          String?
-  key          String?
+  url          String? // R2 or Blob URL for the document
+  key          String? // R2 storage key
+  type         String? // Document type
   fileName     String?
-  status       DocumentStatus @default(PENDING)
+  status       DocumentStatus @default(DRAFT)
   signedAt     DateTime?
   expiresAt    DateTime?
-  preparedAt   DateTime? // Added preparedAt field
-  signeeId     String?        @db.ObjectId
+  preparedAt   DateTime? // When document was prepared for signing
+  sentAt       DateTime? // When document was sent to signers
   authorId     String         @db.ObjectId
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
@@ -113,28 +113,61 @@ model Document {
   hash         String? // File hash for integrity verification and duplicate detection
   dueDate      DateTime?
 
-  author User            @relation("AuthoredDocuments", fields: [authorId], references: [id], onDelete: Cascade)
-  signee User?           @relation("SigneedDocuments", fields: [signeeId], references: [id], onDelete: SetNull)
-  fields DocumentField[]
+  // Document settings
+  allowDownload      Boolean   @default(true)
+  allowPrint         Boolean   @default(true)
+  reminderEnabled    Boolean   @default(false)
+  reminderFrequency  Int? // Days between reminders
+  lastReminderSent   DateTime?
+  completionMessage  String?
+  notifyOnCompletion Boolean   @default(true)
+  enableWatermark    Boolean   @default(false) // Whether to add watermark to final PDF
+  watermarkText      String? // Custom watermark text to use
+  // Removed sequentialSigning as it's not needed for single signer
+
+  // Document metadata
+  pageCount      Int?
+  fileSize       Int? // In bytes
+  originalFormat String? // pdf, docx, etc.
+
+  author      User              @relation("AuthoredDocuments", fields: [authorId], references: [id], onDelete: Cascade)
+  fields      DocumentField[]
+  signers     Signer[] // We'll keep the relationship as is but use only first signer in code
+  history     DocumentHistory[]
+  attachments Attachment[]
 }
 
 model DocumentField {
-  id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  documentId  String  @db.ObjectId
-  type        String
-  label       String
-  required    Boolean @default(false)
-  placeholder String?
-  x           Float
-  y           Float
-  width       Float
-  height      Float
-  pageNumber  Int
+  id               String  @id @default(auto()) @map("_id") @db.ObjectId
+  documentId       String  @db.ObjectId
+  type             String // signature, initial, text, date, checkbox, dropdown, etc.
+  label            String
+  required         Boolean @default(false)
+  placeholder      String?
+  x                Float
+  y                Float
+  width            Float
+  height           Float
+  pageNumber       Int
+  value            String? // To store the value of the field after signing
+  signerId         String? @db.ObjectId // The signer assigned to this field
+  color            String? // Color code for visual identification
+  fontFamily       String? // Font family for text fields
+  fontSize         Int? // Font size for text fields
+  validationRule   String? // JSON string containing validation rules
+  conditionalLogic String? // JSON string containing conditional display logic
+  options          String? // JSON array of options for dropdown fields
+
+  // Field styling
+  backgroundColor String?
+  borderColor     String?
+  textColor       String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  signer   Signer?  @relation(fields: [signerId], references: [id], onDelete: SetNull)
 }
 
 enum Role {
@@ -143,13 +176,80 @@ enum Role {
 }
 
 enum DocumentStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  EXPIRED
+  DRAFT // Document being prepared
+  PENDING // Document sent for signing
+  COMPLETED // All signatures complete
+  DECLINED // One or more signers declined
+  EXPIRED // Document past expiration date
+  CANCELED // Document canceled by author
 }
 
 enum DocumentType {
   SIGNED
   UNSIGNED
+}
+
+model Signer {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  documentId    String       @db.ObjectId
+  email         String
+  name          String?
+  role          String? // Role or title of the signer
+  status        SignerStatus @default(PENDING)
+  accessCode    String? // Optional security code for document access
+  invitedAt     DateTime?
+  viewedAt      DateTime?
+  completedAt   DateTime?
+  notifiedAt    DateTime?
+  declinedAt    DateTime?
+  declineReason String?
+  ipAddress     String? // IP address when signing
+  userAgent     String? // Browser/device info when signing
+  // Removed order field as it's not needed for single signer
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  document Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  fields   DocumentField[]
+}
+
+enum SignerStatus {
+  PENDING // Not yet signed
+  VIEWED // Has viewed the document
+  COMPLETED // Has signed all required fields
+  DECLINED // Declined to sign
+}
+
+model DocumentHistory {
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  documentId String  @db.ObjectId
+  action     String // Created, Viewed, Signed, etc.
+  actorEmail String? // Email of person who performed action
+  actorName  String? // Name of person who performed action
+  actorRole  String? // Role: Author, Signer, etc.
+  ipAddress  String? // IP address of actor
+  userAgent  String? // Browser/device info
+  details    String? // Additional details as JSON
+
+  timestamp DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+model Attachment {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  documentId  String  @db.ObjectId
+  name        String
+  description String?
+  key         String // R2 storage key
+  url         String? // R2 or Blob URL
+  size        Int // File size in bytes
+  mimeType    String // MIME type of the attachment
+  uploadedBy  String? @db.ObjectId // User ID who uploaded
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 }

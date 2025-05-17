@@ -19,7 +19,9 @@ interface AccountResponse extends BaseResponse {
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to find an account in the database by its user ID. If the account is found, it returns the account data; otherwise, it returns an error message.
  */
-export async function getAccountByUserId(userId: string): Promise<AccountResponse> {
+export async function getAccountByUserId(
+  userId: string,
+): Promise<AccountResponse> {
   try {
     const account = await prisma.account.findFirst({
       where: {
@@ -56,7 +58,9 @@ export async function getAccountByUserId(userId: string): Promise<AccountRespons
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to find an account in the database by its ID. If the account is found, it returns the account data; otherwise, it returns an error message.
  */
-export async function getAccountById(accountId: string): Promise<AccountResponse> {
+export async function getAccountById(
+  accountId: string,
+): Promise<AccountResponse> {
   try {
     const account = await prisma.account.findFirst({
       where: {
@@ -93,7 +97,9 @@ export async function getAccountById(accountId: string): Promise<AccountResponse
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to find and delete an account in the database by its user ID. If the account is found and deleted, it returns a success message; otherwise, it returns an error message.
  */
-export async function deleteAccountByUserId(userId: string): Promise<BaseResponse> {
+export async function deleteAccountByUserId(
+  userId: string,
+): Promise<BaseResponse> {
   try {
     const deleteResult = await prisma.account.deleteMany({
       where: {
@@ -129,7 +135,10 @@ export async function deleteAccountByUserId(userId: string): Promise<BaseRespons
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to find and update an account in the database by its ID. If the account is found and updated, it returns the updated account data; otherwise, it returns an error message.
  */
-export async function updateAccountById(accountId: string, data: Partial<Account>): Promise<AccountResponse> {
+export async function updateAccountById(
+  accountId: string,
+  data: Partial<Account>,
+): Promise<AccountResponse> {
   try {
     const account = await prisma.account.update({
       where: {

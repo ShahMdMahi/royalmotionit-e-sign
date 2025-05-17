@@ -90,11 +90,17 @@ export function NameChangeForm() {
         {state.message && !state.success && (
           <Alert variant="destructive" className="mb-4 py-2">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-xs">{state.message}</AlertDescription>
+            <AlertDescription className="text-xs">
+              {state.message}
+            </AlertDescription>
           </Alert>
         )}
 
-        <form action={formAction} onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form
+          action={formAction}
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-6"
+        >
           <div className="grid gap-2">
             <Label htmlFor="name" className="text-sm font-medium">
               New Name
@@ -108,7 +114,11 @@ export function NameChangeForm() {
               disabled={isLoading || isPending}
               aria-invalid={!!errors.name || !!state.errors?.name}
             />
-            {(errors.name || state.errors?.name) && <p className="text-xs text-red-500 mt-1">{errors.name?.message || state.errors?.name?.[0]}</p>}
+            {(errors.name || state.errors?.name) && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.name?.message || state.errors?.name?.[0]}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password" className="text-sm font-medium">
@@ -123,9 +133,17 @@ export function NameChangeForm() {
               disabled={isLoading || isPending}
               aria-invalid={!!errors.password || !!state.errors?.password}
             />
-            {(errors.password || state.errors?.password) && <p className="text-xs text-red-500 mt-1">{errors.password?.message || state.errors?.password?.[0]}</p>}
+            {(errors.password || state.errors?.password) && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.password?.message || state.errors?.password?.[0]}
+              </p>
+            )}
           </div>
-          <Button type="submit" className="w-full sm:w-auto hover:bg-primary/80 gap-2" disabled={isLoading || isPending}>
+          <Button
+            type="submit"
+            className="w-full sm:w-auto hover:bg-primary/80 gap-2"
+            disabled={isLoading || isPending}
+          >
             <Save className="size-4" />
             {isLoading || isPending ? "Updating..." : "Update Name"}
           </Button>

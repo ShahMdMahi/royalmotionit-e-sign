@@ -1,5 +1,13 @@
-import { createVerificationToken, deleteVerificationToken, getVerificationTokenByIdentifier } from "@/data/verification-token";
-import { createResetPasswordToken, deleteResetPasswordToken, getResetPasswordTokenByIdentifier } from "@/data/reset-password-token";
+import {
+  createVerificationToken,
+  deleteVerificationToken,
+  getVerificationTokenByIdentifier,
+} from "@/data/verification-token";
+import {
+  createResetPasswordToken,
+  deleteResetPasswordToken,
+  getResetPasswordTokenByIdentifier,
+} from "@/data/reset-password-token";
 import { v4 as uuid } from "uuid";
 
 // Define interfaces for return types
@@ -32,7 +40,9 @@ interface ResetPasswordTokenResult extends BaseResponse {
  * @throws {Error} Throws an error if there is an issue with the token generation process.
  * @description This function generates a UUID token that expires in 1 hour, checks for and deletes any existing tokens for the email, and creates a new token in the database.
  */
-export async function generateVerificationToken(email: string): Promise<VerificationTokenResult> {
+export async function generateVerificationToken(
+  email: string,
+): Promise<VerificationTokenResult> {
   try {
     const token = uuid();
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
@@ -87,7 +97,9 @@ export async function generateVerificationToken(email: string): Promise<Verifica
  * @throws {Error} Throws an error if there is an issue with the token generation process.
  * @description This function generates a UUID token that expires in 24 hours, checks for and deletes any existing tokens for the email, and creates a new token in the database.
  */
-export async function generateResetPasswordToken(email: string): Promise<ResetPasswordTokenResult> {
+export async function generateResetPasswordToken(
+  email: string,
+): Promise<ResetPasswordTokenResult> {
   try {
     const token = uuid();
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now

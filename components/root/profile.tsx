@@ -63,11 +63,19 @@ export function ProfileComponent({ user, session }: ProfileComponentProps) {
           <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
             <div className="flex flex-col items-center gap-4">
               <Avatar className="w-36 h-36 border-2 border-primary shadow-md">
-                <AvatarImage src={user.image ?? undefined} alt={user.name ?? "User"} className="object-cover" />
-                <AvatarFallback className="text-3xl font-bold text-primary bg-primary/10">{getInitials(user.name ?? "U")}</AvatarFallback>
+                <AvatarImage
+                  src={user.image ?? undefined}
+                  alt={user.name ?? "User"}
+                  className="object-cover"
+                />
+                <AvatarFallback className="text-3xl font-bold text-primary bg-primary/10">
+                  {getInitials(user.name ?? "U")}
+                </AvatarFallback>
               </Avatar>
               <div className="text-center">
-                <h2 className="text-xl font-semibold">{user.name || "No name provided"}</h2>
+                <h2 className="text-xl font-semibold">
+                  {user.name || "No name provided"}
+                </h2>
                 <p className="text-sm text-muted-foreground">{user.email}</p>
               </div>
             </div>
@@ -79,16 +87,22 @@ export function ProfileComponent({ user, session }: ProfileComponentProps) {
                     <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
                       <UserIcon className="size-4 text-primary" />
                     </div>
-                    <span className="font-medium text-lg">Personal Details</span>
+                    <span className="font-medium text-lg">
+                      Personal Details
+                    </span>
                   </div>
                   <div className="space-y-3 pl-11">
                     <div className="space-y-1">
                       <p className="text-sm text-muted-foreground">Name</p>
-                      <p className="font-medium">{user.name ?? "No name provided"}</p>
+                      <p className="font-medium">
+                        {user.name ?? "No name provided"}
+                      </p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm text-muted-foreground">Email</p>
-                      <p className="font-medium">{user.email ?? "No email provided"}</p>
+                      <p className="font-medium">
+                        {user.email ?? "No email provided"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -102,12 +116,22 @@ export function ProfileComponent({ user, session }: ProfileComponentProps) {
                   </div>
                   <div className="space-y-3 pl-11">
                     <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">Email Verified</p>
-                      <p className="font-medium">{user.emailVerified ? "Yes" : "No"}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Email Verified
+                      </p>
+                      <p className="font-medium">
+                        {user.emailVerified ? "Yes" : "No"}
+                      </p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">Account Type</p>
-                      <p className="font-medium">{session.user.isOauth ? "Social Login" : "Email & Password"}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Account Type
+                      </p>
+                      <p className="font-medium">
+                        {session.user.isOauth
+                          ? "Social Login"
+                          : "Email & Password"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -122,12 +146,20 @@ export function ProfileComponent({ user, session }: ProfileComponentProps) {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-11">
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Account Created</p>
-                    <p className="font-medium">{user.createdAt ? formatDate(user.createdAt) : "Unknown"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Account Created
+                    </p>
+                    <p className="font-medium">
+                      {user.createdAt ? formatDate(user.createdAt) : "Unknown"}
+                    </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Last Updated</p>
-                    <p className="font-medium">{user.updatedAt ? formatDate(user.updatedAt) : "Unknown"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Last Updated
+                    </p>
+                    <p className="font-medium">
+                      {user.updatedAt ? formatDate(user.updatedAt) : "Unknown"}
+                    </p>
                   </div>
                 </div>
               </div>

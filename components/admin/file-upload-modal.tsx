@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +23,11 @@ interface FileUploadModalProps {
   onUploadSuccess?: (documentId: string) => void;
 }
 
-export function FileUploadModal({ isOpen, onCloseAction, onUploadSuccess }: FileUploadModalProps) {
+export function FileUploadModal({
+  isOpen,
+  onCloseAction,
+  onUploadSuccess,
+}: FileUploadModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState("");
   const [description, setDescription] = useState("");
@@ -106,7 +117,9 @@ export function FileUploadModal({ isOpen, onCloseAction, onUploadSuccess }: File
 
       xhr.upload.addEventListener("progress", (event) => {
         if (event.lengthComputable) {
-          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          const percentComplete = Math.round(
+            (event.loaded / event.total) * 100,
+          );
           setUploadProgress(percentComplete);
         }
       });
@@ -132,7 +145,9 @@ export function FileUploadModal({ isOpen, onCloseAction, onUploadSuccess }: File
         } else {
           try {
             const response = JSON.parse(xhr.responseText);
-            setError(response.message || `Upload failed with status ${xhr.status}`);
+            setError(
+              response.message || `Upload failed with status ${xhr.status}`,
+            );
           } catch {
             setError(`Upload failed with status ${xhr.status}`);
           }
@@ -153,7 +168,9 @@ export function FileUploadModal({ isOpen, onCloseAction, onUploadSuccess }: File
     } catch (error) {
       console.error("Error in upload process:", error);
       setUploading(false);
-      setError(error instanceof Error ? error.message : "An unknown error occurred");
+      setError(
+        error instanceof Error ? error.message : "An unknown error occurred",
+      );
     }
   };
 
@@ -171,7 +188,9 @@ export function FileUploadModal({ isOpen, onCloseAction, onUploadSuccess }: File
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Upload Document</DialogTitle>
-            <DialogDescription>Upload a document for signature. Supported format: PDF (max 10MB).</DialogDescription>
+            <DialogDescription>
+              Upload a document for signature. Supported format: PDF (max 10MB).
+            </DialogDescription>
           </DialogHeader>
 
           {error && (
@@ -184,7 +203,9 @@ export function FileUploadModal({ isOpen, onCloseAction, onUploadSuccess }: File
           {!file ? (
             <div
               className={`border-2 border-dashed rounded-lg p-10 transition-colors ${
-                isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/20"
+                isDragging
+                  ? "border-primary bg-primary/5"
+                  : "border-muted-foreground/20"
               } flex flex-col items-center justify-center gap-4 my-4 cursor-pointer`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -193,11 +214,18 @@ export function FileUploadModal({ isOpen, onCloseAction, onUploadSuccess }: File
             >
               <Upload className="h-10 w-10 text-muted-foreground" />
               <p className="text-sm text-muted-foreground text-center">
-                <span className="font-medium">Click to upload</span> or drag and drop
+                <span className="font-medium">Click to upload</span> or drag and
+                drop
                 <br />
                 PDF (max. 10MB)
               </p>
-              <Input id="file-upload" type="file" accept="application/pdf" onChange={handleFileChange} className="hidden" />
+              <Input
+                id="file-upload"
+                type="file"
+                accept="application/pdf"
+                onChange={handleFileChange}
+                className="hidden"
+              />
             </div>
           ) : (
             <div className="border rounded-lg p-4 my-4">
@@ -207,9 +235,17 @@ export function FileUploadModal({ isOpen, onCloseAction, onUploadSuccess }: File
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{file.name}</p>
-                  <p className="text-xs text-muted-foreground">{(file.size / 1024 / 1024).toFixed(2)} MB • PDF</p>
+                  <p className="text-xs text-muted-foreground">
+                    {(file.size / 1024 / 1024).toFixed(2)} MB • PDF
+                  </p>
                 </div>
-                <Button type="button" variant="ghost" size="icon" onClick={removeFile} className="h-8 w-8 rounded-full">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={removeFile}
+                  className="h-8 w-8 rounded-full"
+                >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -220,7 +256,9 @@ export function FileUploadModal({ isOpen, onCloseAction, onUploadSuccess }: File
             <div className="my-4">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium">Uploading...</span>
-                <span className="text-sm text-muted-foreground">{uploadProgress}%</span>
+                <span className="text-sm text-muted-foreground">
+                  {uploadProgress}%
+                </span>
               </div>
               <Progress value={uploadProgress} className="h-2" />
             </div>
@@ -229,7 +267,14 @@ export function FileUploadModal({ isOpen, onCloseAction, onUploadSuccess }: File
           <div className="grid gap-4 py-2">
             <div className="grid gap-2">
               <Label htmlFor="fileName">Document Title</Label>
-              <Input id="fileName" placeholder="Enter document title" value={fileName} onChange={(e) => setFileName(e.target.value)} disabled={uploading} required />
+              <Input
+                id="fileName"
+                placeholder="Enter document title"
+                value={fileName}
+                onChange={(e) => setFileName(e.target.value)}
+                disabled={uploading}
+                required
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="description">Description (Optional)</Label>
@@ -246,10 +291,19 @@ export function FileUploadModal({ isOpen, onCloseAction, onUploadSuccess }: File
           </div>
 
           <DialogFooter className="mt-4">
-            <Button type="button" variant="outline" onClick={onCloseAction} disabled={uploading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCloseAction}
+              disabled={uploading}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={!file || !fileName.trim() || uploading} className="relative">
+            <Button
+              type="submit"
+              disabled={!file || !fileName.trim() || uploading}
+              className="relative"
+            >
               {uploading ? `Uploading ${uploadProgress}%` : "Upload Document"}
             </Button>
           </DialogFooter>

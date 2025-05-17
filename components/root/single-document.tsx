@@ -1,33 +1,62 @@
 "use client";
 
-import { Document, User, DocumentField } from "@prisma/client";
+import {
+  Document as PrismaDocument,
+  User,
+  DocumentField as PrismaDocumentField,
+} from "@prisma/client";
 import { useEffect, useState } from "react";
 import { getFromR2 } from "@/actions/r2";
 import { PDFViewer } from "../common/pdf-viewer";
 import { format } from "date-fns";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileText, AlertTriangle, Check, Clock, Calendar, User as UserIcon, Mail, Hash, FileSignature, Info, Shield, ArrowLeft } from "lucide-react";
+import { FileText, AlertTriangle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { DocumentToolbar } from "../document/document-toolbar";
+import { toast } from "sonner";
+import { Document as DocumentType, Signer } from "@/types/document";
+
+// Define a custom signer type that aligns with both the DB schema and our type
+type DocumentSigner = Omit<Signer, "name"> & {
+  name?: string | undefined; // Replace null with undefined
+};
 
 interface SingleDocumentComponentProps {
-  document: Document & { fields?: DocumentField[] };
+  document: PrismaDocument & {
+    fields?: PrismaDocumentField[];
+    signers?: Array<{
+      id: string;
+      documentId: string;
+      email: string;
+      name?: string | undefined;
+      status: string;
+      role?: string | undefined;
+      // Note: order field removed as it's not needed for single signer
+    }>;
+  };
   author?: User;
-  signee?: User | null;
   backLink?: string;
 }
 
-export function SingleDocumentComponent({ document, author, signee, backLink = "/documents" }: SingleDocumentComponentProps) {
+export function SingleDocumentComponent({
+  document,
+  author,
+  backLink = "/documents",
+}: SingleDocumentComponentProps) {
   const [pdfData, setPdfData] = useState<Uint8Array | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     async function fetchDocument() {
@@ -46,16 +75,24 @@ export function SingleDocumentComponent({ document, author, signee, backLink = "
             setPdfData(response.data.Body);
             setError(null);
           } else {
-            console.error("Failed to fetch PDF: Response successful but no body content.");
+            console.error(
+              "Failed to fetch PDF: Response successful but no body content.",
+            );
             setError("PDF content is missing in the response.");
           }
         } else {
-          console.error("Failed to fetch PDF:", response.message, response.error);
+          console.error(
+            "Failed to fetch PDF:",
+            response.message,
+            response.error,
+          );
           setError(response.message || "Failed to load PDF document.");
         }
       } catch (e) {
         console.error("Error fetching document:", e);
-        setError(e instanceof Error ? e.message : "An unexpected error occurred.");
+        setError(
+          e instanceof Error ? e.message : "An unexpected error occurred.",
+        );
       } finally {
         setIsLoading(false);
       }
@@ -91,6 +128,65 @@ export function SingleDocumentComponent({ document, author, signee, backLink = "
     return format(new Date(date), "PPP p");
   };
 
+  // Handle document actions
+  const handleDocumentSave = async (doc: any) => {
+    setIsSaving(true);
+    try {
+      // Here you would normally implement save functionality
+      await new Promise((resolve) => setTimeout(resolve, 500)); // Simulating API call
+      toast.success("Document processed successfully!");
+
+      // Return a properly formatted Document type
+      const savedDoc: DocumentType = {
+        id: doc.id,
+        title: doc.title,
+        description: doc.description,
+        authorId: doc.authorId,
+        authorName: doc.authorName,
+        authorEmail: doc.authorEmail,
+        status: doc.status,
+        key: doc.key || "",
+        type: doc.type || "default",
+        createdAt: doc.createdAt || new Date(),
+        updatedAt: new Date(),
+        preparedAt: doc.preparedAt,
+        sentAt: doc.sentAt,
+        viewedAt: doc.viewedAt,
+        signedAt: doc.signedAt,
+        expiresAt: doc.expiresAt,
+        enableWatermark: doc.enableWatermark,
+        watermarkText: doc.watermarkText,
+        fields: doc.fields,
+        signer: doc.signer
+          ? {
+              id: doc.signer.id,
+              documentId: doc.signer.documentId || doc.id,
+              email: doc.signer.email,
+              name: doc.signer.name,
+              role: doc.signer.role,
+              status: doc.signer.status || "PENDING",
+              accessCode: doc.signer.accessCode,
+              invitedAt: doc.signer.invitedAt,
+              viewedAt: doc.signer.viewedAt,
+              completedAt: doc.signer.completedAt,
+              notifiedAt: doc.signer.notifiedAt,
+              declinedAt: doc.signer.declinedAt,
+              declineReason: doc.signer.declineReason,
+              color: doc.signer.color,
+            }
+          : undefined,
+      };
+
+      return savedDoc;
+    } catch (error) {
+      console.error("Error processing document:", error);
+      toast.error("Failed to process document");
+      throw error;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <Card className="w-full max-w-7xl mx-auto my-8 border-border shadow-lg">
@@ -101,7 +197,9 @@ export function SingleDocumentComponent({ document, author, signee, backLink = "
             </div>
             Loading Document...
           </CardTitle>
-          <CardDescription>Please wait while the document is being loaded.</CardDescription>
+          <CardDescription>
+            Please wait while the document is being loaded.
+          </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="flex flex-col justify-center items-center h-[60vh] space-y-4">
@@ -123,7 +221,9 @@ export function SingleDocumentComponent({ document, author, signee, backLink = "
             </div>
             Error Loading Document
           </CardTitle>
-          <CardDescription>There was an issue retrieving the document.</CardDescription>
+          <CardDescription>
+            There was an issue retrieving the document.
+          </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="flex flex-col justify-center items-center h-96 text-destructive space-y-4">
@@ -147,293 +247,91 @@ export function SingleDocumentComponent({ document, author, signee, backLink = "
       </Card>
     );
   }
-
   return (
-    <Card className="w-full max-w-7xl mx-auto my-8 border-border shadow-lg">
-      <CardHeader className="border-b border-border">
-        <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-          <div className="space-y-1">
-            <CardTitle className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
-              <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <FileText className="size-4 text-primary" />
-              </div>
-              {document.title}
-            </CardTitle>
-            <CardDescription className="text-sm sm:text-base">{document.description || "Review the document details below"}</CardDescription>
+    <div className="flex flex-col w-full">
+      <DocumentToolbar
+        document={
+          {
+            ...document,
+            type: "default",
+            key: document.key || "", // Ensure key is never null
+            description: document.description || "", // Convert null to string
+            preparedAt: document.preparedAt || undefined, // Convert null to undefined
+            sentAt: document.sentAt || undefined, // Convert null to undefined
+            signedAt: document.signedAt || undefined, // Convert null to undefined
+            expiresAt: document.expiresAt || undefined, // Convert null to undefined
+            watermarkText: document.watermarkText || undefined, // Convert null to undefined
+            signer:
+              document.signers && document.signers.length > 0
+                ? {
+                    id: document.signers[0].id,
+                    documentId: document.signers[0].documentId || document.id,
+                    email: document.signers[0].email,
+                    name: document.signers[0].name || undefined,
+                    role: document.signers[0].role || undefined,
+                    status: document.signers[0].status as
+                      | "PENDING"
+                      | "COMPLETED"
+                      | "DECLINED"
+                      | "VIEWED",
+                  }
+                : undefined,
+            fields: document.fields?.map((f) => ({
+              ...f,
+              type: f.type as import("@/types/document").DocumentFieldType, // Cast to correct type
+              placeholder: f.placeholder ?? undefined,
+              value: f.value ?? undefined,
+              color: f.color ?? undefined,
+              fontFamily: f.fontFamily ?? undefined,
+              validationRule: f.validationRule ?? undefined,
+              conditionalLogic: f.conditionalLogic ?? undefined,
+              options: f.options ?? undefined,
+              backgroundColor: f.backgroundColor ?? undefined,
+              borderColor: f.borderColor ?? undefined,
+              textColor: f.textColor ?? undefined,
+              fontSize: f.fontSize ?? undefined, // Convert null to undefined
+            })),
+          } as DocumentType
+        }
+        isSaving={isSaving}
+        onSaveAction={handleDocumentSave}
+      />
+      {/* Keep the original toolbar hidden for compatibility */}{" "}
+      <div className="hidden">
+        <DocumentToolbar
+          document={
+            {
+              ...document,
+              type: "default",
+              description: document.description || undefined, // Convert null to undefined
+              key: document.key || "", // Ensure key is never null
+              signer:
+                document.signers && document.signers.length > 0
+                  ? {
+                      ...document.signers[0],
+                      documentId: document.signers[0].documentId || document.id,
+                      name: document.signers[0].name || undefined, // Convert null to undefined
+                      role: document.signers[0].role || undefined, // Convert null to undefined
+                      status: document.signers[0].status as
+                        | "PENDING"
+                        | "COMPLETED"
+                        | "DECLINED"
+                        | "VIEWED",
+                    }
+                  : undefined,
+            } as DocumentType
+          }
+          isSaving={isSaving}
+          onSaveAction={handleDocumentSave}
+        />
+      </div>{" "}
+      {pdfData && (
+        <div className="w-full border-b overflow-hidden p-0 mt-4">
+          <div className="aspect-[1/1.4] w-full mx-auto">
+            <PDFViewer pdfData={pdfData} />
           </div>
-          <Badge variant={getStatusBadgeVariant(document.status)} className="text-xs sm:text-sm px-2 py-1 h-auto ml-auto sm:ml-0">
-            {document.status === "APPROVED" && <Check className="size-3 mr-1" />}
-            {document.status === "PENDING" && <Clock className="size-3 mr-1" />}
-            {document.status}
-          </Badge>
         </div>
-      </CardHeader>
-
-      <CardContent className="p-0">
-        <Tabs defaultValue="document" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 p-0 bg-muted/50">
-            <TabsTrigger value="document" className="rounded-none border-r py-3">
-              <FileText className="size-4 mr-2" /> Document
-            </TabsTrigger>
-            <TabsTrigger value="details" className="rounded-none py-3">
-              <Info className="size-4 mr-2" /> Details
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="document" className="pt-0 border-t">
-            {error && pdfData && (
-              <div className="m-6 p-4 border border-destructive/50 bg-destructive/10 text-destructive rounded-md">
-                <p className="flex items-center gap-2">
-                  <AlertTriangle className="size-4" />
-                  There was an issue refreshing the document: {error}. Displaying cached or previous version.
-                </p>
-              </div>
-            )}
-
-            {!pdfData && !error && (
-              <div className="flex flex-col items-center justify-center h-96 m-6 rounded-md bg-muted/20">
-                <FileText className="size-12 text-muted-foreground/50 mb-2" />
-                <p className="text-muted-foreground">No document preview available.</p>
-              </div>
-            )}
-
-            {pdfData && (
-              <div className="w-full border-b overflow-hidden p-0">
-                <div className="aspect-[1/1] w-full mx-auto">
-                  <PDFViewer pdfData={pdfData} />
-                </div>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="details" className="pt-0 border-t">
-            <ScrollArea className="h-full">
-              <div className="p-6 space-y-8">
-                {/* Document Information */}
-                <div className="space-y-3">
-                  <h3 className="text-lg font-medium flex items-center gap-2">
-                    <Shield className="size-5 text-primary" />
-                    Document Information
-                  </h3>
-                  <Separator />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm rounded-lg bg-muted/20 p-4">
-                    <div>
-                      <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                        <Hash className="size-3.5" /> Document ID:
-                      </p>
-                      <p className="text-muted-foreground break-all bg-background/50 p-1.5 rounded border text-xs font-mono">{document.id}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                        <FileText className="size-3.5" /> File Name:
-                      </p>
-                      <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{document.fileName || "N/A"}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                        <FileSignature className="size-3.5" /> Title:
-                      </p>
-                      <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{document.title}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                        <Shield className="size-3.5" /> Document Type:
-                      </p>
-                      <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{document.documentType}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                        <Shield className="size-3.5" /> Status:
-                      </p>
-                      <Badge variant={getStatusBadgeVariant(document.status)} className="mt-1">
-                        {document.status}
-                      </Badge>
-                    </div>
-                    {document.description && (
-                      <div className="sm:col-span-2">
-                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                          <Info className="size-3.5" /> Description:
-                        </p>
-                        <p className="text-muted-foreground whitespace-pre-wrap bg-background/50 p-1.5 rounded border">{document.description}</p>
-                      </div>
-                    )}
-                    {document.hash && (
-                      <div className="sm:col-span-2">
-                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                          <Hash className="size-3.5" /> File Hash (SHA256):
-                        </p>
-                        <p className="text-muted-foreground break-all text-xs font-mono bg-background/50 p-1.5 rounded border">{document.hash}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Interactive Fields */}
-                {document.fields && Array.isArray(document.fields) && document.fields.length > 0 && (
-                  <div className="space-y-3">
-                    <h3 className="text-lg font-medium flex items-center gap-2">
-                      <FileSignature className="size-5 text-primary" />
-                      Interactive Fields
-                    </h3>
-                    <Separator />
-                    <div className="rounded-lg bg-muted/20 p-4">
-                      <div className="text-sm mb-2">
-                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                          <Info className="size-3.5" /> Number of Fields:
-                        </p>
-                        <p className="text-muted-foreground">
-                          {document.fields.length} field{document.fields.length !== 1 ? "s" : ""}
-                        </p>
-                      </div>
-                      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                        {document.fields.map((field, index) => (
-                          <div key={field.id || index} className={`text-xs p-2 rounded flex items-center gap-2 ${field.required ? "bg-primary/5 border border-primary/20" : "bg-background"}`}>
-                            <div className="size-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                              <FileSignature className="size-3 text-primary" />
-                            </div>
-                            <div>
-                              <span>{field.label || `Field ${index + 1}`}</span>
-                              {field.required && <span className="text-primary text-[10px] ml-1.5">(Required)</span>}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* People Section */}
-                {(author || signee) && (
-                  <div className="space-y-3">
-                    <h3 className="text-lg font-medium flex items-center gap-2">
-                      <UserIcon className="size-5 text-primary" />
-                      People
-                    </h3>
-                    <Separator />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {author && (
-                        <div className="rounded-lg bg-muted/20 p-4 flex items-start gap-3">
-                          <Avatar className="size-10 border-2 border-primary/20">
-                            <AvatarImage src={author.image ?? undefined} alt={author.name ?? "Author"} />
-                            <AvatarFallback className="bg-primary/10 text-primary">{getInitials(author.name)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-semibold text-primary flex items-center gap-1.5">
-                              <UserIcon className="size-3.5" /> Author:
-                            </p>
-                            <p className="text-muted-foreground font-medium">{author.name || "N/A"}</p>
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
-                              <Mail className="size-3" />
-                              {author.email}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {signee && (
-                        <div className="rounded-lg bg-muted/20 p-4 flex items-start gap-3">
-                          <Avatar className="size-10 border-2 border-primary/20">
-                            <AvatarImage src={signee.image ?? undefined} alt={signee.name ?? "Signee"} />
-                            <AvatarFallback className="bg-primary/10 text-primary">{getInitials(signee.name)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-semibold text-primary flex items-center gap-1.5">
-                              <UserIcon className="size-3.5" /> Signee:
-                            </p>
-                            <p className="text-muted-foreground font-medium">{signee.name || "N/A"}</p>
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
-                              <Mail className="size-3" />
-                              {signee.email}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Dates & Timeline */}
-                <div className="space-y-3">
-                  <h3 className="text-lg font-medium flex items-center gap-2">
-                    <Calendar className="size-5 text-primary" />
-                    Dates & Timeline
-                  </h3>
-                  <Separator />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-muted/20 p-4 rounded-lg">
-                      <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                        <Clock className="size-3.5" /> Created On:
-                      </p>
-                      <p className="text-muted-foreground">{formatDateTime(document.createdAt)}</p>
-                    </div>
-
-                    <div className="bg-muted/20 p-4 rounded-lg">
-                      <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                        <Clock className="size-3.5" /> Last Updated:
-                      </p>
-                      <p className="text-muted-foreground">{formatDateTime(document.updatedAt)}</p>
-                    </div>
-
-                    {document.signedAt && (
-                      <div className="bg-muted/20 p-4 rounded-lg">
-                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                          <FileSignature className="size-3.5" /> Signed On:
-                        </p>
-                        <p className="text-muted-foreground">{formatDateTime(document.signedAt)}</p>
-                      </div>
-                    )}
-
-                    {document.expiresAt && (
-                      <div className="bg-muted/20 p-4 rounded-lg">
-                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                          <Calendar className="size-3.5" /> Expires On:
-                        </p>
-                        <p className={`text-muted-foreground ${new Date(document.expiresAt) < new Date() ? "text-destructive" : ""}`}>{formatDateTime(document.expiresAt)}</p>
-                      </div>
-                    )}
-
-                    {document.preparedAt && (
-                      <div className="bg-muted/20 p-4 rounded-lg">
-                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                          <Clock className="size-3.5" /> Prepared On:
-                        </p>
-                        <p className="text-muted-foreground">{formatDateTime(document.preparedAt)}</p>
-                      </div>
-                    )}
-
-                    {document.dueDate && (
-                      <div className="bg-muted/20 p-4 rounded-lg">
-                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                          <Calendar className="size-3.5" /> Due Date:
-                        </p>
-                        <p className={`text-muted-foreground ${new Date(document.dueDate) < new Date() ? "text-destructive" : ""}`}>{formatDateTime(document.dueDate)}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-
-      <CardFooter className="border-t p-4 flex flex-wrap justify-between gap-3">
-        <Button variant="outline" size="sm" asChild>
-          <Link href={backLink}>
-            <ArrowLeft className="size-4 mr-2" />
-            Back to Documents
-          </Link>
-        </Button>
-
-        {/* <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm">
-            <Download className="size-4 mr-2" /> Download
-          </Button>
-          <Button size="sm">
-            <FileSignature className="size-4 mr-2" /> Sign Document
-          </Button>
-        </div> */}
-      </CardFooter>
-    </Card>
+      )}
+    </div>
   );
 }

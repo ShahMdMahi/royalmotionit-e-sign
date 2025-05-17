@@ -6,7 +6,8 @@ import { AdminDashboardComponent } from "@/components/admin/admin-dashboard";
 
 export const metadata: Metadata = {
   title: "Dashboard - Admin - Royal Sign - RoyalMotionIT",
-  description: "Dashboard for managing administrative tasks in Royal Sign e-signature application.",
+  description:
+    "Dashboard for managing administrative tasks in Royal Sign e-signature application.",
 };
 
 export default async function AdminDashboard() {

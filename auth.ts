@@ -56,9 +56,15 @@ export const {
       if (!existingUser?.emailVerified) {
         if (!existingUser?.email) return false;
         if (!existingUser?.name) return false;
-        const verificationToken = await generateVerificationToken(existingUser.email);
+        const verificationToken = await generateVerificationToken(
+          existingUser.email,
+        );
         if (!verificationToken.verificationToken?.token) return false;
-        await sendAccountVerificationEmail(existingUser.name, existingUser.email, verificationToken.verificationToken.token);
+        await sendAccountVerificationEmail(
+          existingUser.name,
+          existingUser.email,
+          verificationToken.verificationToken.token,
+        );
         return false;
       }
 

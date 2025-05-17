@@ -3,17 +3,29 @@ import { SingleDocumentComponent } from "@/components/root/single-document";
 import { prisma } from "@/prisma/prisma";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
+import { normalizeDatabaseDocument } from "@/actions/document-normalizers";
 
-export default async function SingleDocument({ params }: { params: Promise<{ id: string }> }) {
+export default async function SingleDocument({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const session = await auth();
   if (session) {
     if (session.user.id) {
       const id = (await params).id;
       try {
-        const document = await prisma.document.findUnique({
+        // Check if user has direct access or team-based access
+        const document = await prisma.document.findFirst({
           where: {
-            OR: [{ authorId: session.user.id }, { signeeId: session.user.id }],
             id: id,
+            OR: [
+              { authorId: session.user.id },
+              { signers: { some: { email: session.user.email ?? "" } } },
+            ],
+          },
+          include: {
+            signers: true,
           },
         });
 
@@ -21,24 +33,37 @@ export default async function SingleDocument({ params }: { params: Promise<{ id:
           toast.error("Document not found or you do not have access to it.");
           redirect("/documents");
           return;
+        } // Get the author
+        const author = await prisma.user.findUnique({
+          where: { id: document.authorId },
+        });
+        if (!author) {
+          toast.error("Document author not found");
+          redirect("/documents");
+          return;
         }
 
-        if (document.authorId && document.signeeId) {
-          const author = await prisma.user.findUnique({
-            where: { id: document.authorId },
-          });
-          const signee = await prisma.user.findUnique({
-            where: { id: document.signeeId },
-          });
+        // Normalize the document to fix null/undefined type issues
+        const normalizedDocument = await normalizeDatabaseDocument(document);
 
-          if (author && signee) {
-            return <SingleDocumentComponent document={document} author={author} signee={signee} />;
-          } else if (author) {
-            return <SingleDocumentComponent document={document} author={author} />;
-          }
-        }
+        // Convert the normalized document back to the expected format for SingleDocumentComponent
+        const documentForComponent = {
+          ...document, // Keep all original Prisma fields
+          // Apply fixes for the fields that need type conversion
+          signers: normalizedDocument.signers.map((signer) => ({
+            ...signer,
+            name: signer.name,
+            role: signer.role,
+          })),
+        };
 
-        return <SingleDocumentComponent document={document} />;
+        // Return the document with author and signers data
+        return (
+          <SingleDocumentComponent
+            document={documentForComponent}
+            author={author}
+          />
+        );
       } catch (error) {
         console.error("Error fetching document:", error);
         toast.error("Error fetching document. Please try again later.");

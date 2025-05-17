@@ -1,0 +1,11 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    // Disable the no-img-element rule since we're deliberately using img in the PDF viewer
+    "@next/next/no-img-element": "off",
+    // Allow some explicit any types in the codebase for now
+    "@typescript-eslint/no-explicit-any": "warn",
+    // Relax the rule for react hooks exhaustive deps during development
+    "react-hooks/exhaustive-deps": "warn"
+  }
+}

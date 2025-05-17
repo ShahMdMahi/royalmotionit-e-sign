@@ -2,14 +2,27 @@ import { Mail, Phone, MapPin, Clock, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Contact Us - Royal Sign",
-  description: "Get in touch with the Royal Sign team for inquiries, support, or partnerships.",
+  description:
+    "Get in touch with the Royal Sign team for inquiries, support, or partnerships.",
 };
 
 export default async function Contact() {
@@ -17,8 +30,13 @@ export default async function Contact() {
     <div className="container mx-auto px-4 py-12 space-y-16">
       {/* Header Section */}
       <section className="text-center space-y-4 max-w-3xl mx-auto">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text">Get in Touch</h1>
-        <p className="text-lg text-muted-foreground">Have questions about our e-signature solution? We&apos;d love to hear from you. Our team is ready to assist with any inquiries.</p>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text">
+          Get in Touch
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          Have questions about our e-signature solution? We&apos;d love to hear
+          from you. Our team is ready to assist with any inquiries.
+        </p>
       </section>
 
       {/* Contact Information Cards */}
@@ -29,8 +47,13 @@ export default async function Contact() {
             <CardTitle>Email Us</CardTitle>
           </CardHeader>
           <CardContent>
-            <CardDescription className="mb-2">Send us an email and we&apos;ll get back to you within 24 hours.</CardDescription>
-            <a href="mailto:contact@royalmotionit.com" className="text-primary font-medium">
+            <CardDescription className="mb-2">
+              Send us an email and we&apos;ll get back to you within 24 hours.
+            </CardDescription>
+            <a
+              href="mailto:contact@royalmotionit.com"
+              className="text-primary font-medium"
+            >
               contact@royalmotionit.com
             </a>
           </CardContent>
@@ -42,7 +65,9 @@ export default async function Contact() {
             <CardTitle>Call Us</CardTitle>
           </CardHeader>
           <CardContent>
-            <CardDescription className="mb-2">Our customer service team is available during business hours.</CardDescription>
+            <CardDescription className="mb-2">
+              Our customer service team is available during business hours.
+            </CardDescription>
             <a href="tel:+1-555-123-4567" className="text-primary font-medium">
               +1-555-123-4567
             </a>
@@ -55,7 +80,9 @@ export default async function Contact() {
             <CardTitle>Visit Us</CardTitle>
           </CardHeader>
           <CardContent>
-            <CardDescription className="mb-2">Stop by our office to meet the team in person.</CardDescription>
+            <CardDescription className="mb-2">
+              Stop by our office to meet the team in person.
+            </CardDescription>
             <p className="text-primary font-medium">
               123 Tech Park Avenue
               <br />
@@ -73,7 +100,10 @@ export default async function Contact() {
         <Card className="lg:col-span-3 border">
           <CardHeader>
             <CardTitle className="gradient-text">Send us a Message</CardTitle>
-            <CardDescription>Fill out the form below and a member of our team will be in touch as soon as possible.</CardDescription>
+            <CardDescription>
+              Fill out the form below and a member of our team will be in touch
+              as soon as possible.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form className="space-y-6">
@@ -96,7 +126,11 @@ export default async function Contact() {
                 <label htmlFor="email" className="text-sm font-medium">
                   Email
                 </label>
-                <Input id="email" placeholder="john.doe@example.com" type="email" />
+                <Input
+                  id="email"
+                  placeholder="john.doe@example.com"
+                  type="email"
+                />
               </div>
 
               <div className="space-y-2">
@@ -118,7 +152,9 @@ export default async function Contact() {
                     <SelectItem value="general">General Information</SelectItem>
                     <SelectItem value="sales">Sales Inquiry</SelectItem>
                     <SelectItem value="support">Technical Support</SelectItem>
-                    <SelectItem value="partnership">Partnership Opportunity</SelectItem>
+                    <SelectItem value="partnership">
+                      Partnership Opportunity
+                    </SelectItem>
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
@@ -128,7 +164,11 @@ export default async function Contact() {
                 <label htmlFor="message" className="text-sm font-medium">
                   Message
                 </label>
-                <Textarea id="message" placeholder="Please provide details about your inquiry..." rows={5} />
+                <Textarea
+                  id="message"
+                  placeholder="Please provide details about your inquiry..."
+                  rows={5}
+                />
               </div>
 
               <Button type="submit" className="w-full">
@@ -151,7 +191,9 @@ export default async function Contact() {
                 <MapPin className="h-12 w-12 text-muted-foreground" />
                 <span className="sr-only">Map placeholder</span>
               </div>
-              <p className="text-sm text-muted-foreground mt-2 text-center">Interactive map would be displayed here</p>
+              <p className="text-sm text-muted-foreground mt-2 text-center">
+                Interactive map would be displayed here
+              </p>
             </CardContent>
           </Card>
 
@@ -176,7 +218,9 @@ export default async function Contact() {
                   <span>Closed</span>
                 </div>
                 <div className="border-t pt-2 mt-2">
-                  <p className="text-sm text-muted-foreground">All times listed are in Pacific Time (PT)</p>
+                  <p className="text-sm text-muted-foreground">
+                    All times listed are in Pacific Time (PT)
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -187,47 +231,70 @@ export default async function Contact() {
       {/* FAQ Section */}
       <section className="space-y-8">
         <div className="text-center space-y-3 max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold gradient-text">Frequently Asked Questions</h2>
-          <p className="text-muted-foreground">Quick answers to common questions</p>
+          <h2 className="text-3xl font-bold gradient-text">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-muted-foreground">
+            Quick answers to common questions
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="card-hover border">
             <CardHeader>
-              <CardTitle className="text-lg">How quickly will I receive a response?</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">We typically respond to all inquiries within 24 business hours. For urgent matters, we recommend calling our customer service line.</p>
-            </CardContent>
-          </Card>
-
-          <Card className="card-hover border">
-            <CardHeader>
-              <CardTitle className="text-lg">Do you offer demos of your platform?</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Yes! You can request a personalized demo through this contact form. A member of our sales team will arrange a convenient time.</p>
-            </CardContent>
-          </Card>
-
-          <Card className="card-hover border">
-            <CardHeader>
-              <CardTitle className="text-lg">I need technical support. Is this the right place?</CardTitle>
+              <CardTitle className="text-lg">
+                How quickly will I receive a response?
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                For faster technical support, existing customers should use the support portal in their dashboard. This contact form is better for general inquiries.
+                We typically respond to all inquiries within 24 business hours.
+                For urgent matters, we recommend calling our customer service
+                line.
               </p>
             </CardContent>
           </Card>
 
           <Card className="card-hover border">
             <CardHeader>
-              <CardTitle className="text-lg">Do you offer partnership opportunities?</CardTitle>
+              <CardTitle className="text-lg">
+                Do you offer demos of your platform?
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                We&apos;re always open to strategic partnerships! Please select &quot;Partnership Opportunity&quot; in the inquiry type field and provide details about your proposal.
+                Yes! You can request a personalized demo through this contact
+                form. A member of our sales team will arrange a convenient time.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="card-hover border">
+            <CardHeader>
+              <CardTitle className="text-lg">
+                I need technical support. Is this the right place?
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                For faster technical support, existing customers should use the
+                support portal in their dashboard. This contact form is better
+                for general inquiries.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="card-hover border">
+            <CardHeader>
+              <CardTitle className="text-lg">
+                Do you offer partnership opportunities?
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                We&apos;re always open to strategic partnerships! Please select
+                &quot;Partnership Opportunity&quot; in the inquiry type field
+                and provide details about your proposal.
               </p>
             </CardContent>
           </Card>
@@ -237,9 +304,18 @@ export default async function Contact() {
       {/* CTA Section */}
       <section className="gradient-bg rounded-xl p-8 md:p-12 text-center text-primary-foreground">
         <div className="space-y-6 max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold">Ready to Experience Royal Sign?</h2>
-          <p className="text-lg">Try our e-signature platform free for 14 days. No credit card required.</p>
-          <Button size="lg" className="px-12 bg-white hover:bg-white/90 text-primary" asChild>
+          <h2 className="text-3xl font-bold">
+            Ready to Experience Royal Sign?
+          </h2>
+          <p className="text-lg">
+            Try our e-signature platform free for 14 days. No credit card
+            required.
+          </p>
+          <Button
+            size="lg"
+            className="px-12 bg-white hover:bg-white/90 text-primary"
+            asChild
+          >
             <Link href="/auth/register">Start Free Trial</Link>
           </Button>
         </div>

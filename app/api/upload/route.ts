@@ -22,7 +22,9 @@ const uploadAttempts = new Map<string, { count: number; resetAt: number }>();
  * @param file File to check
  * @returns Object with validation result and optional error message
  */
-async function validateFileIntegrity(file: File): Promise<{ valid: boolean; error?: string }> {
+async function validateFileIntegrity(
+  file: File,
+): Promise<{ valid: boolean; error?: string }> {
   try {
     // For PDFs, check for the magic number signature in header
     if (file.type === "application/pdf") {
@@ -75,7 +77,10 @@ async function calculateFileHash(file: File): Promise<string> {
  * @param userId User ID to check
  * @returns Object indicating if rate limit is exceeded
  */
-function checkRateLimit(userId: string): { allowed: boolean; resetIn?: number } {
+function checkRateLimit(userId: string): {
+  allowed: boolean;
+  resetIn?: number;
+} {
   const now = Date.now();
   const resetTime = now + 60000; // 1 minute from now
   const userAttempts = uploadAttempts.get(userId);
@@ -106,7 +111,11 @@ function checkRateLimit(userId: string): { allowed: boolean; resetIn?: number } 
 /**
  * Helper function to implement retry logic with exponential backoff
  */
-async function withRetry<T>(operation: () => Promise<T>, maxRetries: number = MAX_RETRIES, initialDelay: number = RETRY_DELAY_MS): Promise<T> {
+async function withRetry<T>(
+  operation: () => Promise<T>,
+  maxRetries: number = MAX_RETRIES,
+  initialDelay: number = RETRY_DELAY_MS,
+): Promise<T> {
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -123,7 +132,9 @@ async function withRetry<T>(operation: () => Promise<T>, maxRetries: number = MA
 
       if (attempt < maxRetries) {
         const delay = initialDelay * Math.pow(2, attempt);
-        console.log(`Retrying operation after ${delay}ms (attempt ${attempt + 1}/${maxRetries})`);
+        console.log(
+          `Retrying operation after ${delay}ms (attempt ${attempt + 1}/${maxRetries})`,
+        );
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
@@ -135,7 +146,10 @@ async function withRetry<T>(operation: () => Promise<T>, maxRetries: number = MA
 /**
  * Clean up resources if the upload process fails
  */
-async function cleanupOnFailure(documentId: string | null, r2ObjectKey: string | null) {
+async function cleanupOnFailure(
+  documentId: string | null,
+  r2ObjectKey: string | null,
+) {
   try {
     // Delete the document record if it was created
     if (documentId) {
@@ -143,7 +157,9 @@ async function cleanupOnFailure(documentId: string | null, r2ObjectKey: string |
         .delete({
           where: { id: documentId },
         })
-        .catch((err) => console.error(`Failed to delete document ${documentId}:`, err));
+        .catch((err) =>
+          console.error(`Failed to delete document ${documentId}:`, err),
+        );
     }
 
     // Delete the R2 object if it exists
@@ -151,7 +167,9 @@ async function cleanupOnFailure(documentId: string | null, r2ObjectKey: string |
       await deleteFromR2({
         Bucket: process.env.R2_BUCKET_NAME,
         Key: r2ObjectKey,
-      }).catch((err) => console.error(`Failed to delete R2 object ${r2ObjectKey}:`, err));
+      }).catch((err) =>
+        console.error(`Failed to delete R2 object ${r2ObjectKey}:`, err),
+      );
     }
   } catch (error) {
     console.error("Error in cleanup process:", error);
@@ -171,7 +189,7 @@ export async function POST(req: NextRequest) {
           error: true,
           message: "Unauthorized",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
     if (!session.user) {
@@ -181,7 +199,7 @@ export async function POST(req: NextRequest) {
           error: true,
           message: "User not found",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -194,7 +212,7 @@ export async function POST(req: NextRequest) {
           error: true,
           message: `Rate limit exceeded. Try again in ${rateLimit.resetIn} seconds.`,
         },
-        { status: 429 }
+        { status: 429 },
       );
     }
 
@@ -207,7 +225,7 @@ export async function POST(req: NextRequest) {
           error: true,
           message: `File too large (max ${MAX_FILE_SIZE / 1024 / 1024}MB)`,
         },
-        { status: 413 }
+        { status: 413 },
       );
     }
 
@@ -220,7 +238,7 @@ export async function POST(req: NextRequest) {
           error: true,
           message: "Invalid request format. Expected multipart/form-data",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -235,9 +253,12 @@ export async function POST(req: NextRequest) {
           success: false,
           error: true,
           message: "Failed to parse form data",
-          details: formError instanceof Error ? formError.message : "Unknown parsing error",
+          details:
+            formError instanceof Error
+              ? formError.message
+              : "Unknown parsing error",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -254,7 +275,7 @@ export async function POST(req: NextRequest) {
           error: true,
           message: "Valid file is required",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -266,7 +287,7 @@ export async function POST(req: NextRequest) {
           error: true,
           message: "Valid file name is required",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -278,7 +299,7 @@ export async function POST(req: NextRequest) {
           error: true,
           message: `File too large (max ${MAX_FILE_SIZE / 1024 / 1024}MB)`,
         },
-        { status: 413 }
+        { status: 413 },
       );
     }
 
@@ -290,7 +311,7 @@ export async function POST(req: NextRequest) {
           error: true,
           message: `Invalid file type: ${file.type}. Allowed types: ${ALLOWED_FILE_TYPES.join(", ")}`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -303,7 +324,7 @@ export async function POST(req: NextRequest) {
           error: true,
           message: integrityCheck.error || "File integrity validation failed",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -331,7 +352,7 @@ export async function POST(req: NextRequest) {
           error: true,
           message: "Failed to create document record",
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -353,9 +374,12 @@ export async function POST(req: NextRequest) {
           success: false,
           error: true,
           message: "Failed to process file data",
-          details: bufferError instanceof Error ? bufferError.message : "Unknown buffer error",
+          details:
+            bufferError instanceof Error
+              ? bufferError.message
+              : "Unknown buffer error",
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -363,12 +387,16 @@ export async function POST(req: NextRequest) {
     const uploadResult = await withRetry(
       () => uploadFileToR2(buffer, key, file.type, sanitizedFileName),
       3, // Max retries for upload
-      1000 // Initial delay of 1s for upload retries
+      1000, // Initial delay of 1s for upload retries
     );
 
     // Handle upload failures
     if (!uploadResult.success) {
-      console.error("R2 upload failed:", uploadResult.message, uploadResult.error);
+      console.error(
+        "R2 upload failed:",
+        uploadResult.message,
+        uploadResult.error,
+      );
       await cleanupOnFailure(createdDocumentId, uploadedObjectKey);
       return NextResponse.json(
         {
@@ -376,9 +404,12 @@ export async function POST(req: NextRequest) {
           error: true,
           message: uploadResult.message || "Upload failed",
           errorType: "StorageError",
-          details: uploadResult.error instanceof Error ? uploadResult.error.message : String(uploadResult.error),
+          details:
+            uploadResult.error instanceof Error
+              ? uploadResult.error.message
+              : String(uploadResult.error),
         },
-        { status: uploadResult.statusCode || 500 }
+        { status: uploadResult.statusCode || 500 },
       );
     }
 
@@ -398,7 +429,10 @@ export async function POST(req: NextRequest) {
         throw new Error("Failed to update document with storage details");
       }
     } catch (updateError) {
-      console.error("Failed to update document with storage details:", updateError);
+      console.error(
+        "Failed to update document with storage details:",
+        updateError,
+      );
       await cleanupOnFailure(createdDocumentId, uploadedObjectKey);
 
       return NextResponse.json(
@@ -406,9 +440,12 @@ export async function POST(req: NextRequest) {
           success: false,
           error: true,
           message: "Failed to finalize document record",
-          details: updateError instanceof Error ? updateError.message : String(updateError),
+          details:
+            updateError instanceof Error
+              ? updateError.message
+              : String(updateError),
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -424,7 +461,7 @@ export async function POST(req: NextRequest) {
         key: uploadResult.data.key,
         fileName: sanitizedFileName,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     // Run cleanup for any created resources
@@ -433,7 +470,10 @@ export async function POST(req: NextRequest) {
     console.error("Unexpected upload error:", error);
 
     // Handle database connectivity issues
-    if (error instanceof Prisma.PrismaClientInitializationError || error instanceof Prisma.PrismaClientRustPanicError) {
+    if (
+      error instanceof Prisma.PrismaClientInitializationError ||
+      error instanceof Prisma.PrismaClientRustPanicError
+    ) {
       return NextResponse.json(
         {
           success: false,
@@ -442,7 +482,7 @@ export async function POST(req: NextRequest) {
           errorType: "DatabaseError",
           details: error instanceof Error ? error.message : String(error),
         },
-        { status: 503 }
+        { status: 503 },
       );
     }
 
@@ -458,14 +498,18 @@ export async function POST(req: NextRequest) {
           errorCode: error.name,
           errorType: "S3ServiceException",
         },
-        { status: statusCode }
+        { status: statusCode },
       );
     }
 
     // Handle standard Error objects
     if (error instanceof Error) {
       // Check for network-related errors
-      if (error.name === "NetworkError" || error.message.includes("network") || error.message.includes("connection")) {
+      if (
+        error.name === "NetworkError" ||
+        error.message.includes("network") ||
+        error.message.includes("connection")
+      ) {
         return NextResponse.json(
           {
             success: false,
@@ -474,7 +518,7 @@ export async function POST(req: NextRequest) {
             details: error.message,
             errorType: error.name,
           },
-          { status: 503 }
+          { status: 503 },
         );
       }
 
@@ -488,7 +532,7 @@ export async function POST(req: NextRequest) {
             details: error.message,
             errorType: error.name,
           },
-          { status: 504 }
+          { status: 504 },
         );
       }
 
@@ -505,7 +549,7 @@ export async function POST(req: NextRequest) {
               errorCode: error.code,
               errorType: "DatabaseConstraintError",
             },
-            { status: 400 }
+            { status: 400 },
           );
         }
       }
@@ -519,7 +563,7 @@ export async function POST(req: NextRequest) {
           details: error.message,
           errorType: error.name,
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -531,7 +575,7 @@ export async function POST(req: NextRequest) {
         message: "An unknown error occurred during upload",
         details: String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

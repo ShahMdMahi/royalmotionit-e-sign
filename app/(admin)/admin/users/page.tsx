@@ -7,7 +7,8 @@ import { UsersComponent } from "@/components/admin/users";
 
 export const metadata: Metadata = {
   title: "Users - Admin - Royal Sign - RoyalMotionIT",
-  description: "Users for managing administrative tasks in Royal Sign e-signature application.",
+  description:
+    "Users for managing administrative tasks in Royal Sign e-signature application.",
 };
 
 export default async function AdminUsers() {

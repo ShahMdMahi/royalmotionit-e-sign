@@ -1,4 +1,19 @@
-import { Body, Button, Container, Head, Heading, Hr, Html, Img, Link, Preview, Section, Text, Column, Row } from "@react-email/components";
+import {
+  Body,
+  Button,
+  Container,
+  Head,
+  Heading,
+  Hr,
+  Html,
+  Img,
+  Link,
+  Preview,
+  Section,
+  Text,
+  Column,
+  Row,
+} from "@react-email/components";
 
 interface AccountVerificationEmailProps {
   username: string;
@@ -6,8 +21,13 @@ interface AccountVerificationEmailProps {
   verificationToken: string;
 }
 
-export const AccountVerificationEmail = ({ username, userEmail, verificationToken }: AccountVerificationEmailProps) => {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://royal-sign.vercel.app";
+export const AccountVerificationEmail = ({
+  username,
+  userEmail,
+  verificationToken,
+}: AccountVerificationEmailProps) => {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL || "https://royal-sign.vercel.app";
   const verificationUrl = `${baseUrl}/auth/verify-email/${verificationToken}`;
 
   // Theme colors from globals.css using exact OKLCH values
@@ -45,7 +65,13 @@ export const AccountVerificationEmail = ({ username, userEmail, verificationToke
               backgroundImage: `linear-gradient(120deg, ${theme.primaryHex}30 0%, ${theme.primaryHex}70 100%)`,
             }}
           >
-            <Img src={`${baseUrl}/name_logo.png`} width="220" height="auto" alt="Royal Sign Logo" style={logo} />
+            <Img
+              src={`${baseUrl}/name_logo.png`}
+              width="220"
+              height="auto"
+              alt="Royal Sign Logo"
+              style={logo}
+            />
             <Heading
               style={{
                 ...heading,
@@ -60,7 +86,9 @@ export const AccountVerificationEmail = ({ username, userEmail, verificationToke
           <Section style={contentSection}>
             <Text style={greeting}>Hello {username},</Text>
             <Text style={text}>
-              Thank you for registering with Royal Sign. To complete your registration and access all features, please verify your email address:{" "}
+              Thank you for registering with Royal Sign. To complete your
+              registration and access all features, please verify your email
+              address:{" "}
               <span
                 style={{
                   ...highlight,
@@ -70,7 +98,10 @@ export const AccountVerificationEmail = ({ username, userEmail, verificationToke
                 {userEmail}
               </span>
             </Text>
-            <Text style={text}>Your account is almost ready! Just click the button below to verify your email address and activate your account.</Text>
+            <Text style={text}>
+              Your account is almost ready! Just click the button below to
+              verify your email address and activate your account.
+            </Text>
 
             {/* Call to action button */}
             <Section style={buttonContainer}>
@@ -94,13 +125,25 @@ export const AccountVerificationEmail = ({ username, userEmail, verificationToke
                 borderLeft: `4px solid ${theme.primaryHex}`,
               }}
             >
-              <Text style={securityHeading}>Important Security Information:</Text>
-              <Text style={securityText}>• This verification link will expire in 24 hours</Text>
-              <Text style={securityText}>• If you did not create an account with Royal Sign, please disregard this email</Text>
-              <Text style={securityText}>• Never share your verification link with anyone else</Text>
+              <Text style={securityHeading}>
+                Important Security Information:
+              </Text>
+              <Text style={securityText}>
+                • This verification link will expire in 24 hours
+              </Text>
+              <Text style={securityText}>
+                • If you did not create an account with Royal Sign, please
+                disregard this email
+              </Text>
+              <Text style={securityText}>
+                • Never share your verification link with anyone else
+              </Text>
             </Section>
 
-            <Text style={{ ...text, marginTop: "30px" }}>If the button above doesn't work, you can copy and paste the following URL into your browser:</Text>
+            <Text style={{ ...text, marginTop: "30px" }}>
+              If the button above doesn't work, you can copy and paste the
+              following URL into your browser:
+            </Text>
             <Text
               style={{
                 ...verificationLink,
@@ -133,8 +176,17 @@ export const AccountVerificationEmail = ({ username, userEmail, verificationToke
             >
               Need Help?
             </Text>
-            <Text style={text}>If you're having trouble verifying your email or have any questions, our support team is here to help.</Text>
-            <Img src={`${baseUrl}/icon_logo.png`} width="30" height="30" alt="Support" style={supportIcon} />
+            <Text style={text}>
+              If you're having trouble verifying your email or have any
+              questions, our support team is here to help.
+            </Text>
+            <Img
+              src={`${baseUrl}/icon_logo.png`}
+              width="30"
+              height="30"
+              alt="Support"
+              style={supportIcon}
+            />
             <Button
               href="mailto:support@royalmotionit.com"
               style={{
@@ -154,9 +206,16 @@ export const AccountVerificationEmail = ({ username, userEmail, verificationToke
               backgroundColor: `${theme.secondaryForegroundHex}08`,
             }}
           >
-            <Img src={`${baseUrl}/logo.png`} width="60" height="auto" alt="Royal Sign Logo" style={footerLogo} />
+            <Img
+              src={`${baseUrl}/logo.png`}
+              width="60"
+              height="auto"
+              alt="Royal Sign Logo"
+              style={footerLogo}
+            />
             <Text style={footerText}>
-              If you have any questions or need assistance, please contact our support team at{" "}
+              If you have any questions or need assistance, please contact our
+              support team at{" "}
               <Link
                 href="mailto:support@royalmotionit.com"
                 style={{
@@ -185,7 +244,9 @@ export const AccountVerificationEmail = ({ username, userEmail, verificationToke
               </span>
             </Text>
             <Text style={footerText}>Powered by Royal Motion IT</Text>
-            <Text style={copyright}>© {currentYear} Royal Motion IT. All rights reserved.</Text>
+            <Text style={copyright}>
+              © {currentYear} Royal Motion IT. All rights reserved.
+            </Text>
           </Section>
         </Container>
       </Body>
@@ -198,7 +259,8 @@ export default AccountVerificationEmail;
 // Email styles
 const main = {
   backgroundColor: "#f8f9fc",
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif',
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif',
   color: "#333333",
 };
 

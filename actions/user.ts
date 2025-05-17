@@ -33,7 +33,10 @@ type ChangeNotificationSettingsState = {
 /**
  * Change user's name
  */
-export async function changeName(prevState: ChangeNameFormState, formData: FormData): Promise<ChangeNameFormState> {
+export async function changeName(
+  prevState: ChangeNameFormState,
+  formData: FormData,
+): Promise<ChangeNameFormState> {
   // Validate form fields
   const validatedFields = ChangeNameSchema.safeParse({
     name: formData.get("name"),
@@ -115,7 +118,10 @@ export async function changeName(prevState: ChangeNameFormState, formData: FormD
 /**
  * Change user's password
  */
-export async function changePassword(prevState: ChangePasswordFormState, formData: FormData): Promise<ChangePasswordFormState> {
+export async function changePassword(
+  prevState: ChangePasswordFormState,
+  formData: FormData,
+): Promise<ChangePasswordFormState> {
   // Validate form fields
   const validatedFields = ChangePasswordSchema.safeParse({
     currentPassword: formData.get("currentPassword"),
@@ -161,7 +167,10 @@ export async function changePassword(prevState: ChangePasswordFormState, formDat
 
     // Check if the current password is correct
     if (user.password) {
-      const isCurrentPasswordValid = await bcryptjs.compare(currentPassword, user.password);
+      const isCurrentPasswordValid = await bcryptjs.compare(
+        currentPassword,
+        user.password,
+      );
       if (!isCurrentPasswordValid) {
         return {
           errors: { currentPassword: ["Current password is incorrect"] },
@@ -192,7 +201,8 @@ export async function changePassword(prevState: ChangePasswordFormState, formDat
   } catch (error) {
     console.error("Password change error:", error);
     return {
-      message: "An error occurred while changing your password. Please try again.",
+      message:
+        "An error occurred while changing your password. Please try again.",
       success: false,
     };
   }
@@ -201,7 +211,9 @@ export async function changePassword(prevState: ChangePasswordFormState, formDat
 /**
  * Change notification settings
  */
-export async function changeNotificationSettings(status: boolean): Promise<ChangeNotificationSettingsState> {
+export async function changeNotificationSettings(
+  status: boolean,
+): Promise<ChangeNotificationSettingsState> {
   try {
     const session = await auth();
 
@@ -231,8 +243,39 @@ export async function changeNotificationSettings(status: boolean): Promise<Chang
   } catch (error) {
     console.error("Notification settings error:", error);
     return {
-      message: "An error occurred while changing your notification settings. Please try again.",
+      message:
+        "An error occurred while changing your notification settings. Please try again.",
       success: false,
+    };
+  }
+}
+
+/**
+ * Get user by email address
+ * Used for checking if a user exists when adding signers
+ */
+export async function getUserByEmail(email: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        createdAt: true,
+      },
+    });
+
+    return {
+      success: true,
+      user,
+    };
+  } catch (error) {
+    console.error("Error getting user by email:", error);
+    return {
+      success: false,
+      message: "Error retrieving user information",
     };
   }
 }

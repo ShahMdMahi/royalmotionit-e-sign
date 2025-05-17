@@ -7,7 +7,8 @@ import { prisma } from "@/prisma/prisma";
 
 export const metadata: Metadata = {
   title: "Documents - Admin - Royal Sign - RoyalMotionIT",
-  description: "Documents for managing administrative tasks in Royal Sign e-signature application.",
+  description:
+    "Documents for managing administrative tasks in Royal Sign e-signature application.",
 };
 
 export default async function AdminDocuments() {
@@ -17,9 +18,12 @@ export default async function AdminDocuments() {
   } else if (session.user.role === Role.USER) {
     redirect("/dashboard");
   } else if (session.user.role === Role.ADMIN) {
-    const documents = await prisma.document.findMany();
+    const documents = await prisma.document.findMany({
+      include: { signers: true },
+      orderBy: { createdAt: "desc" },
+    });
     const users = await prisma.user.findMany();
-    return <DocumentComponent documents={documents} users={users} />; 
+    return <DocumentComponent documents={documents} users={users} />;
   } else {
     redirect("/");
   }

@@ -5,7 +5,8 @@ import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Maintenance - Royal Sign- RoyalMotionIT",
-  description: "Royal Sign is currently under maintenance. Please check back later.",
+  description:
+    "Royal Sign is currently under maintenance. Please check back later.",
 };
 
 export default async function MaintenancePage() {

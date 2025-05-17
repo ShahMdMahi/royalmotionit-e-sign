@@ -9,7 +9,8 @@ import { Role } from "@prisma/client";
 
 export const metadata: Metadata = {
   title: "Reset Password - Authentication - Royal Sign - RoyalMotionIT",
-  description: "Secure authentication portal for Royal Sign, providing access to electronic signature and document management services developed by RoyalMotionIT",
+  description:
+    "Secure authentication portal for Royal Sign, providing access to electronic signature and document management services developed by RoyalMotionIT",
 };
 
 interface ResetPasswordPageProps {
@@ -18,7 +19,9 @@ interface ResetPasswordPageProps {
   }>;
 }
 
-export default async function ResetPassword({ params }: ResetPasswordPageProps) {
+export default async function ResetPassword({
+  params,
+}: ResetPasswordPageProps) {
   const session = await auth();
   if (!session) {
     const resetPasswordToken = (await params).token;
@@ -32,7 +35,13 @@ export default async function ResetPassword({ params }: ResetPasswordPageProps) 
     return (
       <div className="grid min-h-svh lg:grid-cols-2">
         <div className="relative hidden bg-muted lg:block">
-          <Image src="/logo.png" alt="Image" priority fill className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale" />
+          <Image
+            src="/logo.png"
+            alt="Image"
+            priority
+            fill
+            className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          />
         </div>
         <div className="flex flex-col gap-4 p-6 md:p-10">
           <div className="flex justify-center gap-2 md:justify-end">
@@ -42,7 +51,13 @@ export default async function ResetPassword({ params }: ResetPasswordPageProps) 
           </div>
           <div className="flex flex-1 items-center justify-center">
             <div className="w-full max-w-xs">
-              {resetPasswordToken ? <ResetPasswordForm token={resetPasswordToken} /> : <div className="text-center text-muted-foreground">Invalid token. Please try again.</div>}
+              {resetPasswordToken ? (
+                <ResetPasswordForm token={resetPasswordToken} />
+              ) : (
+                <div className="text-center text-muted-foreground">
+                  Invalid token. Please try again.
+                </div>
+              )}
             </div>
           </div>
         </div>

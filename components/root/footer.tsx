@@ -12,10 +12,18 @@ export default function Footer() {
           {/* Company Info */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
-              <Image src="/icon_logo.png" alt="RoyalMotionIT" width={40} height={40} />
+              <Image
+                src="/icon_logo.png"
+                alt="RoyalMotionIT"
+                width={40}
+                height={40}
+              />
               <span className="text-xl font-bold">RoyalMotionIT</span>
             </div>
-            <p className="text-sm text-muted-foreground">Simplify your document workflow with our secure e-signature solution. Sign, send, and manage documents from anywhere.</p>
+            <p className="text-sm text-muted-foreground">
+              Simplify your document workflow with our secure e-signature
+              solution. Sign, send, and manage documents from anywhere.
+            </p>
             <div className="flex space-x-3 mt-2">
               <Link href="#" className="hover:text-primary transition-colors">
                 <Facebook size={18} />
@@ -39,19 +47,34 @@ export default function Footer() {
           {/* Quick Links */}
           <div className="flex flex-col gap-3">
             <h3 className="font-semibold text-lg">Quick Links</h3>
-            <Link href="/" className="text-sm hover:text-primary transition-colors">
+            <Link
+              href="/"
+              className="text-sm hover:text-primary transition-colors"
+            >
               Home
             </Link>
-            <Link href="/about-us" className="text-sm hover:text-primary transition-colors">
+            <Link
+              href="/about-us"
+              className="text-sm hover:text-primary transition-colors"
+            >
               About Us
             </Link>
-            <Link href="/contact-us" className="text-sm hover:text-primary transition-colors">
+            <Link
+              href="/contact-us"
+              className="text-sm hover:text-primary transition-colors"
+            >
               Contact Us
             </Link>
-            <Link href="/auth/login" className="text-sm hover:text-primary transition-colors">
+            <Link
+              href="/auth/login"
+              className="text-sm hover:text-primary transition-colors"
+            >
               Login
             </Link>
-            <Link href="/auth/register" className="text-sm hover:text-primary transition-colors">
+            <Link
+              href="/auth/register"
+              className="text-sm hover:text-primary transition-colors"
+            >
               Register
             </Link>
           </div>
@@ -59,16 +82,28 @@ export default function Footer() {
           {/* Legal Links */}
           <div className="flex flex-col gap-3">
             <h3 className="font-semibold text-lg">Legal</h3>
-            <Link href="/terms-of-service" className="text-sm hover:text-primary transition-colors">
+            <Link
+              href="/terms-of-service"
+              className="text-sm hover:text-primary transition-colors"
+            >
               Terms of Service
             </Link>
-            <Link href="/privacy-policy" className="text-sm hover:text-primary transition-colors">
+            <Link
+              href="/privacy-policy"
+              className="text-sm hover:text-primary transition-colors"
+            >
               Privacy Policy
             </Link>
-            <Link href="/accessibility" className="text-sm hover:text-primary transition-colors">
+            <Link
+              href="/accessibility"
+              className="text-sm hover:text-primary transition-colors"
+            >
               Accessibility
             </Link>
-            <Link href="/cookie-policy" className="text-sm hover:text-primary transition-colors">
+            <Link
+              href="/cookie-policy"
+              className="text-sm hover:text-primary transition-colors"
+            >
               Cookie Policy
             </Link>
           </div>
@@ -76,22 +111,32 @@ export default function Footer() {
           {/* Newsletter */}
           <div className="flex flex-col gap-3">
             <h3 className="font-semibold text-lg">Stay Updated</h3>
-            <p className="text-sm text-muted-foreground">Subscribe to our newsletter for updates and tips.</p>
+            <p className="text-sm text-muted-foreground">
+              Subscribe to our newsletter for updates and tips.
+            </p>
             <div className="flex flex-col gap-2">
               <div className="flex gap-2">
-                <Input type="email" placeholder="Enter your email" className="h-9 text-sm" />
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="h-9 text-sm"
+                />
                 <Button size="sm" className="h-9">
                   <Mail className="mr-1 h-4 w-4" />
                   <span>Subscribe</span>
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">By subscribing, you agree to our Privacy Policy.</p>
+              <p className="text-xs text-muted-foreground">
+                By subscribing, you agree to our Privacy Policy.
+              </p>
             </div>
           </div>
         </div>
 
         <div className="flex flex-col gap-4 mt-8 border-t pt-6 items-center">
-          <p className="text-sm text-muted-foreground text-center">© {new Date().getFullYear()} RoyalMotionIT. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground text-center">
+            © {new Date().getFullYear()} RoyalMotionIT. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

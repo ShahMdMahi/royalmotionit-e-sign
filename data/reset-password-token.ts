@@ -19,7 +19,9 @@ interface ResetPasswordTokenResponse extends BaseResponse {
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to find a reset password token in the database by its identifier. If the token is found, it returns the token data; otherwise, it returns an error message.
  */
-export async function getResetPasswordTokenByIdentifier(identifier: string): Promise<ResetPasswordTokenResponse> {
+export async function getResetPasswordTokenByIdentifier(
+  identifier: string,
+): Promise<ResetPasswordTokenResponse> {
   try {
     const resetPasswordToken = await prisma.resetPasswordToken.findFirst({
       where: {
@@ -59,7 +61,11 @@ export async function getResetPasswordTokenByIdentifier(identifier: string): Pro
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to create a new reset password token in the database. It returns the created token data.
  */
-export async function createResetPasswordToken(tokenData: { identifier: string; token: string; expires: Date }): Promise<ResetPasswordTokenResponse> {
+export async function createResetPasswordToken(tokenData: {
+  identifier: string;
+  token: string;
+  expires: Date;
+}): Promise<ResetPasswordTokenResponse> {
   try {
     const createdToken = await prisma.resetPasswordToken.create({
       data: {
@@ -91,7 +97,9 @@ export async function createResetPasswordToken(tokenData: { identifier: string; 
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to delete a reset password token from the database by its identifier. It returns a success message if the deletion is successful.
  */
-export async function deleteResetPasswordToken(identifier: string): Promise<BaseResponse> {
+export async function deleteResetPasswordToken(
+  identifier: string,
+): Promise<BaseResponse> {
   try {
     await prisma.resetPasswordToken.deleteMany({
       where: {

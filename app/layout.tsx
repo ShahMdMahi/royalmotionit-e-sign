@@ -16,7 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Royal Sign - RoyalMotionIT",
-  description: "A platform for electronic signatures and document management by RoyalMotionIT.",
+  description:
+    "A platform for electronic signatures and document management by RoyalMotionIT.",
 };
 
 export default async function RootLayout({
@@ -26,7 +27,9 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full`}
+      >
         <ThemeProvider attribute="class" defaultTheme="light">
           {children}
           <Toaster richColors />

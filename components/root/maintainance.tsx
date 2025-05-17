@@ -23,8 +23,13 @@ export default function Maintenance() {
             <Wrench className="h-6 w-6" />
           </div>
 
-          <p className="text-lg text-muted-foreground">Our system is currently undergoing scheduled maintenance.</p>
-          <p className="text-sm text-muted-foreground mb-6">We&apos;re working to improve your experience. Please check back soon.</p>
+          <p className="text-lg text-muted-foreground">
+            Our system is currently undergoing scheduled maintenance.
+          </p>
+          <p className="text-sm text-muted-foreground mb-6">
+            We&apos;re working to improve your experience. Please check back
+            soon.
+          </p>
         </div>
 
         <div className="mt-6 flex flex-col gap-4">
@@ -33,13 +38,19 @@ export default function Maintenance() {
             <span className="text-sm">Expected completion: Shortly</span>
           </div>
 
-          <Button variant="outline" className="w-full" onClick={() => window.location.reload()}>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => window.location.reload()}
+          >
             Refresh Page
           </Button>
         </div>
       </Card>
 
-      <p className="mt-8 text-sm text-muted-foreground">Royal Sign — Digital Document Signing</p>
+      <p className="mt-8 text-sm text-muted-foreground">
+        Royal Sign — Digital Document Signing
+      </p>
     </div>
   );
 }

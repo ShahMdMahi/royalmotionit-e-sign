@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FileX, ArrowLeft, Home } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export const metadata = {
   title: "Not Found - Royal Sign - RoyalMotionIT",
@@ -16,12 +22,16 @@ export default function NotFound() {
       </div>
 
       <h1 className="text-3xl font-bold tracking-tight mb-2">Page Not Found</h1>
-      <p className="text-muted-foreground mb-8">The page you are looking for doesn&apos;t exist or has been moved.</p>
+      <p className="text-muted-foreground mb-8">
+        The page you are looking for doesn&apos;t exist or has been moved.
+      </p>
 
       <Card className="card-hover border-none shadow-lg w-full">
         <CardHeader>
           <CardTitle>Looking for something?</CardTitle>
-          <CardDescription>Here are some helpful links to get you back on track.</CardDescription>
+          <CardDescription>
+            Here are some helpful links to get you back on track.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-3">
@@ -31,7 +41,11 @@ export default function NotFound() {
                 Return Home
               </Link>
             </Button>
-            <Button variant="outline" asChild className="w-full justify-start gap-2">
+            <Button
+              variant="outline"
+              asChild
+              className="w-full justify-start gap-2"
+            >
               <Link href="/dashboard">
                 <ArrowLeft className="size-4" />
                 Go to Dashboard

@@ -94,7 +94,10 @@ export async function getUserByEmail(email: string): Promise<UserResponse> {
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to update a user's name in the database by their ID. If the update is successful, it returns the updated user data; otherwise, it returns an error message.
  * */
-export async function updateUserName(id: string, name: string): Promise<UserResponse> {
+export async function updateUserName(
+  id: string,
+  name: string,
+): Promise<UserResponse> {
   try {
     const user = await prisma.user.update({
       where: {
@@ -135,7 +138,10 @@ export async function updateUserName(id: string, name: string): Promise<UserResp
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to update a user's password in the database by their ID. If the update is successful, it returns the updated user data; otherwise, it returns an error message.
  */
-export async function updateUserPassword(id: string, password: string): Promise<UserResponse> {
+export async function updateUserPassword(
+  id: string,
+  password: string,
+): Promise<UserResponse> {
   try {
     const user = await prisma.user.update({
       where: {
@@ -176,7 +182,10 @@ export async function updateUserPassword(id: string, password: string): Promise<
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to update a user's role in the database by their ID. If the update is successful, it returns the updated user data; otherwise, it returns an error message.
  */
-export async function updateUserRole(id: string, role: Role): Promise<UserResponse> {
+export async function updateUserRole(
+  id: string,
+  role: Role,
+): Promise<UserResponse> {
   try {
     const user = await prisma.user.update({
       where: {
@@ -217,7 +226,10 @@ export async function updateUserRole(id: string, role: Role): Promise<UserRespon
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to update a user's image in the database by their ID. If the update is successful, it returns the updated user data; otherwise, it returns an error message.
  */
-export async function updateUserImage(id: string, image: string): Promise<UserResponse> {
+export async function updateUserImage(
+  id: string,
+  image: string,
+): Promise<UserResponse> {
   try {
     const user = await prisma.user.update({
       where: {
@@ -258,7 +270,10 @@ export async function updateUserImage(id: string, image: string): Promise<UserRe
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to update multiple user fields in the database by their ID. If the update is successful, it returns the updated user data; otherwise, it returns an error message.
  */
-export async function updateUser(id: string, data: Partial<User>): Promise<UserResponse> {
+export async function updateUser(
+  id: string,
+  data: Partial<User>,
+): Promise<UserResponse> {
   try {
     const user = await prisma.user.update({
       where: {
@@ -325,7 +340,9 @@ export async function deleteUserById(id: string): Promise<BaseResponse> {
  * @throws {Error} Throws an error if there is an issue with the database query.
  * @description This function uses Prisma to find a user in the database by their email and update the email verification date. If the user is found and updated, it returns the user data; otherwise, it returns an error message.
  */
-export async function getUserByEmailAndVerify(email: string): Promise<UserResponse> {
+export async function getUserByEmailAndVerify(
+  email: string,
+): Promise<UserResponse> {
   try {
     const user = await prisma.user.update({
       where: {

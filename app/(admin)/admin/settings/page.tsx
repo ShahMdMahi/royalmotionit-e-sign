@@ -6,7 +6,8 @@ import { AdminSettingsComponent } from "@/components/admin/admin-settings";
 
 export const metadata: Metadata = {
   title: "Settings - Admin - Royal Sign - RoyalMotionIT",
-  description: "Settings for managing administrative tasks in Royal Sign e-signature application.",
+  description:
+    "Settings for managing administrative tasks in Royal Sign e-signature application.",
 };
 
 export default async function AdminSettings() {

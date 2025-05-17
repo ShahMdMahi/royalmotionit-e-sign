@@ -5,9 +5,22 @@ import { MobileMenu } from "@/components/root/mobile-menu";
 import Image from "next/image";
 import { auth } from "@/auth";
 import { Role } from "@prisma/client";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileSignature, LayoutDashboard, LogOut, Settings, User } from "lucide-react";
+import {
+  FileSignature,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+  User,
+} from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { logoutUser } from "@/actions/auth";
 
@@ -44,7 +57,12 @@ export default async function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <div className="flex items-center gap-2">
-            <Image src="/icon_logo.png" alt="RoyalMotionIT" width={24} height={24} />
+            <Image
+              src="/icon_logo.png"
+              alt="RoyalMotionIT"
+              width={24}
+              height={24}
+            />
             <span className="text-xl font-bold">Royal Sign</span>
           </div>
         </Link>
@@ -52,7 +70,13 @@ export default async function Navbar() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-6">
           {navItems.map((item) => (
-            <Link key={item.name} href={item.href} className={cn("text-sm font-medium transition-colors hover:text-primary")}>
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-primary",
+              )}
+            >
               {item.name}
             </Link>
           ))}
@@ -71,15 +95,28 @@ export default async function Navbar() {
               {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative rounded-full h-8 w-8 p-0">
-                    <Avatar className="h-8 w-8">{userImage ? <AvatarImage src={userImage} alt={userName || "User"} /> : <AvatarFallback>{getInitials(userName)}</AvatarFallback>}</Avatar>
+                  <Button
+                    variant="ghost"
+                    className="relative rounded-full h-8 w-8 p-0"
+                  >
+                    <Avatar className="h-8 w-8">
+                      {userImage ? (
+                        <AvatarImage src={userImage} alt={userName || "User"} />
+                      ) : (
+                        <AvatarFallback>{getInitials(userName)}</AvatarFallback>
+                      )}
+                    </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{userName || "User"}</p>
-                      <p className="text-xs leading-none text-muted-foreground">{userEmail}</p>
+                      <p className="text-sm font-medium leading-none">
+                        {userName || "User"}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {userEmail}
+                      </p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -97,7 +134,7 @@ export default async function Navbar() {
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         <span>Dashboard</span>
                       </DropdownMenuItem>
-                    </Link>
+                    </Link>{" "}
                     <Link href="/documents">
                       <DropdownMenuItem>
                         <FileSignature className="mr-2 h-4 w-4" />
@@ -119,7 +156,10 @@ export default async function Navbar() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="text-destructive" asChild>
                       <form action={logoutUser}>
-                        <Button type="submit" className="w-full flex items-center">
+                        <Button
+                          type="submit"
+                          className="w-full flex items-center"
+                        >
                           <LogOut className="mr-2 h-4 w-4" />
                           <span>Sign out</span>
                         </Button>
@@ -131,7 +171,11 @@ export default async function Navbar() {
             </div>
           ) : (
             <>
-              <Button variant="outline" asChild className="hidden sm:inline-flex">
+              <Button
+                variant="outline"
+                asChild
+                className="hidden sm:inline-flex"
+              >
                 <Link href="/auth/login">Login</Link>
               </Button>
               <Button asChild>
@@ -141,7 +185,14 @@ export default async function Navbar() {
           )}
 
           {/* Mobile Menu */}
-          <MobileMenu navItems={navItems} isLoggedIn={isLoggedIn} userName={userName} userEmail={userEmail} userImage={userImage} isAdmin={isAdmin} />
+          <MobileMenu
+            navItems={navItems}
+            isLoggedIn={isLoggedIn}
+            userName={userName}
+            userEmail={userEmail}
+            userImage={userImage}
+            isAdmin={isAdmin}
+          />
         </div>
       </div>
     </header>

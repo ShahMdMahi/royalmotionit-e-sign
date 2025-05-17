@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { Session } from "next-auth";
 import { Mail, User, Settings as SettingsIcon } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -19,8 +25,12 @@ interface SettingsComponentProps {
   notification: boolean;
 }
 
-export function SettingsComponent({ session, notification }: SettingsComponentProps) {
-  const [emailNotifications, setEmailNotifications] = useState<boolean>(notification);
+export function SettingsComponent({
+  session,
+  notification,
+}: SettingsComponentProps) {
+  const [emailNotifications, setEmailNotifications] =
+    useState<boolean>(notification);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
   const userName = session.user?.name || "User";
@@ -38,11 +48,15 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
       const response = await changeNotificationSettings(newStatus);
 
       if (response.success) {
-        toast.success(response.message || "Notification settings updated successfully.");
+        toast.success(
+          response.message || "Notification settings updated successfully.",
+        );
       } else {
         // Revert state if request failed
         setEmailNotifications(!newStatus);
-        toast.error(response.message || "Failed to update notification settings.");
+        toast.error(
+          response.message || "Failed to update notification settings.",
+        );
       }
     } catch (error) {
       console.error("Error updating notification settings:", error);
@@ -76,11 +90,17 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
       <Tabs defaultValue="profile" className="w-full">
         <div className="mb-8 border-b border-border/80 overflow-x-auto">
           <TabsList className="w-full md:w-auto justify-start bg-transparent h-12">
-            <TabsTrigger value="profile" className="gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
+            <TabsTrigger
+              value="profile"
+              className="gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+            >
               <User className="size-4" />
               <span>Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
+            <TabsTrigger
+              value="notifications"
+              className="gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+            >
               <Mail className="size-4" />
               <span>Notifications</span>
             </TabsTrigger>
@@ -90,7 +110,9 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
         {/* Profile Tab - Name and Password Change */}
         <TabsContent value="profile" className="space-y-8">
           <Alert className="bg-primary/5 border-primary/20">
-            <AlertDescription className="text-sm text-foreground">Update your profile information and password</AlertDescription>
+            <AlertDescription className="text-sm text-foreground">
+              Update your profile information and password
+            </AlertDescription>
           </Alert>
 
           <div className="grid grid-cols-1 gap-8">
@@ -103,7 +125,9 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
                   </div>
                   Profile Information
                 </CardTitle>
-                <CardDescription className="text-base">Update your name</CardDescription>
+                <CardDescription className="text-base">
+                  Update your name
+                </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <NameChangeForm />
@@ -118,7 +142,9 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
         {/* Notifications Tab - Email Notifications */}
         <TabsContent value="notifications" className="space-y-8">
           <Alert className="bg-primary/5 border-primary/20">
-            <AlertDescription className="text-sm text-foreground">Control email notification settings</AlertDescription>
+            <AlertDescription className="text-sm text-foreground">
+              Control email notification settings
+            </AlertDescription>
           </Alert>
 
           <div className="grid grid-cols-1 gap-8">
@@ -130,19 +156,37 @@ export function SettingsComponent({ session, notification }: SettingsComponentPr
                   </div>
                   Email Notifications
                 </CardTitle>
-                <CardDescription className="text-base">Manage email notification preferences</CardDescription>
+                <CardDescription className="text-base">
+                  Manage email notification preferences
+                </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-4 bg-card/50 rounded-lg border border-border shadow-sm">
                     <div className="space-y-1">
-                      <Label htmlFor="email-notif" className="text-lg font-medium">
+                      <Label
+                        htmlFor="email-notif"
+                        className="text-lg font-medium"
+                      >
                         Email Notifications
                       </Label>
-                      <p className="text-sm text-muted-foreground">Receive notifications about document activities via email</p>
+                      <p className="text-sm text-muted-foreground">
+                        Receive notifications about document activities via
+                        email
+                      </p>
                     </div>
-                    <Switch id="email-notif" checked={emailNotifications} onCheckedChange={handleNotificationChange} disabled={isUpdating} className="scale-125 data-[state=checked]:bg-primary" />
-                    {isUpdating && <span className="ml-2 text-xs text-muted-foreground animate-pulse">Updating...</span>}
+                    <Switch
+                      id="email-notif"
+                      checked={emailNotifications}
+                      onCheckedChange={handleNotificationChange}
+                      disabled={isUpdating}
+                      className="scale-125 data-[state=checked]:bg-primary"
+                    />
+                    {isUpdating && (
+                      <span className="ml-2 text-xs text-muted-foreground animate-pulse">
+                        Updating...
+                      </span>
+                    )}
                   </div>
                 </div>
               </CardContent>

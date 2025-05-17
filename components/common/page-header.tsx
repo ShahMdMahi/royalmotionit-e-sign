@@ -23,7 +23,7 @@ export function PageHeader({
   userEmail = "",
   userId = "",
   userImage = null,
-  icon
+  icon,
 }: PageHeaderProps) {
   // Helper function to get user initials for avatar fallback
   const getInitials = (name: string) => {
@@ -40,15 +40,20 @@ export function PageHeader({
       <div className="space-y-2 flex items-center gap-3">
         {icon && <div className="hidden sm:flex">{icon}</div>}
         <div>
-          <h1 className="text-3xl font-bold tracking-tighter md:text-4xl">{title}</h1>
+          <h1 className="text-3xl font-bold tracking-tighter md:text-4xl">
+            {title}
+          </h1>
           <p className="text-muted-foreground text-lg">{description}</p>
         </div>
       </div>
-      
+
       {showUserInfo && (
         <div className="flex items-center gap-4 bg-card p-3 rounded-lg border border-border shadow-sm">
           <Avatar className="h-12 w-12 border-2 border-primary/30 shadow-md">
-            <AvatarImage src={userImage ?? undefined} alt={userName || "User"} />
+            <AvatarImage
+              src={userImage ?? undefined}
+              alt={userName || "User"}
+            />
             <AvatarFallback className="bg-primary/10 text-primary font-medium text-lg">
               {getInitials(userName || "U")}
             </AvatarFallback>

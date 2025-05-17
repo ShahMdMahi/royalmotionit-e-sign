@@ -6,7 +6,8 @@ import { AdminProfileComponent } from "@/components/admin/admin-profile";
 
 export const metadata: Metadata = {
   title: "Profile - Admin - Royal Sign - RoyalMotionIT",
-  description: "Profile for managing administrative tasks in Royal Sign e-signature application.",
+  description:
+    "Profile for managing administrative tasks in Royal Sign e-signature application.",
 };
 
 export default async function AdminProfile() {

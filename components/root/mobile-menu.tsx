@@ -2,9 +2,28 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, User, FileSignature, LogIn, LogOut, Home, Info, Phone, FileText, Settings, LayoutDashboard } from "lucide-react";
+import {
+  Menu,
+  User,
+  FileSignature,
+  LogIn,
+  LogOut,
+  Home,
+  Info,
+  Phone,
+  FileText,
+  Settings,
+  LayoutDashboard,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Image from "next/image";
@@ -20,7 +39,14 @@ interface MobileMenuProps {
   isAdmin?: boolean;
 }
 
-export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImage, isAdmin }: MobileMenuProps) {
+export function MobileMenu({
+  navItems,
+  isLoggedIn,
+  userEmail,
+  userName,
+  userImage,
+  isAdmin,
+}: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
@@ -43,29 +69,55 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
           <span className="sr-only">Toggle menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="flex flex-col w-full max-w-[80vw] sm:max-w-[300px] p-3 sm:p-4">
+      <SheetContent
+        side="left"
+        className="flex flex-col w-full max-w-[80vw] sm:max-w-[300px] p-3 sm:p-4"
+      >
         <SheetHeader className="border-b pb-2 -mx-3 sm:-mx-4 px-3 sm:px-4">
           <div className="flex justify-start items-center gap-1.5 mb-1">
-            <Image src="/icon_logo.png" alt="RoyalMotionIT" width={24} height={24} />
+            <Image
+              src="/icon_logo.png"
+              alt="RoyalMotionIT"
+              width={24}
+              height={24}
+            />
             <SheetTitle className="text-base">Royal Sign</SheetTitle>
           </div>
-          <SheetDescription className="text-xs">E-Signature Platform by RoyalMotionIT</SheetDescription>
+          <SheetDescription className="text-xs">
+            E-Signature Platform by RoyalMotionIT
+          </SheetDescription>
         </SheetHeader>
 
         {isLoggedIn && (
           <div className="flex items-center gap-2 my-2 p-2 bg-muted/50 rounded-md mx-0.5">
-            <Avatar className="h-7 w-7">{userImage ? <AvatarImage src={userImage} alt={userName || "User"} /> : <AvatarFallback>{getInitials(userName)}</AvatarFallback>}</Avatar>
+            <Avatar className="h-7 w-7">
+              {userImage ? (
+                <AvatarImage src={userImage} alt={userName || "User"} />
+              ) : (
+                <AvatarFallback>{getInitials(userName)}</AvatarFallback>
+              )}
+            </Avatar>
             <div className="flex flex-col overflow-hidden">
-              <span className="text-xs font-medium truncate">{userName || "User"}</span>
-              <span className="text-xs text-muted-foreground truncate">{userEmail}</span>
+              <span className="text-xs font-medium truncate">
+                {userName || "User"}
+              </span>
+              <span className="text-xs text-muted-foreground truncate">
+                {userEmail}
+              </span>
             </div>
           </div>
         )}
 
         <div className="flex flex-col gap-1 my-1.5 flex-1 overflow-y-auto max-h-[50vh] px-1">
-          <span className="text-xs font-medium text-muted-foreground mb-0.5 px-1">NAVIGATION</span>
+          <span className="text-xs font-medium text-muted-foreground mb-0.5 px-1">
+            NAVIGATION
+          </span>
 
-          <Link href="/" className="flex items-center text-sm py-1.5 px-2 hover:text-primary transition-colors rounded hover:bg-muted/50" onClick={() => setIsOpen(false)}>
+          <Link
+            href="/"
+            className="flex items-center text-sm py-1.5 px-2 hover:text-primary transition-colors rounded hover:bg-muted/50"
+            onClick={() => setIsOpen(false)}
+          >
             <Home className="h-4 w-4 mr-2" />
             Home
           </Link>
@@ -73,11 +125,20 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
           {navItems
             .filter((item) => item.name !== "Home")
             .map((item) => (
-              <Link key={item.name} href={item.href} className="flex items-center text-sm py-1.5 px-2 hover:text-primary transition-colors rounded hover:bg-muted/50" onClick={() => setIsOpen(false)}>
+              <Link
+                key={item.name}
+                href={item.href}
+                className="flex items-center text-sm py-1.5 px-2 hover:text-primary transition-colors rounded hover:bg-muted/50"
+                onClick={() => setIsOpen(false)}
+              >
                 {item.name === "About" && <Info className="h-4 w-4 mr-2" />}
                 {item.name === "Contact" && <Phone className="h-4 w-4 mr-2" />}
-                {item.name === "Privacy Policy" && <FileText className="h-4 w-4 mr-2" />}
-                {item.name === "Terms of Service" && <FileText className="h-4 w-4 mr-2" />}
+                {item.name === "Privacy Policy" && (
+                  <FileText className="h-4 w-4 mr-2" />
+                )}
+                {item.name === "Terms of Service" && (
+                  <FileText className="h-4 w-4 mr-2" />
+                )}
                 {item.name}
               </Link>
             ))}
@@ -114,8 +175,7 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
                 >
                   <LayoutDashboard className="h-4 w-4" />
                   Dashboard
-                </Button>
-
+                </Button>{" "}
                 <Button
                   variant="outline"
                   size="sm"
@@ -128,7 +188,6 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
                   <FileSignature className="h-4 w-4" />
                   Documents
                 </Button>
-
                 <Button
                   variant="outline"
                   size="sm"
@@ -141,7 +200,6 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
                   <User className="h-4 w-4" />
                   Profile
                 </Button>
-
                 <Button
                   variant="outline"
                   size="sm"
@@ -159,7 +217,12 @@ export function MobileMenu({ navItems, isLoggedIn, userEmail, userName, userImag
               <Separator className="my-1.5 -mx-3 sm:-mx-4" />
 
               <form action={logoutUser} className="w-full">
-                <Button type="submit" variant="destructive" size="sm" className="justify-start gap-1.5 w-full text-xs h-8 px-3">
+                <Button
+                  type="submit"
+                  variant="destructive"
+                  size="sm"
+                  className="justify-start gap-1.5 w-full text-xs h-8 px-3"
+                >
                   <LogOut className="h-4 w-4" />
                   Sign Out
                 </Button>

@@ -37,7 +37,9 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tighter">Admin Profile</h1>
-          <p className="text-muted-foreground">Manage your admin profile and view advanced details</p>
+          <p className="text-muted-foreground">
+            Manage your admin profile and view advanced details
+          </p>
         </div>
         <div className="flex items-center gap-3 bg-primary/5 px-4 py-2 rounded-lg border border-primary/10">
           <Shield className="size-5 text-primary" />
@@ -59,13 +61,25 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
           <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
             <div className="flex flex-col items-center gap-4">
               <Avatar className="w-36 h-36 border-2 border-primary shadow-md">
-                <AvatarImage src={userData.image ?? undefined} alt={userData.name ?? "User"} className="object-cover" />
-                <AvatarFallback className="text-3xl font-bold text-primary bg-primary/10">{getInitials(userData.name ?? "A")}</AvatarFallback>
+                <AvatarImage
+                  src={userData.image ?? undefined}
+                  alt={userData.name ?? "User"}
+                  className="object-cover"
+                />
+                <AvatarFallback className="text-3xl font-bold text-primary bg-primary/10">
+                  {getInitials(userData.name ?? "A")}
+                </AvatarFallback>
               </Avatar>
               <div className="text-center">
-                <h2 className="text-xl font-semibold">{userData.name || "No name provided"}</h2>
-                <p className="text-sm text-muted-foreground">{userData.email}</p>
-                <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">Administrator</div>
+                <h2 className="text-xl font-semibold">
+                  {userData.name || "No name provided"}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {userData.email}
+                </p>
+                <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                  Administrator
+                </div>
               </div>
             </div>
 
@@ -76,12 +90,16 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
                     <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
                       <UserIcon className="size-4 text-primary" />
                     </div>
-                    <span className="font-medium text-lg">Account Information</span>
+                    <span className="font-medium text-lg">
+                      Account Information
+                    </span>
                   </div>
                   <div className="space-y-3 pl-11">
                     <div className="grid grid-cols-[120px_1fr] gap-1">
                       <span className="text-muted-foreground">ID:</span>
-                      <span className="font-medium truncate">{userData.id}</span>
+                      <span className="font-medium truncate">
+                        {userData.id}
+                      </span>
                     </div>
                     <div className="grid grid-cols-[120px_1fr] gap-1">
                       <span className="text-muted-foreground">Email:</span>
@@ -89,7 +107,9 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
                     </div>
                     <div className="grid grid-cols-[120px_1fr] gap-1">
                       <span className="text-muted-foreground">Role:</span>
-                      <span className="font-medium capitalize">{userData.role?.toLowerCase() || "Admin"}</span>
+                      <span className="font-medium capitalize">
+                        {userData.role?.toLowerCase() || "Admin"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -99,15 +119,21 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
                     <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
                       <Shield className="size-4 text-primary" />
                     </div>
-                    <span className="font-medium text-lg">Admin Privileges</span>
+                    <span className="font-medium text-lg">
+                      Admin Privileges
+                    </span>
                   </div>
                   <div className="space-y-3 pl-11">
                     <div className="grid grid-cols-[120px_1fr] gap-1">
-                      <span className="text-muted-foreground">Access Level:</span>
+                      <span className="text-muted-foreground">
+                        Access Level:
+                      </span>
                       <span className="font-medium">Full Access</span>
                     </div>
                     <div className="grid grid-cols-[120px_1fr] gap-1">
-                      <span className="text-muted-foreground">Permissions:</span>
+                      <span className="text-muted-foreground">
+                        Permissions:
+                      </span>
                       <span className="font-medium">All Permissions</span>
                     </div>
                     <div className="grid grid-cols-[120px_1fr] gap-1">
@@ -130,12 +156,24 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-11">
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Account Created</p>
-                    <p className="font-medium">{userData.createdAt ? formatDate(userData.createdAt) : "Not available"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Account Created
+                    </p>
+                    <p className="font-medium">
+                      {userData.createdAt
+                        ? formatDate(userData.createdAt)
+                        : "Not available"}
+                    </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Last Updated</p>
-                    <p className="font-medium">{userData.updatedAt ? formatDate(userData.updatedAt) : "Not available"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Last Updated
+                    </p>
+                    <p className="font-medium">
+                      {userData.updatedAt
+                        ? formatDate(userData.updatedAt)
+                        : "Not available"}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Last Login</p>
@@ -143,7 +181,11 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Admin Since</p>
-                    <p className="font-medium">{userData.createdAt ? formatDate(userData.createdAt) : "Not available"}</p>
+                    <p className="font-medium">
+                      {userData.createdAt
+                        ? formatDate(userData.createdAt)
+                        : "Not available"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -155,7 +197,9 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
                   </div>
                   <div className="space-y-1 flex-1">
                     <p className="font-medium">User Identifier</p>
-                    <p className="text-sm text-muted-foreground break-all">{userData.id}</p>
+                    <p className="text-sm text-muted-foreground break-all">
+                      {userData.id}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -214,9 +258,14 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
               <CardTitle className="text-lg font-medium">Change Name</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <p className="text-muted-foreground mb-4">You can change your name using the profile settings</p>
+              <p className="text-muted-foreground mb-4">
+                You can change your name using the profile settings
+              </p>
               <div className="flex justify-end">
-                <Link href="/admin/settings" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
+                <Link
+                  href="/admin/settings"
+                  className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90"
+                >
                   Go to Settings
                 </Link>
               </div>
@@ -225,12 +274,19 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
 
           <Card className="overflow-hidden shadow-lg rounded-xl border-border">
             <CardHeader className="p-6 border-b border-border bg-muted/10">
-              <CardTitle className="text-lg font-medium">Change Password</CardTitle>
+              <CardTitle className="text-lg font-medium">
+                Change Password
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <p className="text-muted-foreground mb-4">You can change your password using the profile settings</p>
+              <p className="text-muted-foreground mb-4">
+                You can change your password using the profile settings
+              </p>
               <div className="flex justify-end">
-                <Link href="/admin/settings" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
+                <Link
+                  href="/admin/settings"
+                  className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90"
+                >
                   Go to Settings
                 </Link>
               </div>

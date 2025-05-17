@@ -12,8 +12,12 @@ export function DashboardComponent() {
       <div className="flex flex-col gap-10">
         {/* Header Section */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tighter md:text-4xl">Welcome to Your Dashboard</h1>
-          <p className="text-muted-foreground text-lg">Manage and track all your documents and signature requests.</p>
+          <h1 className="text-3xl font-bold tracking-tighter md:text-4xl">
+            Welcome to Your Dashboard
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Manage and track all your documents and signature requests.
+          </p>
         </div>
 
         {/* Main User Actions */}
@@ -26,7 +30,9 @@ export function DashboardComponent() {
                 </div>
                 <div className="space-y-2 text-center">
                   <h3 className="text-xl font-medium">My Documents</h3>
-                  <p className="text-sm text-muted-foreground">Access and manage your documents</p>
+                  <p className="text-sm text-muted-foreground">
+                    Access and manage your documents
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -40,7 +46,9 @@ export function DashboardComponent() {
                 </div>
                 <div className="space-y-2 text-center">
                   <h3 className="text-xl font-medium">My Profile</h3>
-                  <p className="text-sm text-muted-foreground">View and update your account details</p>
+                  <p className="text-sm text-muted-foreground">
+                    View and update your account details
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -54,7 +62,9 @@ export function DashboardComponent() {
                 </div>
                 <div className="space-y-2 text-center">
                   <h3 className="text-xl font-medium">My Settings</h3>
-                  <p className="text-sm text-muted-foreground">Customize your preferences</p>
+                  <p className="text-sm text-muted-foreground">
+                    Customize your preferences
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -67,10 +77,16 @@ export function DashboardComponent() {
                   <LogOut className="size-7 text-destructive" />
                 </div>
                 <div className="space-y-2 text-center">
-                  <Button type="submit" variant="ghost" className="text-xl font-medium h-auto p-0 hover:text-destructive">
+                  <Button
+                    type="submit"
+                    variant="ghost"
+                    className="text-xl font-medium h-auto p-0 hover:text-destructive"
+                  >
                     Logout
                   </Button>
-                  <p className="text-sm text-muted-foreground">Sign out from your account</p>
+                  <p className="text-sm text-muted-foreground">
+                    Sign out from your account
+                  </p>
                 </div>
               </CardContent>
             </Card>

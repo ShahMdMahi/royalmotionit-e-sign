@@ -1,4 +1,19 @@
-import { Body, Button, Container, Head, Heading, Hr, Html, Img, Link, Preview, Section, Text, Column, Row } from "@react-email/components";
+import {
+  Body,
+  Button,
+  Container,
+  Head,
+  Heading,
+  Hr,
+  Html,
+  Img,
+  Link,
+  Preview,
+  Section,
+  Text,
+  Column,
+  Row,
+} from "@react-email/components";
 
 interface ResetPasswordEmailProps {
   username: string;
@@ -6,8 +21,13 @@ interface ResetPasswordEmailProps {
   resetToken: string;
 }
 
-export const ResetPasswordEmail = ({ username, userEmail, resetToken }: ResetPasswordEmailProps) => {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://royal-sign.vercel.app";
+export const ResetPasswordEmail = ({
+  username,
+  userEmail,
+  resetToken,
+}: ResetPasswordEmailProps) => {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL || "https://royal-sign.vercel.app";
   const resetPasswordUrl = `${baseUrl}/auth/reset-password/${resetToken}`;
 
   // Theme colors from globals.css using exact OKLCH values
@@ -45,7 +65,13 @@ export const ResetPasswordEmail = ({ username, userEmail, resetToken }: ResetPas
               backgroundImage: `linear-gradient(120deg, ${theme.primaryHex}30 0%, ${theme.primaryHex}70 100%)`,
             }}
           >
-            <Img src={`${baseUrl}/name_logo.png`} width="220" height="auto" alt="Royal Sign Logo" style={logo} />
+            <Img
+              src={`${baseUrl}/name_logo.png`}
+              width="220"
+              height="auto"
+              alt="Royal Sign Logo"
+              style={logo}
+            />
             <Heading
               style={{
                 ...heading,
@@ -60,7 +86,8 @@ export const ResetPasswordEmail = ({ username, userEmail, resetToken }: ResetPas
           <Section style={contentSection}>
             <Text style={greeting}>Hello {username},</Text>
             <Text style={text}>
-              We received a request to reset the password for your Royal Sign account with email address:{" "}
+              We received a request to reset the password for your Royal Sign
+              account with email address:{" "}
               <span
                 style={{
                   ...highlight,
@@ -70,7 +97,10 @@ export const ResetPasswordEmail = ({ username, userEmail, resetToken }: ResetPas
                 {userEmail}
               </span>
             </Text>
-            <Text style={text}>To reset your password, click the button below. This link will expire in 1 hour for security purposes.</Text>
+            <Text style={text}>
+              To reset your password, click the button below. This link will
+              expire in 1 hour for security purposes.
+            </Text>
 
             {/* Call to action button */}
             <Section style={buttonContainer}>
@@ -94,14 +124,29 @@ export const ResetPasswordEmail = ({ username, userEmail, resetToken }: ResetPas
                 borderLeft: `4px solid ${theme.primaryHex}`,
               }}
             >
-              <Text style={securityHeading}>Important Security Information:</Text>
-              <Text style={securityText}>• This password reset link will expire in 1 hour</Text>
-              <Text style={securityText}>• If you did not request a password reset, please ignore this email or contact support</Text>
-              <Text style={securityText}>• For security, never share this reset link with anyone</Text>
-              <Text style={securityText}>• Choose a strong, unique password that you haven't used elsewhere</Text>
+              <Text style={securityHeading}>
+                Important Security Information:
+              </Text>
+              <Text style={securityText}>
+                • This password reset link will expire in 1 hour
+              </Text>
+              <Text style={securityText}>
+                • If you did not request a password reset, please ignore this
+                email or contact support
+              </Text>
+              <Text style={securityText}>
+                • For security, never share this reset link with anyone
+              </Text>
+              <Text style={securityText}>
+                • Choose a strong, unique password that you haven't used
+                elsewhere
+              </Text>
             </Section>
 
-            <Text style={{ ...text, marginTop: "30px" }}>If the button above doesn't work, you can copy and paste the following URL into your browser:</Text>
+            <Text style={{ ...text, marginTop: "30px" }}>
+              If the button above doesn't work, you can copy and paste the
+              following URL into your browser:
+            </Text>
             <Text
               style={{
                 ...resetLink,
@@ -134,8 +179,17 @@ export const ResetPasswordEmail = ({ username, userEmail, resetToken }: ResetPas
             >
               Need Help?
             </Text>
-            <Text style={text}>If you're having trouble resetting your password or didn't request this change, contact our support team immediately.</Text>
-            <Img src={`${baseUrl}/icon_logo.png`} width="30" height="30" alt="Support" style={supportIcon} />
+            <Text style={text}>
+              If you're having trouble resetting your password or didn't request
+              this change, contact our support team immediately.
+            </Text>
+            <Img
+              src={`${baseUrl}/icon_logo.png`}
+              width="30"
+              height="30"
+              alt="Support"
+              style={supportIcon}
+            />
             <Button
               href="mailto:support@royalmotionit.com"
               style={{
@@ -155,9 +209,16 @@ export const ResetPasswordEmail = ({ username, userEmail, resetToken }: ResetPas
               backgroundColor: `${theme.secondaryForegroundHex}08`,
             }}
           >
-            <Img src={`${baseUrl}/logo.png`} width="60" height="auto" alt="Royal Sign Logo" style={footerLogo} />
+            <Img
+              src={`${baseUrl}/logo.png`}
+              width="60"
+              height="auto"
+              alt="Royal Sign Logo"
+              style={footerLogo}
+            />
             <Text style={footerText}>
-              If you have any questions or need assistance, please contact our support team at{" "}
+              If you have any questions or need assistance, please contact our
+              support team at{" "}
               <Link
                 href="mailto:support@royalmotionit.com"
                 style={{
@@ -186,7 +247,9 @@ export const ResetPasswordEmail = ({ username, userEmail, resetToken }: ResetPas
               </span>
             </Text>
             <Text style={footerText}>Powered by Royal Motion IT</Text>
-            <Text style={copyright}>© {currentYear} Royal Motion IT. All rights reserved.</Text>
+            <Text style={copyright}>
+              © {currentYear} Royal Motion IT. All rights reserved.
+            </Text>
           </Section>
         </Container>
       </Body>
@@ -199,7 +262,8 @@ export default ResetPasswordEmail;
 // Email styles
 const main = {
   backgroundColor: "#f8f9fc",
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif',
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif',
   color: "#333333",
 };
 

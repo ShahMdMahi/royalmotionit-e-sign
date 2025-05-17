@@ -1,4 +1,19 @@
-import { Body, Button, Container, Head, Heading, Hr, Html, Img, Link, Preview, Section, Text, Column, Row } from "@react-email/components";
+import {
+  Body,
+  Button,
+  Container,
+  Head,
+  Heading,
+  Hr,
+  Html,
+  Img,
+  Link,
+  Preview,
+  Section,
+  Text,
+  Column,
+  Row,
+} from "@react-email/components";
 
 interface WelcomeEmailProps {
   username: string;
@@ -6,7 +21,8 @@ interface WelcomeEmailProps {
 }
 
 export const WelcomeEmail = ({ username, userEmail }: WelcomeEmailProps) => {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://royal-sign.vercel.app";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL || "https://royal-sign.vercel.app";
 
   // Theme colors from globals.css using exact OKLCH values
   const theme = {
@@ -43,7 +59,13 @@ export const WelcomeEmail = ({ username, userEmail }: WelcomeEmailProps) => {
               backgroundImage: `linear-gradient(120deg, ${theme.primaryHex}30 0%, ${theme.primaryHex}70 100%)`,
             }}
           >
-            <Img src={`${baseUrl}/name_logo.png`} width="220" height="auto" alt="Royal Sign Logo" style={logo} />
+            <Img
+              src={`${baseUrl}/name_logo.png`}
+              width="220"
+              height="auto"
+              alt="Royal Sign Logo"
+              style={logo}
+            />
             <Heading
               style={{
                 ...heading,
@@ -58,7 +80,9 @@ export const WelcomeEmail = ({ username, userEmail }: WelcomeEmailProps) => {
           <Section style={contentSection}>
             <Text style={greeting}>Hello {username},</Text>
             <Text style={text}>
-              Thank you for signing up for Royal Sign by Royal Motion IT. We're excited to have you on board! Your account has been created with the email address:{" "}
+              Thank you for signing up for Royal Sign by Royal Motion IT. We're
+              excited to have you on board! Your account has been created with
+              the email address:{" "}
               <span
                 style={{
                   ...highlight,
@@ -69,7 +93,9 @@ export const WelcomeEmail = ({ username, userEmail }: WelcomeEmailProps) => {
               </span>
             </Text>
             <Text style={text}>
-              Royal Sign provides a secure and efficient way to electronically sign and manage your documents. Get started by exploring our dashboard and creating your first signature.
+              Royal Sign provides a secure and efficient way to electronically
+              sign and manage your documents. Get started by exploring our
+              dashboard and creating your first signature.
             </Text>
 
             {/* Call to action button */}
@@ -94,27 +120,61 @@ export const WelcomeEmail = ({ username, userEmail }: WelcomeEmailProps) => {
                 borderLeft: `4px solid ${theme.primaryHex}`,
               }}
             >
-              <Text style={featuresHeading}>Here are some quick tips to get you started:</Text>
+              <Text style={featuresHeading}>
+                Here are some quick tips to get you started:
+              </Text>
 
               <Row>
                 <Column style={featureColumn}>
-                  <Img src={`${baseUrl}/icon_logo.png`} width="40" height="40" alt="Upload" style={featureIcon} />
-                  <Text style={featureText}>Upload documents that need signatures</Text>
+                  <Img
+                    src={`${baseUrl}/icon_logo.png`}
+                    width="40"
+                    height="40"
+                    alt="Upload"
+                    style={featureIcon}
+                  />
+                  <Text style={featureText}>
+                    Upload documents that need signatures
+                  </Text>
                 </Column>
                 <Column style={featureColumn}>
-                  <Img src={`${baseUrl}/icon_logo.png`} width="40" height="40" alt="Create" style={featureIcon} />
-                  <Text style={featureText}>Create and save your signature</Text>
+                  <Img
+                    src={`${baseUrl}/icon_logo.png`}
+                    width="40"
+                    height="40"
+                    alt="Create"
+                    style={featureIcon}
+                  />
+                  <Text style={featureText}>
+                    Create and save your signature
+                  </Text>
                 </Column>
               </Row>
 
               <Row>
                 <Column style={featureColumn}>
-                  <Img src={`${baseUrl}/icon_logo.png`} width="40" height="40" alt="Send" style={featureIcon} />
-                  <Text style={featureText}>Send documents for signature to others</Text>
+                  <Img
+                    src={`${baseUrl}/icon_logo.png`}
+                    width="40"
+                    height="40"
+                    alt="Send"
+                    style={featureIcon}
+                  />
+                  <Text style={featureText}>
+                    Send documents for signature to others
+                  </Text>
                 </Column>
                 <Column style={featureColumn}>
-                  <Img src={`${baseUrl}/icon_logo.png`} width="40" height="40" alt="Track" style={featureIcon} />
-                  <Text style={featureText}>Track signature status in real-time</Text>
+                  <Img
+                    src={`${baseUrl}/icon_logo.png`}
+                    width="40"
+                    height="40"
+                    alt="Track"
+                    style={featureIcon}
+                  />
+                  <Text style={featureText}>
+                    Track signature status in real-time
+                  </Text>
                 </Column>
               </Row>
             </Section>
@@ -142,8 +202,17 @@ export const WelcomeEmail = ({ username, userEmail }: WelcomeEmailProps) => {
             >
               Need Help Getting Started?
             </Text>
-            <Text style={text}>Our team is here to help you make the most of Royal Sign. Feel free to reach out with any questions.</Text>
-            <Img src={`${baseUrl}/icon_logo.png`} width="30" height="30" alt="Support" style={supportIcon} />
+            <Text style={text}>
+              Our team is here to help you make the most of Royal Sign. Feel
+              free to reach out with any questions.
+            </Text>
+            <Img
+              src={`${baseUrl}/icon_logo.png`}
+              width="30"
+              height="30"
+              alt="Support"
+              style={supportIcon}
+            />
             <Button
               href="mailto:support@royalmotionit.com"
               style={{
@@ -163,9 +232,16 @@ export const WelcomeEmail = ({ username, userEmail }: WelcomeEmailProps) => {
               backgroundColor: `${theme.secondaryForegroundHex}08`,
             }}
           >
-            <Img src={`${baseUrl}/logo.png`} width="60" height="auto" alt="Royal Sign Logo" style={footerLogo} />
+            <Img
+              src={`${baseUrl}/logo.png`}
+              width="60"
+              height="auto"
+              alt="Royal Sign Logo"
+              style={footerLogo}
+            />
             <Text style={footerText}>
-              If you have any questions or need assistance, please contact our support team at{" "}
+              If you have any questions or need assistance, please contact our
+              support team at{" "}
               <Link
                 href="mailto:support@royalmotionit.com"
                 style={{
@@ -194,7 +270,9 @@ export const WelcomeEmail = ({ username, userEmail }: WelcomeEmailProps) => {
               </span>
             </Text>
             <Text style={footerText}>Powered by Royal Motion IT</Text>
-            <Text style={copyright}>© {currentYear} Royal Motion IT. All rights reserved.</Text>
+            <Text style={copyright}>
+              © {currentYear} Royal Motion IT. All rights reserved.
+            </Text>
           </Section>
         </Container>
       </Body>
@@ -207,7 +285,8 @@ export default WelcomeEmail;
 // Email styles
 const main = {
   backgroundColor: "#f8f9fc",
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif',
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif',
   color: "#333333",
 };
 
