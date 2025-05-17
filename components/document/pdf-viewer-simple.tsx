@@ -1,12 +1,27 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  useMemo,
+} from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { DocumentField } from "@/types/document";
-import { handlePageChange, handleTotalPagesChange } from "@/actions/pdf-viewer-actions";
+import {
+  handlePageChange,
+  handleTotalPagesChange,
+} from "@/actions/pdf-viewer-actions";
 import { usePdfWorker } from "@/hooks/use-pdf-worker";
 import { cn } from "@/lib/utils";
-import { pdfToScreenCoordinates, screenToPdfCoordinates, getAccurateScaleFactor, preciseScaledValue, getExactFieldPosition } from "@/utils/pdf-utils";
+import {
+  pdfToScreenCoordinates,
+  screenToPdfCoordinates,
+  getAccurateScaleFactor,
+  preciseScaledValue,
+  getExactFieldPosition,
+} from "@/utils/pdf-utils";
 
 // Import react-pdf styles for annotations
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
@@ -52,8 +67,17 @@ export function PDFViewerSimple({
   // Debug logging
   if (debug) {
     console.log("PDF.js version:", pdfjs.version);
-    console.log("PDF data type:", typeof pdfData, pdfData instanceof Uint8Array ? "Uint8Array" : "", Array.isArray(pdfData) ? "Array" : "");
-    console.log("PDF.js worker loaded:", workerLoaded, workerError ? `Error: ${workerError.message}` : "");
+    console.log(
+      "PDF data type:",
+      typeof pdfData,
+      pdfData instanceof Uint8Array ? "Uint8Array" : "",
+      Array.isArray(pdfData) ? "Array" : "",
+    );
+    console.log(
+      "PDF.js worker loaded:",
+      workerLoaded,
+      workerError ? `Error: ${workerError.message}` : "",
+    );
   }
 
   // Update container dimensions on resize
@@ -67,7 +91,7 @@ export function PDFViewerSimple({
   useEffect(() => {
     // We no longer need complex dimension measurements
     // Our fields will scale directly with the Page component
-    
+
     // Just add a resize handler in case we need it later
     const handleResize = () => {
       // No-op for now, we don't need to respond to window resizes
@@ -94,7 +118,7 @@ export function PDFViewerSimple({
       // Allow some time for the page to render before measuring
       setTimeout(updateDimensions, 100);
     },
-    [onTotalPagesChangeAction, updateDimensions]
+    [onTotalPagesChangeAction, updateDimensions],
   );
 
   // Handle page render success to get dimensions and update scale
@@ -114,12 +138,15 @@ export function PDFViewerSimple({
         setPageSize(originalSize);
 
         if (debug) {
-          console.log("PDF original dimensions from page object:", originalSize);
+          console.log(
+            "PDF original dimensions from page object:",
+            originalSize,
+          );
           console.log("Using viewer scale:", viewerScale);
         }
       }
     },
-    [debug, viewerScale]
+    [debug, viewerScale],
   );
 
   // Handle page change
@@ -130,7 +157,7 @@ export function PDFViewerSimple({
         await onPageChangeAction(newPage);
       }
     },
-    [onPageChangeAction]
+    [onPageChangeAction],
   );
 
   // Get fields for current page - strictly filter by exact page number match
@@ -144,16 +171,15 @@ export function PDFViewerSimple({
     // For preview mode, we want to use the raw scale value
     // This matches the edit viewer's behavior since we're using the scale prop on the Page component
     // We're directly passing viewerScale to the Page component, so we use it directly here too
-    
+
     if (debug) {
       console.log("Scale factor calculation:", {
         viewerZoomLevel: viewerScale,
         scaleFactor: viewerScale,
       });
     }
-    
-    return viewerScale;  // Use the direct zoom level as our scale factor
-    
+
+    return viewerScale; // Use the direct zoom level as our scale factor
   }, [viewerScale, debug]);
 
   // Helper to increment zoom level
@@ -184,7 +210,8 @@ export function PDFViewerSimple({
   const renderFieldOverlay = useCallback(
     (field: DocumentField) => {
       const value = fieldValues[field.id] || "";
-      const isAssignedToCurrentSigner = !field.signerId || field.signerId === currentSignerId;
+      const isAssignedToCurrentSigner =
+        !field.signerId || field.signerId === currentSignerId;
       const hasValue = !!value;
 
       const getFieldDisplay = () => {
@@ -192,60 +219,130 @@ export function PDFViewerSimple({
           case "signature":
             return hasValue ? (
               <div className="absolute inset-0 flex items-center justify-center overflow-hidden w-full h-full">
-                <img src={value} alt="Signature" className="max-w-full max-h-full object-contain" draggable="false" />
+                <img
+                  src={value}
+                  alt="Signature"
+                  className="max-w-full max-h-full object-contain"
+                  draggable="false"
+                />
               </div>
             ) : (
-              <div className="text-muted-foreground text-xs flex items-center justify-center w-full h-full italic">{isAssignedToCurrentSigner ? "Sign here" : "Signature field"}</div>
+              <div className="text-muted-foreground text-xs flex items-center justify-center w-full h-full italic">
+                {isAssignedToCurrentSigner ? "Sign here" : "Signature field"}
+              </div>
             );
           case "initial":
             return hasValue ? (
               <div className="absolute inset-0 flex items-center justify-center overflow-hidden w-full h-full">
-                <img src={value} alt="Initial" className="max-w-full max-h-full object-contain" draggable="false" />
+                <img
+                  src={value}
+                  alt="Initial"
+                  className="max-w-full max-h-full object-contain"
+                  draggable="false"
+                />
               </div>
             ) : (
-              <div className="text-muted-foreground text-xs flex items-center justify-center w-full h-full italic">{isAssignedToCurrentSigner ? "Initial here" : "Initial field"}</div>
+              <div className="text-muted-foreground text-xs flex items-center justify-center w-full h-full italic">
+                {isAssignedToCurrentSigner ? "Initial here" : "Initial field"}
+              </div>
             );
           case "text":
             return (
               <div className="text-foreground text-sm p-1 flex items-center w-full h-full">
-                {hasValue ? value : <span className="text-muted-foreground italic">{field.placeholder || "Text"}</span>}
+                {hasValue ? (
+                  value
+                ) : (
+                  <span className="text-muted-foreground italic">
+                    {field.placeholder || "Text"}
+                  </span>
+                )}
               </div>
             );
           case "date":
             return (
               <div className="text-foreground text-sm p-1 flex items-center w-full h-full">
-                {hasValue ? value : <span className="text-muted-foreground italic">{field.placeholder || "Date"}</span>}
+                {hasValue ? (
+                  value
+                ) : (
+                  <span className="text-muted-foreground italic">
+                    {field.placeholder || "Date"}
+                  </span>
+                )}
               </div>
             );
           case "checkbox":
             return (
               <div className="w-full h-full flex items-center justify-center">
                 {value === "true" || String(value) === "true" ? (
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="0.5" y="0.5" width="15" height="15" rx="1.5" stroke="#000000" />
-                    <path d="M12 5L6.5 10.5L4 8" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect
+                      x="0.5"
+                      y="0.5"
+                      width="15"
+                      height="15"
+                      rx="1.5"
+                      stroke="#000000"
+                    />
+                    <path
+                      d="M12 5L6.5 10.5L4 8"
+                      stroke="#000000"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 ) : (
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="0.5" y="0.5" width="15" height="15" rx="1.5" stroke="#000000" />
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect
+                      x="0.5"
+                      y="0.5"
+                      width="15"
+                      height="15"
+                      rx="1.5"
+                      stroke="#000000"
+                    />
                   </svg>
                 )}
               </div>
             );
           default:
-            return <div className="text-muted-foreground text-xs flex items-center justify-center w-full h-full italic">{field.label || field.type}</div>;
+            return (
+              <div className="text-muted-foreground text-xs flex items-center justify-center w-full h-full italic">
+                {field.label || field.type}
+              </div>
+            );
         }
       };
 
       // Use direct scale factor that matches the Page component's scale
       const scaleFactor = calculateScaleFactor();
-      
+
       // Parse field coordinates and dimensions
-      const x = typeof field.x === 'string' ? parseFloat(field.x) : Number(field.x);
-      const y = typeof field.y === 'string' ? parseFloat(field.y) : Number(field.y);
-      const width = typeof field.width === 'string' ? parseFloat(field.width) : Number(field.width);
-      const height = typeof field.height === 'string' ? parseFloat(field.height) : Number(field.height);
-      
+      const x =
+        typeof field.x === "string" ? parseFloat(field.x) : Number(field.x);
+      const y =
+        typeof field.y === "string" ? parseFloat(field.y) : Number(field.y);
+      const width =
+        typeof field.width === "string"
+          ? parseFloat(field.width)
+          : Number(field.width);
+      const height =
+        typeof field.height === "string"
+          ? parseFloat(field.height)
+          : Number(field.height);
+
       // Apply scale to all dimensions directly
       const exactX = x * scaleFactor;
       const exactY = y * scaleFactor;
@@ -254,9 +351,13 @@ export function PDFViewerSimple({
 
       if (debug) {
         console.group(`Field ${field.id} positioning`);
-        console.log(`Original coordinates: (${field.x}, ${field.y}) with dimensions ${field.width}x${field.height}`);
+        console.log(
+          `Original coordinates: (${field.x}, ${field.y}) with dimensions ${field.width}x${field.height}`,
+        );
         console.log(`Scale factor: ${scaleFactor}`);
-        console.log(`Screen position: (${exactX}, ${exactY}) with dimensions ${exactWidth}x${exactHeight}`);
+        console.log(
+          `Screen position: (${exactX}, ${exactY}) with dimensions ${exactWidth}x${exactHeight}`,
+        );
         console.groupEnd();
       }
 
@@ -265,10 +366,15 @@ export function PDFViewerSimple({
           key={field.id}
           className={cn(
             "field-overlay rounded bg-background/20 backdrop-blur-[1px] overflow-hidden",
-            highlightFields && isAssignedToCurrentSigner && !hasValue && "animate-pulse",
+            highlightFields &&
+              isAssignedToCurrentSigner &&
+              !hasValue &&
+              "animate-pulse",
             hasValue && "bg-background/40",
-            highlightFields && isAssignedToCurrentSigner && "cursor-pointer pointer-events-auto",
-            debug && "outline-2 outline-red-500 z-50"
+            highlightFields &&
+              isAssignedToCurrentSigner &&
+              "cursor-pointer pointer-events-auto",
+            debug && "outline-2 outline-red-500 z-50",
           )}
           style={{
             left: `${exactX}px`,
@@ -279,7 +385,11 @@ export function PDFViewerSimple({
             zIndex: 30,
           }}
           onClick={() => {
-            if (highlightFields && isAssignedToCurrentSigner && onFieldClickAction) {
+            if (
+              highlightFields &&
+              isAssignedToCurrentSigner &&
+              onFieldClickAction
+            ) {
               onFieldClickAction(field.id);
             }
           }}
@@ -294,11 +404,21 @@ export function PDFViewerSimple({
         </div>
       );
     },
-    [calculateScaleFactor, currentSignerId, debug, fieldValues, highlightFields, onFieldClickAction]
+    [
+      calculateScaleFactor,
+      currentSignerId,
+      debug,
+      fieldValues,
+      highlightFields,
+      onFieldClickAction,
+    ],
   );
 
   return (
-    <div className="relative h-full w-full pdf-viewer-container" ref={viewerContainerRef}>
+    <div
+      className="relative h-full w-full pdf-viewer-container"
+      ref={viewerContainerRef}
+    >
       {!workerLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-50">
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
@@ -327,9 +447,9 @@ export function PDFViewerSimple({
               ref={pageRef}
               style={{
                 position: "relative",
-                transformOrigin: 'center', // Center origin for more natural zooming
-                width: 'max-content', // Ensure it fits the content exactly
-                height: 'max-content', // Ensure it fits the content exactly
+                transformOrigin: "center", // Center origin for more natural zooming
+                width: "max-content", // Ensure it fits the content exactly
+                height: "max-content", // Ensure it fits the content exactly
               }}
               data-page-number={currentPage}
               data-viewer-scale={viewerScale}
@@ -360,16 +480,18 @@ export function PDFViewerSimple({
               />
 
               {/* Field overlays */}
-              {viewerLoaded && currentPageFields.map((field) => renderFieldOverlay(field))}
+              {viewerLoaded &&
+                currentPageFields.map((field) => renderFieldOverlay(field))}
 
               {/* Debug grid overlay - only shown in debug mode */}
               {debug && (
-                <div 
-                  className="absolute inset-0 opacity-10 pointer-events-none z-40" 
+                <div
+                  className="absolute inset-0 opacity-10 pointer-events-none z-40"
                   style={{
-                    backgroundImage: 'linear-gradient(to right, rgba(0,0,255,0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,255,0.5) 1px, transparent 1px)',
-                    backgroundSize: '50px 50px',
-                    backgroundPosition: '0 0',
+                    backgroundImage:
+                      "linear-gradient(to right, rgba(0,0,255,0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,255,0.5) 1px, transparent 1px)",
+                    backgroundSize: "50px 50px",
+                    backgroundPosition: "0 0",
                   }}
                 />
               )}
@@ -379,8 +501,24 @@ export function PDFViewerSimple({
         {/* Controls */}
         <div className="flex items-center justify-between p-2 bg-background border-t">
           <div className="flex items-center space-x-2">
-            <button onClick={() => currentPage > 1 && handlePageChanged(currentPage - 1)} disabled={currentPage <= 1} className="p-1 rounded-md hover:bg-accent disabled:opacity-50">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <button
+              onClick={() =>
+                currentPage > 1 && handlePageChanged(currentPage - 1)
+              }
+              disabled={currentPage <= 1}
+              className="p-1 rounded-md hover:bg-accent disabled:opacity-50"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="m15 18-6-6 6-6" />
               </svg>
             </button>
@@ -388,25 +526,66 @@ export function PDFViewerSimple({
               Page {currentPage} of {numPages || "-"}
             </span>
             <button
-              onClick={() => currentPage < (numPages || 0) && handlePageChanged(currentPage + 1)}
+              onClick={() =>
+                currentPage < (numPages || 0) &&
+                handlePageChanged(currentPage + 1)
+              }
               disabled={!numPages || currentPage >= numPages}
               className="p-1 rounded-md hover:bg-accent disabled:opacity-50"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="m9 18 6-6-6-6" />
               </svg>
             </button>
           </div>
 
           <div className="flex items-center space-x-2">
-            <button onClick={zoomOut} className="p-1 rounded-md hover:bg-accent" disabled={viewerScale <= 0.5}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <button
+              onClick={zoomOut}
+              className="p-1 rounded-md hover:bg-accent"
+              disabled={viewerScale <= 0.5}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M5 12h14" />
               </svg>
             </button>
             <span>{Math.round(viewerScale * 100)}%</span>
-            <button onClick={zoomIn} className="p-1 rounded-md hover:bg-accent" disabled={viewerScale >= 2}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <button
+              onClick={zoomIn}
+              className="p-1 rounded-md hover:bg-accent"
+              disabled={viewerScale >= 2}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M12 5v14" />
                 <path d="M5 12h14" />
               </svg>

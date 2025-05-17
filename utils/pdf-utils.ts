@@ -184,7 +184,7 @@ export function getAccurateScaleFactor(
 /**
  * Utility function to accurately position and size PDF fields
  * Handles exact positioning with consistent decimal precision
- * 
+ *
  * @param value Original coordinate or dimension value
  * @param scaleFactor The scaling factor to apply
  * @param decimals Number of decimal places for precision (default: 3)
@@ -193,14 +193,15 @@ export function getAccurateScaleFactor(
 export function preciseScaledValue(
   value: number | string,
   scaleFactor: number,
-  decimals: number = 3
+  decimals: number = 3,
 ): number {
   // Ensure we're working with a number
-  const numericValue = typeof value === 'string' ? parseFloat(value) : Number(value);
-  
+  const numericValue =
+    typeof value === "string" ? parseFloat(value) : Number(value);
+
   // Apply scaling
   const scaled = numericValue * scaleFactor;
-  
+
   // Round to specified decimal places for consistent rendering
   // Using 3 decimal places provides better positioning accuracy
   const factor = Math.pow(10, decimals);
@@ -210,7 +211,7 @@ export function preciseScaledValue(
 /**
  * Enhanced coordinate transformation for PDF field positioning
  * Uses a more accurate approach to calculate the exact position based on multiple factors
- * 
+ *
  * @param field The document field with coordinates in PDF units
  * @param scaleFactor Current scale factor
  * @param viewerScale Current zoom level of the viewer (already incorporated in scaleFactor)
@@ -219,17 +220,28 @@ export function preciseScaledValue(
  * @returns Exact position and dimensions for the field in screen pixels
  */
 export function getExactFieldPosition(
-  field: { x: number | string; y: number | string; width: number | string; height: number | string },
+  field: {
+    x: number | string;
+    y: number | string;
+    width: number | string;
+    height: number | string;
+  },
   scaleFactor: number,
   viewerScale: number = 1,
   pageElement: HTMLElement | null = null,
-  debug: boolean = false
+  debug: boolean = false,
 ) {
   // Convert all values to numbers
-  const x = typeof field.x === 'string' ? parseFloat(field.x) : Number(field.x);
-  const y = typeof field.y === 'string' ? parseFloat(field.y) : Number(field.y);
-  const width = typeof field.width === 'string' ? parseFloat(field.width) : Number(field.width);
-  const height = typeof field.height === 'string' ? parseFloat(field.height) : Number(field.height);
+  const x = typeof field.x === "string" ? parseFloat(field.x) : Number(field.x);
+  const y = typeof field.y === "string" ? parseFloat(field.y) : Number(field.y);
+  const width =
+    typeof field.width === "string"
+      ? parseFloat(field.width)
+      : Number(field.width);
+  const height =
+    typeof field.height === "string"
+      ? parseFloat(field.height)
+      : Number(field.height);
 
   // Calculate exact values with direct multiplication - simplest and most reliable approach
   // scaleFactor already includes zoom level since it's calculated from actual rendered page size
@@ -237,19 +249,19 @@ export function getExactFieldPosition(
   const exactY = y * scaleFactor;
   const exactWidth = width * scaleFactor;
   const exactHeight = height * scaleFactor;
-  
+
   if (debug) {
-    console.log('Field positioning details:', {
+    console.log("Field positioning details:", {
       original: { x, y, width, height },
       scaleFactor,
-      scaled: { x: exactX, y: exactY, width: exactWidth, height: exactHeight }
+      scaled: { x: exactX, y: exactY, width: exactWidth, height: exactHeight },
     });
   }
-  
+
   return {
     x: exactX,
     y: exactY,
     width: exactWidth,
-    height: exactHeight
+    height: exactHeight,
   };
 }

@@ -97,10 +97,11 @@ export function PDFEditViewerSimple({
       if (!selectedFieldId) return;
 
       // Only process arrow keys
-      if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key))
+        return;
 
       // Find the selected field
-      const field = fields.find(f => f.id === selectedFieldId);
+      const field = fields.find((f) => f.id === selectedFieldId);
       if (!field) return;
 
       // Prevent default to avoid page scrolling
@@ -117,16 +118,16 @@ export function PDFEditViewerSimple({
       let newY = Number(field.y);
 
       switch (e.key) {
-        case 'ArrowUp':
+        case "ArrowUp":
           newY -= moveStep;
           break;
-        case 'ArrowDown':
+        case "ArrowDown":
           newY += moveStep;
           break;
-        case 'ArrowLeft':
+        case "ArrowLeft":
           newX -= moveStep;
           break;
-        case 'ArrowRight':
+        case "ArrowRight":
           newX += moveStep;
           break;
       }
@@ -138,8 +139,13 @@ export function PDFEditViewerSimple({
       }
 
       // Only update if position actually changed
-      if (Math.abs(field.x - newX) >= 0.01 || Math.abs(field.y - newY) >= 0.01) {
-        console.log(`Arrow key: moving field ${field.id} to (${newX}, ${newY})`);
+      if (
+        Math.abs(field.x - newX) >= 0.01 ||
+        Math.abs(field.y - newY) >= 0.01
+      ) {
+        console.log(
+          `Arrow key: moving field ${field.id} to (${newX}, ${newY})`,
+        );
 
         // Update field position
         if (onFieldDragEnd) {
@@ -154,16 +160,24 @@ export function PDFEditViewerSimple({
         }
       }
     },
-    [fields, selectedFieldId, snapToGrid, snapToGridValue, calculateScaleFactor, onFieldDragEnd, onFieldUpdateAction]
+    [
+      fields,
+      selectedFieldId,
+      snapToGrid,
+      snapToGridValue,
+      calculateScaleFactor,
+      onFieldDragEnd,
+      onFieldUpdateAction,
+    ],
   );
 
   // Add global keydown event listener when a field is selected
   useEffect(() => {
     if (selectedFieldId) {
-      window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener("keydown", handleKeyDown);
 
       return () => {
-        window.removeEventListener('keydown', handleKeyDown);
+        window.removeEventListener("keydown", handleKeyDown);
       };
     }
   }, [selectedFieldId, handleKeyDown]);
