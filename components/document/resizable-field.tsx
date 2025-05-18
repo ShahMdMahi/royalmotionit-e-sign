@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { DocumentField } from "@/types/document";
 import { cn } from "@/lib/utils";
-import { Trash, Move, ChevronsUpDown } from "lucide-react";
+import { Trash, Move, ChevronsUpDown, Asterisk } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { pdfToScreenCoordinates } from "@/utils/pdf-utils";
 
@@ -255,6 +255,8 @@ export function ResizableField({
             </div>
             <span className="truncate max-w-[100px]">
               {field.label || getFieldTypeDisplay()}
+              {/* Always show required indicator for single-user system */}
+              <Asterisk className="h-3 w-3 ml-1 inline-block text-red-500" />
             </span>
           </div>
           <Button
@@ -276,13 +278,21 @@ export function ResizableField({
       {/* Main content area */}
       <div className="flex items-center justify-center h-full w-full p-1">
         {field.label ? (
-          <span className="truncate text-xs text-muted-foreground">
-            {field.label}
-          </span>
+          <div className="flex items-center">
+            <span className="truncate text-xs text-muted-foreground">
+              {field.label}
+            </span>
+            {/* Show required asterisk for all fields */}
+            <span className="text-red-500 ml-1">*</span>
+          </div>
         ) : (
-          <span className="text-xs text-muted-foreground">
-            {getFieldTypeDisplay()}
-          </span>
+          <div className="flex items-center">
+            <span className="text-xs text-muted-foreground">
+              {getFieldTypeDisplay()}
+            </span>
+            {/* Show required asterisk for all fields */}
+            <span className="text-red-500 ml-1">*</span>
+          </div>
         )}
       </div>
 

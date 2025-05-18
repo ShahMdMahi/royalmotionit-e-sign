@@ -1,22 +1,18 @@
 import { auth } from "@/auth";
-import { SignDocumentComponent } from "@/components/document";
 import { prisma } from "@/prisma/prisma";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
 import { DocumentField } from "@/types/document";
 import { normalizeDatabaseDocument } from "@/actions/document-normalizers";
+import { SignDocumentClientWrapper } from "@/components/document/sign-document-client-wrapper";
 
-export default async function SignDocument({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function SignDocument({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session || !session.user.id || !session.user.email) {
     redirect("/auth/login");
   }
 
-  const { id } = params;
+  const id = (await params).id;
 
   try {
     // Find the document and check if this user is a signer
@@ -36,34 +32,26 @@ export default async function SignDocument({
     }
 
     // Normalize the document to handle null vs undefined differences
-    const document = await normalizeDatabaseDocument(prismaDocument); // Find the signer associated with this user's email
-    const signer = document.signers.find(
-      (s) => s.email.toLowerCase() === (session.user.email || "").toLowerCase(),
-    );
+    const normalizedDoc = await normalizeDatabaseDocument(prismaDocument);
 
-    if (!signer) {
+    // Get the single signer for this document
+    // In a single signer system, there's only one signer per document
+    const signer = prismaDocument.signers?.[0];
+
+    // Check if the current user is the authorized signer
+    if (!signer || signer.email.toLowerCase() !== (session.user.email || "").toLowerCase()) {
       toast.error("You are not authorized to sign this document");
       redirect("/documents");
     }
 
     // Check if document is ready for signing
-    if (document.status !== "PENDING") {
+    if (normalizedDoc.status !== "PENDING") {
       toast.error("This document is not available for signing");
       redirect(`/documents/${id}`);
     }
 
-    // If sequential signing is enabled, check if it's this signer's turn
-    if (document.sequentialSigning) {
-      // Get the lowest order signer who hasn't completed yet
-      const nextSigner = document.signers
-        .filter((s) => s.status !== "COMPLETED")
-        .sort((a, b) => a.order - b.order)[0];
-
-      if (nextSigner?.id !== signer.id) {
-        toast.error("It's not your turn to sign this document yet");
-        redirect(`/documents/${id}`);
-      }
-    }
+    // Sequential signing check is no longer needed in a single-signer system
+    // Since there's only one signer, they're always the next in line to sign
 
     // Update signer status to VIEWED if not already
     if (signer.status === "PENDING" && !signer.viewedAt) {
@@ -78,7 +66,7 @@ export default async function SignDocument({
       // Record in document history
       await prisma.documentHistory.create({
         data: {
-          documentId: document.id,
+          documentId: prismaDocument.id,
           action: "VIEWED",
           actorEmail: session.user.email,
           actorName: session.user.name || undefined,
@@ -89,7 +77,8 @@ export default async function SignDocument({
       });
     }
     // Get only the fields assigned to this signer and map them to DocumentField type
-    const signerFields = document.fields
+    const fields = normalizedDoc.fields || [];
+    const signerFields = fields
       .filter((field) => field.signerId === signer.id)
       .map((field) => {
         // Convert Prisma DocumentField to our application DocumentField type
@@ -118,14 +107,17 @@ export default async function SignDocument({
           textColor: field.textColor || undefined,
         } as DocumentField;
       });
-    // Ensure we have document in the expected format for the component
-    return (
-      <SignDocumentComponent
-        document={document}
-        signer={signer}
-        fields={signerFields}
-      />
-    );
+
+    // Prepare document for the component with the expected structure
+    // The SignDocumentComponent expects the document to have a signers array
+    const documentForComponent = {
+      ...prismaDocument,
+      fields: normalizedDoc.fields,
+      signers: [signer], // Pass as an array with the single signer
+    };
+
+    // Return the client wrapper component with the properly structured data
+    return <SignDocumentClientWrapper document={documentForComponent} signer={signer} fields={signerFields} />;
   } catch (error) {
     console.error("Error fetching document for signing:", error);
     toast.error("Error loading document for signing");

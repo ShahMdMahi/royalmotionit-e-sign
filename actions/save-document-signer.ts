@@ -11,9 +11,7 @@ import { Signer } from "@/types/document";
  * @param signer The signer data to save
  * @returns The saved signer
  */
-export async function saveDocumentSigner(
-  signer: Signer & { color?: string },
-): Promise<{
+export async function saveDocumentSigner(signer: Signer & { color?: string }): Promise<{
   success: boolean;
   signer?: any; // Using 'any' here to accommodate Prisma's type which differs from our Signer interface
   error?: string;
@@ -34,9 +32,7 @@ export async function saveDocumentSigner(
     });
 
     if (!document) {
-      throw new Error(
-        "Document not found or you don't have permission to edit it",
-      );
+      throw new Error("Document not found or you don't have permission to edit it");
     }
 
     // Check if a signer already exists for this document
@@ -64,9 +60,7 @@ export async function saveDocumentSigner(
         },
       });
 
-      console.log(
-        `Updated signer ${savedSigner.id} for document ${signer.documentId}`,
-      );
+      console.log(`Updated signer ${savedSigner.id} for document ${signer.documentId}`);
     }
     // Otherwise, create a new signer
     else {
@@ -85,15 +79,49 @@ export async function saveDocumentSigner(
         },
       });
 
-      console.log(
-        `Created new signer ${savedSigner.id} for document ${signer.documentId}`,
-      );
+      console.log(`Created new signer ${savedSigner.id} for document ${signer.documentId}`);
     }
 
     // Revalidate paths
     revalidatePath(`/documents/${signer.documentId}`);
     revalidatePath(`/documents/${signer.documentId}/edit`);
     revalidatePath(`/admin/documents/${signer.documentId}/edit`);
+
+    // Get document and author details for email notification
+    const documentWithAuthor = await prisma.document.findUnique({
+      where: { id: signer.documentId },
+      include: { author: true },
+    });
+
+    // Send email notification to the signer if document exists
+    if (documentWithAuthor) {
+      try {
+        // Import the sendDocumentSignRequestEmail to avoid circular dependencies
+        const { sendDocumentSignRequestEmail } = await import("@/actions/email");
+
+        // Send focused document signing email without account credentials
+        await sendDocumentSignRequestEmail(
+          savedSigner.name || "Signer",
+          savedSigner.email,
+          documentWithAuthor.title,
+          signer.documentId,
+          "You have been assigned to sign this document. Please review and sign it at your earliest convenience.",
+          documentWithAuthor.author?.name || "Document Owner",
+          documentWithAuthor.author?.email || ""
+        );
+
+        // Update the notifiedAt timestamp
+        await prisma.signer.update({
+          where: { id: savedSigner.id },
+          data: { notifiedAt: new Date() },
+        });
+
+        console.log(`Sent signing notification email to ${savedSigner.email} for document ${signer.documentId}`);
+      } catch (emailError) {
+        console.error("Error sending signer notification email:", emailError);
+        // Non-fatal error, continue with the flow
+      }
+    }
 
     return {
       success: true,

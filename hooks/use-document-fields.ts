@@ -47,7 +47,7 @@ export function useDocumentFields(documentId: string) {
     const baseProperties = {
       documentId,
       pageNumber,
-      required: false,
+      required: true, // Set all fields as required by default for single-user system
       x: 100,
       y: 100,
     };
@@ -237,7 +237,7 @@ export function useDocumentFields(documentId: string) {
       documentId: documentId,
       type: fieldType,
       label: defaultProps.label || "Field",
-      required: defaultProps.required || false,
+      required: true, // Always set fields as required in the single-user system
       placeholder: defaultProps.placeholder,
       x: posX,
       y: posY,

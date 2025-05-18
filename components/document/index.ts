@@ -1,6 +1,7 @@
 // Export all document components for easy importing
 
 export { SignDocumentComponent } from "./sign-document";
+export { SignDocumentClientWrapper } from "./sign-document-client-wrapper";
 export { DocumentDetails } from "./document-details";
 export { DocumentFieldLayer } from "./document-field-layer";
 export { DocumentToolbar } from "./document-toolbar";
