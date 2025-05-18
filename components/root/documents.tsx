@@ -129,7 +129,7 @@ export function DocumentsComponent({
                             variant={
                               doc.status === "PENDING"
                                 ? "outline"
-                                : doc.status === "APPROVED"
+                                : doc.status === "COMPLETED"
                                   ? "default"
                                   : "secondary"
                             }
@@ -376,7 +376,7 @@ export function DocumentsComponent({
                       </Button>
                       {doc.documentType === DocumentType.UNSIGNED && (
                         <Button size="sm" asChild className="w-full sm:w-auto">
-                          <Link href={`/documents/${doc.id}?action=sign`}>
+                          <Link href={`/documents/${doc.id}/sign`}>
                             <FileSignature className="h-3.5 w-3.5 mr-1.5" />
                             Sign
                           </Link>
