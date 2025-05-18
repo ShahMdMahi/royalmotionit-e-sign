@@ -19,6 +19,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   Authenticator Authenticator[]
+  signers       Signer[]        // Documents this user needs to sign
 
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
@@ -205,6 +206,7 @@ model Signer {
   declineReason String?
   ipAddress     String? // IP address when signing
   userAgent     String? // Browser/device info when signing
+  userId        String?      @db.ObjectId // Reference to user if the signer is a registered user
   // Removed order field as it's not needed for single signer
 
   createdAt DateTime @default(now())
@@ -212,6 +214,7 @@ model Signer {
 
   document Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
   fields   DocumentField[]
+  user     User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
 
 enum SignerStatus {

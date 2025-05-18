@@ -73,6 +73,8 @@ export async function createField(field: Partial<DocumentField>) {
         height: Number(field.height),
         pageNumber: Number(field.pageNumber),
         document: { connect: { id: field.documentId! } },
+        // Connect to signer if signerId is provided
+        ...(field.signerId ? { signer: { connect: { id: field.signerId } } } : {}),
         value: field.value,
         color: field.color,
         fontFamily: field.fontFamily,
@@ -147,6 +149,10 @@ export async function updateField(field: DocumentField) {
         width: Number(field.width),
         height: Number(field.height),
         pageNumber: Number(field.pageNumber),
+        // Connect or disconnect signer based on field.signerId
+        ...(field.signerId 
+          ? { signer: { connect: { id: field.signerId } } } 
+          : { signer: { disconnect: true } }),
         value: field.value,
         color: field.color,
         fontFamily: field.fontFamily,

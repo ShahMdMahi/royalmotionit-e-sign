@@ -46,6 +46,12 @@ export async function saveDocumentSigner(signer: Signer & { color?: string }): P
 
     // If there's an existing signer, update it
     if (existingSigner) {
+      // Look up user by email to connect the signer to their account
+      const existingUser = await prisma.user.findUnique({
+        where: { email: signer.email.toLowerCase() },
+        select: { id: true },
+      });
+
       savedSigner = await prisma.signer.update({
         where: {
           id: existingSigner.id,
@@ -57,6 +63,8 @@ export async function saveDocumentSigner(signer: Signer & { color?: string }): P
           status: signer.status,
           // Store color in userAgent field
           userAgent: signer.color,
+          // Connect to existing user if found
+          userId: existingUser?.id || null,
         },
       });
 
@@ -67,6 +75,12 @@ export async function saveDocumentSigner(signer: Signer & { color?: string }): P
       // Handle temp ID (remove new- prefix)
       const signerId = signer.id.startsWith("new-") ? undefined : signer.id;
 
+      // Look up user by email to connect the signer to their account
+      const existingUser = await prisma.user.findUnique({
+        where: { email: signer.email.toLowerCase() },
+        select: { id: true },
+      });
+      
       savedSigner = await prisma.signer.create({
         data: {
           id: signerId,
@@ -76,10 +90,32 @@ export async function saveDocumentSigner(signer: Signer & { color?: string }): P
           role: signer.role,
           status: signer.status || "PENDING",
           userAgent: signer.color, // Store color
+          // Connect to existing user if found
+          userId: existingUser?.id || null,
         },
       });
 
       console.log(`Created new signer ${savedSigner.id} for document ${signer.documentId}`);
+      
+      // Update any existing fields to use this signer
+      const documentFields = await prisma.documentField.findMany({
+        where: { documentId: signer.documentId }
+      });
+      
+      // Update signature/initial fields and any required fields to use this signer
+      const fieldsToUpdate = documentFields.filter(field => 
+        ['signature', 'initial'].includes(field.type) || field.required
+      );
+      
+      if (fieldsToUpdate.length > 0) {
+        for (const field of fieldsToUpdate) {
+          await prisma.documentField.update({
+            where: { id: field.id },
+            data: { signerId: savedSigner.id }
+          });
+        }
+        console.log(`Assigned ${fieldsToUpdate.length} fields to new signer ${savedSigner.id}`);
+      }
     }
 
     // Revalidate paths

@@ -345,7 +345,7 @@ export async function completeDocumentSigning(
       };
     }
 
-    // Update signer status with client info if available
+    // Update signer status with client info if available and ensure userId is connected
     await prisma.signer.update({
       where: {
         id: signerId,
@@ -355,6 +355,8 @@ export async function completeDocumentSigning(
         completedAt: new Date(),
         ipAddress: clientInfo?.ipAddress || "127.0.0.1",
         userAgent: clientInfo?.userAgent || "Unknown",
+        // Ensure the userId is set when completing the signature
+        userId: session.user.id,
       },
     });
     // Import the enhanced field validator

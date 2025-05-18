@@ -24,7 +24,10 @@ export default async function Documents() {
           where: {
             signers: {
               some: {
-                email: session.user.email ?? "", // Handle potential null email
+                OR: [
+                  { email: session.user.email ?? "" }, // Match by email
+                  { userId: session.user.id } // Match by userId
+                ]
               },
             },
           },
@@ -43,7 +46,10 @@ export default async function Documents() {
           where: {
             signers: {
               some: {
-                email: session.user.email ?? "", // Handle potential null email
+                OR: [
+                  { email: session.user.email ?? "" }, // Match by email
+                  { userId: session.user.id } // Match by userId
+                ]
               },
             },
           },

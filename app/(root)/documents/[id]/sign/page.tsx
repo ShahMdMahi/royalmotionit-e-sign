@@ -27,7 +27,6 @@ export default async function SignDocument({ params }: { params: Promise<{ id: s
     });
 
     if (!prismaDocument) {
-      toast.error("Document not found");
       redirect("/documents");
     }
 
@@ -40,28 +39,40 @@ export default async function SignDocument({ params }: { params: Promise<{ id: s
 
     // Check if the current user is the authorized signer
     if (!signer || signer.email.toLowerCase() !== (session.user.email || "").toLowerCase()) {
-      toast.error("You are not authorized to sign this document");
       redirect("/documents");
     }
 
     // Check if document is ready for signing
     if (normalizedDoc.status !== "PENDING") {
-      toast.error("This document is not available for signing");
       redirect(`/documents/${id}`);
     }
 
     // Sequential signing check is no longer needed in a single-signer system
     // Since there's only one signer, they're always the next in line to sign
 
-    // Update signer status to VIEWED if not already
-    if (signer.status === "PENDING" && !signer.viewedAt) {
+    // Update signer status to VIEWED if not already and make sure userId is connected
+    if ((signer.status === "PENDING" && !signer.viewedAt) || !signer.userId) {
       await prisma.signer.update({
         where: { id: signer.id },
         data: {
           status: "VIEWED",
           viewedAt: new Date(),
+          // Always ensure the user ID is linked when viewing the document
+          userId: session.user.id,
         },
       });
+      
+      // Make sure all fields are properly assigned to this signer
+      const unassignedFields = prismaDocument.fields.filter(f => !f.signerId);
+      if (unassignedFields.length > 0) {
+        for (const field of unassignedFields) {
+          await prisma.documentField.update({
+            where: { id: field.id },
+            data: { signerId: signer.id }
+          });
+        }
+        console.log(`Assigned ${unassignedFields.length} unassigned fields to signer ${signer.id}`);
+      }
 
       // Record in document history
       await prisma.documentHistory.create({
@@ -78,6 +89,10 @@ export default async function SignDocument({ params }: { params: Promise<{ id: s
     }
     // Get only the fields assigned to this signer and map them to DocumentField type
     const fields = normalizedDoc.fields || [];
+    console.log(`Total fields in document: ${fields.length}`);
+    console.log(`Signer ID: ${signer.id}`);
+    console.log(`Fields with signer ID assigned: ${fields.filter(field => field.signerId).length}`);
+    
     const signerFields = fields
       .filter((field) => field.signerId === signer.id)
       .map((field) => {
@@ -120,7 +135,6 @@ export default async function SignDocument({ params }: { params: Promise<{ id: s
     return <SignDocumentClientWrapper document={documentForComponent} signer={signer} fields={signerFields} />;
   } catch (error) {
     console.error("Error fetching document for signing:", error);
-    toast.error("Error loading document for signing");
     redirect("/documents");
   }
 }

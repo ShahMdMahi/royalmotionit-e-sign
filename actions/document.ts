@@ -161,6 +161,7 @@ export async function saveDocumentFields(
       backgroundColor: field.backgroundColor,
       borderColor: field.borderColor,
       textColor: field.textColor,
+      signerId: field.signerId, // Add the signerId field
     }));
 
     // Delete existing fields
