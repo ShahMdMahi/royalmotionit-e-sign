@@ -29,6 +29,7 @@ export function EditDocumentComponent({
   const [totalPages, setTotalPages] = useState(0);
   const [activeTab, setActiveTab] = useState("fields");
   const [isSaving, setIsSaving] = useState(false);
+  const [hasValidatedSigner, setHasValidatedSigner] = useState(false);
 
   const {
     fields,
@@ -72,9 +73,72 @@ export function EditDocumentComponent({
     fetchPdf();
   }, [document.key]);
 
+  // Check if document has a valid signer when required
+  const hasValidSigner = () => {
+    // Find fields that require a signer (signature, initial)
+    const signerRequiredFields = fields.filter((field) =>
+      ["signature", "initial"].includes(field.type),
+    );
+
+    // If there are no signature/initial fields, we don't need a signer
+    if (signerRequiredFields.length === 0) {
+      console.log("No signature fields found, signer not required");
+      return true;
+    }
+
+    // Check if at least one field has a signerId
+    const fieldsWithSigner = signerRequiredFields.filter(
+      (f) => f.signerId && f.signerId.trim() !== "",
+    );
+
+    const hasAssignedSigner = fieldsWithSigner.length > 0;
+
+    console.log("Signature validation check:");
+    console.log("- Total signature fields found:", signerRequiredFields.length);
+    console.log("- Fields with signer assignments:", fieldsWithSigner.length);
+    signerRequiredFields.forEach((field) => {
+      console.log(
+        `  Field ID: ${field.id}, Type: ${field.type}, SignerId: ${field.signerId || "MISSING"}`,
+      );
+    });
+
+    return hasAssignedSigner;
+  };
+
   // Handle save
   const handleSave = async () => {
     try {
+      // Check if there are any fields to save
+      if (fields.length === 0) {
+        setActiveTab("fields");
+        toast.error(
+          "Please add at least one field before saving the document",
+          {
+            description: "Your document needs at least one field to be useful",
+            action: {
+              label: "Add Fields",
+              onClick: () => setActiveTab("fields"),
+            },
+          },
+        );
+        return;
+      }
+
+      // Validate signer before saving if there are signature fields
+      if (!hasValidSigner()) {
+        setActiveTab("signers");
+        toast.error("Please add a signer before saving the document", {
+          description:
+            "Document includes signature fields which require a signer",
+          action: {
+            label: "Add Signer",
+            onClick: () => setActiveTab("signers"),
+          },
+        });
+        setHasValidatedSigner(true);
+        return;
+      }
+
       setIsSaving(true);
 
       // Save fields to database
@@ -120,6 +184,7 @@ export function EditDocumentComponent({
           return doc as Document;
         }}
         isSaving={isSaving}
+        fields={fields}
       />
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4">
         {/* Left sidebar */}
@@ -136,7 +201,27 @@ export function EditDocumentComponent({
                   fieldType: DocumentFieldType,
                   pageNumber?: number,
                 ) => {
+                  // Add the field first
                   addField(fieldType, pageNumber ?? currentPage);
+
+                  // If adding a signature or initial field, check if we have a signer
+                  if (
+                    ["signature", "initial"].includes(fieldType) &&
+                    !hasValidSigner() &&
+                    !hasValidatedSigner
+                  ) {
+                    // Prompt the user to add a signer
+                    toast.info("Signature field added", {
+                      description:
+                        "Remember to add a signer for signature fields",
+                      action: {
+                        label: "Add Signer",
+                        onClick: () => setActiveTab("signers"),
+                      },
+                    });
+                    setHasValidatedSigner(true);
+                  }
+
                   return { fieldType, pageNumber: pageNumber ?? currentPage };
                 }}
               />
@@ -145,12 +230,20 @@ export function EditDocumentComponent({
               <SignerManager
                 documentId={document.id}
                 onSignerFieldsUpdateAction={async (signerId, color) => {
-                  if (selectedField) {
-                    updateField({
-                      ...selectedField,
-                      color,
-                    });
-                  }
+                  // Update all signature and initial fields with the signer ID
+                  fields.forEach((field) => {
+                    if (["signature", "initial"].includes(field.type)) {
+                      updateField({
+                        ...field,
+                        signerId,
+                        color,
+                      });
+                    }
+                  });
+
+                  console.log(
+                    `Updated ${fields.filter((f) => ["signature", "initial"].includes(f.type)).length} signature fields with signer ID: ${signerId}`,
+                  );
                   return { signerId, color };
                 }}
               />

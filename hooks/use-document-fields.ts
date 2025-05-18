@@ -277,7 +277,16 @@ export function useDocumentFields(documentId: string) {
       fontSize: updatedField.fontSize
         ? Number(updatedField.fontSize)
         : undefined,
+      // Ensure signerId is properly handled
+      signerId: updatedField.signerId || undefined,
     };
+
+    // For signature/initial fields, log the signer ID assignment for debugging
+    if (["signature", "initial"].includes(updatedField.type)) {
+      console.log(
+        `Updating ${updatedField.type} field ${updatedField.id} with signerId: ${updatedField.signerId || "NONE"}`,
+      );
+    }
 
     // Only update if there are actual changes to avoid unnecessary rerenders
     setFields((prevFields) => {

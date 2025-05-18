@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Document } from "@/types/document";
+import { Document, DocumentField } from "@/types/document";
 import { Save, Send, ArrowLeft, Settings, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { handleDocumentSave } from "@/actions/document-toolbar-actions";
@@ -11,16 +11,21 @@ interface DocumentToolbarProps {
   document: Document;
   onSaveAction?: typeof handleDocumentSave;
   isSaving: boolean;
+  fields?: DocumentField[];
 }
 
 export function DocumentToolbar({
   document,
   onSaveAction = handleDocumentSave,
   isSaving,
+  fields = [],
 }: DocumentToolbarProps) {
   const router = useRouter();
   const pathname = window.location.pathname;
   const isEditMode = pathname.includes("/edit");
+
+  // Check if there are any fields to save
+  const hasFields = fields.length > 0;
 
   const handleBack = () => {
     if (isEditMode) {
@@ -60,7 +65,6 @@ export function DocumentToolbar({
       </div>
 
       <div className="flex items-center space-x-2">
-        {" "}
         {!isEditMode && document.status === "DRAFT" && (
           <>
             <Button
@@ -74,7 +78,10 @@ export function DocumentToolbar({
 
             <Button
               onClick={() => onSaveAction(document)}
-              disabled={isSaving}
+              disabled={isSaving || !hasFields}
+              title={
+                !hasFields ? "Add at least one field to send for signing" : ""
+              }
               data-testid="admin-send-button"
             >
               <Send className="h-4 w-4 mr-2" />
@@ -85,7 +92,8 @@ export function DocumentToolbar({
         {isEditMode ? (
           <Button
             onClick={() => onSaveAction(document)}
-            disabled={isSaving}
+            disabled={isSaving || !hasFields}
+            title={!hasFields ? "Add at least one field to save" : ""}
             data-testid="admin-save-button"
           >
             <Save className="h-4 w-4 mr-2" />

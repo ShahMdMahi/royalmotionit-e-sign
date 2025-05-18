@@ -4,6 +4,8 @@ import { ChangeNameSchema, ChangePasswordSchema } from "@/schema";
 import { prisma } from "@/prisma/prisma";
 import bcryptjs from "bcryptjs";
 import { auth } from "@/auth";
+import { Role } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 
 // Types for form states
 type ChangeNameFormState = {
@@ -276,6 +278,63 @@ export async function getUserByEmail(email: string) {
     return {
       success: false,
       message: "Error retrieving user information",
+    };
+  }
+}
+
+/**
+ * Delete user by ID
+ * Only admins can delete users
+ */
+export async function deleteUser(userId: string) {
+  try {
+    const session = await auth();
+
+    // Check if the current user is authenticated and has admin privileges
+    if (!session || !session.user || session.user.role !== Role.ADMIN) {
+      return {
+        success: false,
+        message: "Unauthorized: Only administrators can delete users.",
+      };
+    }
+
+    // Check if the user exists
+    const userToDelete = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!userToDelete) {
+      return {
+        success: false,
+        message: "User not found.",
+      };
+    }
+
+    // Don't allow admins to delete themselves
+    if (userToDelete.id === session.user.id) {
+      return {
+        success: false,
+        message: "You cannot delete your own account.",
+      };
+    }
+
+    // Delete the user
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+
+    // Revalidate the users page to refresh the list
+    revalidatePath("/admin/users");
+
+    return {
+      success: true,
+      message: "User deleted successfully.",
+    };
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return {
+      success: false,
+      message: "An error occurred while deleting the user.",
     };
   }
 }

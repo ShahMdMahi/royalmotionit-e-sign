@@ -279,6 +279,8 @@ export async function completeDocumentSigning(
   message: string;
   error?: string;
   validationErrors?: FieldValidationError[];
+  requiresLogin?: boolean;
+  signerEmail?: string;
 }> {
   try {
     // Get current user - note we don't require authentication for signing
@@ -315,16 +317,35 @@ export async function completeDocumentSigning(
         success: false,
         message: "Signer not found",
       };
-    } // Verify email matches (basic auth) only if session exists
+    }
+
+    // Check if user is authenticated and is authorized to sign
+    if (!session || !session.user) {
+      // User is not authenticated, return error that requires login
+      return {
+        success: false,
+        message:
+          "You need to login with the email address of the signer to complete this action",
+        requiresLogin: true,
+        signerEmail: signer.email,
+      };
+    }
+
+    // Verify email matches (basic auth)
     if (
-      session?.user?.email &&
+      !session.user.email ||
       signer.email.toLowerCase() !== session.user.email.toLowerCase()
     ) {
       return {
         success: false,
-        message: "You are not authorized to sign this document",
+        message:
+          "You are not authorized to sign this document. Please login with the email address the document was sent to.",
+        requiresLogin: true,
+        signerEmail: signer.email,
       };
-    } // Update signer status with client info if available
+    }
+
+    // Update signer status with client info if available
     await prisma.signer.update({
       where: {
         id: signerId,

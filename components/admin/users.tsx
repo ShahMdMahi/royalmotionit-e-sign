@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Search, Users } from "lucide-react";
+import { Edit, Search, Trash2, Users } from "lucide-react";
 import Link from "next/link";
 import {
   Card,
@@ -22,9 +22,32 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+import { deleteUser } from "@/actions/user";
+import { useRouter } from "next/navigation";
 
-export function UsersComponent({ users }: { users: User[] }) {
+export function UsersComponent({
+  users,
+  currentUserId,
+}: {
+  users: User[];
+  currentUserId: string;
+}) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
 
   // Filter users based on search term
   const filteredUsers = users.filter((user) => {
@@ -36,6 +59,29 @@ export function UsersComponent({ users }: { users: User[] }) {
       (user.role?.toLowerCase() || "").includes(searchLower)
     );
   });
+
+  // Handle user deletion
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+
+    try {
+      setIsDeleting(true);
+      const response = await deleteUser(userToDelete.id);
+
+      if (response.success) {
+        toast.success(response.message);
+        router.refresh(); // Refresh the current page to update the user list
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred. Please try again.");
+      console.error("Delete user error:", error);
+    } finally {
+      setIsDeleting(false);
+      setUserToDelete(null);
+    }
+  };
   // Calculate user stats
   const totalUsers = users.length;
   const adminUsers = users.filter(
@@ -58,7 +104,10 @@ export function UsersComponent({ users }: { users: User[] }) {
               View and manage all users in the system.
             </p>
           </div>
-          <Button className="flex items-center gap-2">
+          <Button
+            className="flex items-center gap-2"
+            onClick={() => toast.info("Add user functionality coming soon!")}
+          >
             <Users className="size-4" />
             <span>Add New User</span>
           </Button>
@@ -124,9 +173,8 @@ export function UsersComponent({ users }: { users: User[] }) {
             <CardDescription>
               Manage user accounts and permissions
             </CardDescription>
-          </CardHeader>
+          </CardHeader>{" "}
           <CardContent>
-            {" "}
             {/* Search input */}
             <div className="mb-6 flex items-center gap-4">
               <div className="relative flex-1">
@@ -139,7 +187,13 @@ export function UsersComponent({ users }: { users: User[] }) {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() =>
+                  toast.info("Add user functionality coming soon!")
+                }
+              >
                 <Users className="size-4" />
                 <span>Add User</span>
               </Button>
@@ -159,9 +213,8 @@ export function UsersComponent({ users }: { users: User[] }) {
                   <TableBody>
                     {filteredUsers.map((user) => (
                       <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.id}</TableCell>{" "}
+                        <TableCell className="font-medium">{user.id}</TableCell>
                         <TableCell>
-                          {" "}
                           <div className="flex items-center gap-2">
                             <div
                               className={`size-2 rounded-full ${user.emailVerified ? "bg-emerald-500" : "bg-slate-300"}`}
@@ -188,12 +241,30 @@ export function UsersComponent({ users }: { users: User[] }) {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Link href={`/admin/users/${user.id}`}>
-                            <Button variant="ghost" size="icon">
-                              <Edit className="h-4 w-4" />
-                              <span className="sr-only">Edit user</span>
+                          <div className="flex justify-end gap-1">
+                            <Link href={`/admin/users/${user.id}`}>
+                              <Button variant="ghost" size="icon">
+                                <Edit className="h-4 w-4" />
+                                <span className="sr-only">Edit user</span>
+                              </Button>
+                            </Link>
+
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className={`${user.id === currentUserId ? "opacity-40 cursor-not-allowed" : "text-destructive hover:bg-destructive/10"}`}
+                              onClick={() => setUserToDelete(user)}
+                              disabled={user.id === currentUserId}
+                              title={
+                                user.id === currentUserId
+                                  ? "Cannot delete your own account"
+                                  : "Delete user"
+                              }
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Delete user</span>
                             </Button>
-                          </Link>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -209,6 +280,40 @@ export function UsersComponent({ users }: { users: User[] }) {
             )}
           </CardContent>
         </Card>
+
+        {/* Delete User Dialog */}
+        <AlertDialog
+          open={!!userToDelete}
+          onOpenChange={(open) => !open && setUserToDelete(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete User</AlertDialogTitle>
+              <AlertDialogDescription>
+                {userToDelete && (
+                  <>
+                    Are you sure you want to delete{" "}
+                    {userToDelete.name || userToDelete.email}? This action
+                    cannot be undone and will permanently remove the user and
+                    all associated data.
+                  </>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setUserToDelete(null)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteUser}
+                className="bg-destructive hover:bg-destructive/90"
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete User"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

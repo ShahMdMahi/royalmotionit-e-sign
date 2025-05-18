@@ -23,9 +23,15 @@ type FormData = z.infer<typeof loginSchema>;
 export function LoginForm({
   isGoogleAuthActive,
   isRegistrationActive,
+  prefillEmail,
+  prefillPassword,
+  returnUrl,
 }: {
   isGoogleAuthActive: boolean;
   isRegistrationActive: boolean;
+  prefillEmail?: string;
+  prefillPassword?: string;
+  returnUrl?: string;
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -44,8 +50,8 @@ export function LoginForm({
   } = useForm<FormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: prefillEmail || "",
+      password: prefillPassword || "",
     },
   });
 
@@ -70,16 +76,17 @@ export function LoginForm({
 
   useEffect(() => {
     if (state.success && !isLoading) {
-      toast.success("Login successful! Redirecting to dashboard...");
+      toast.success("Login successful! Redirecting...");
       setTimeout(() => {
-        router.push("/dashboard");
+        // If there's a returnUrl, use that instead of the default dashboard
+        router.push(returnUrl || "/dashboard");
       }, 100);
     }
 
     if (state.message && !state.success && !isLoading) {
       toast.error(state.message);
     }
-  }, [state.success, state.message, isLoading, router]);
+  }, [state.success, state.message, isLoading, router, returnUrl]);
 
   return (
     <div className="w-full max-w-md mx-auto">

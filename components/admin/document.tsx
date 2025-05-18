@@ -17,6 +17,8 @@ import {
   Eye,
   MoreHorizontal,
   Search,
+  Trash2,
+  AlertCircle,
 } from "lucide-react";
 import { FileUploadModal } from "./file-upload-modal";
 import {
@@ -45,6 +47,19 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { deleteDocument } from "@/actions/document";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export function DocumentComponent({
   documents,
@@ -54,12 +69,41 @@ export function DocumentComponent({
   users: User[];
 }) {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<Document | null>(
+    null,
+  );
+  const router = useRouter();
 
   // Search state
   const [searchTerm, setSearchTerm] = useState("");
 
   const openUploadModal = () => setIsUploadModalOpen(true);
   const closeUploadModal = () => setIsUploadModalOpen(false);
+
+  const openDeleteModal = (doc: Document) => {
+    setDocumentToDelete(doc);
+    setDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setDocumentToDelete(null);
+    setDeleteModalOpen(false);
+  };
+
+  const handleDeleteDocument = async () => {
+    if (documentToDelete) {
+      try {
+        await deleteDocument(documentToDelete.id);
+        toast.success("Document deleted successfully");
+        router.refresh();
+      } catch (error) {
+        toast.error("Failed to delete document");
+      } finally {
+        closeDeleteModal();
+      }
+    }
+  };
 
   // Filter documents based on search criteria
   const filteredDocuments = useMemo(() => {
@@ -425,7 +469,11 @@ export function DocumentComponent({
                                     Share document
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-destructive">
+                                  <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() => openDeleteModal(doc)}
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
                                     Delete document
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -453,7 +501,40 @@ export function DocumentComponent({
       <FileUploadModal
         isOpen={isUploadModalOpen}
         onCloseAction={closeUploadModal}
+        onUploadSuccess={() => {
+          router.refresh();
+          toast.success("Document uploaded successfully");
+        }}
       />
+
+      {/* Delete Confirmation Modal */}
+      <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-6 w-6 text-red-500" />
+                Confirm Deletion
+              </div>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this document? This action cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closeDeleteModal}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteDocument}
+              className="bg-red-500 text-white hover:bg-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

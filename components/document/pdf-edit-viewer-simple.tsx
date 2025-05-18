@@ -419,7 +419,6 @@ export function PDFEditViewerSimple({
 
   return (
     <div className="relative h-full w-full" ref={viewerContainerRef}>
-      {" "}
       <DndContext
         sensors={sensors}
         modifiers={[]} // Remove ALL modifiers completely
@@ -433,10 +432,8 @@ export function PDFEditViewerSimple({
           },
         }}
       >
-        {" "}
         <div className="relative h-full w-full overflow-auto flex items-center justify-center">
           <div className="relative pdf-container" ref={pageRef}>
-            {" "}
             <Document
               file={useMemo(() => {
                 console.log("Processing PDF data for Document component");
@@ -547,7 +544,7 @@ export function PDFEditViewerSimple({
             )}
           </div>
         </div>
-      </DndContext>{" "}
+      </DndContext>
       {/* Zoom Controls */}
       <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-lg p-2 flex items-center gap-2 z-10">
         <button
@@ -622,7 +619,7 @@ export function PDFEditViewerSimple({
       {/* Page Info */}
       <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg px-3 py-2 text-sm font-medium z-10">
         Page {currentPage} of {numPages || "?"}
-      </div>{" "}
+      </div>
       {/* Custom styling is now in app/pdf-viewer.css */}
     </div>
   );

@@ -24,6 +24,34 @@ export async function handleSignerFieldsUpdate(
       throw new Error("You must be logged in to perform this action");
     }
 
+    // If signerId is empty, clear associations for all signature fields
+    if (!signerId) {
+      // Find all documents created by this user
+      const documents = await prisma.document.findMany({
+        where: {
+          authorId: session.user.id,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      const documentIds = documents.map((doc) => doc.id);
+
+      // Clear signer associations for signature fields in user's documents
+      await prisma.documentField.updateMany({
+        where: {
+          documentId: { in: documentIds },
+          type: { in: ["signature", "initial"] },
+        },
+        data: {
+          signerId: null,
+        },
+      });
+
+      return { signerId: "", color: "" };
+    }
+
     // Validate the color format (ensure it's a valid hex color)
     if (!color.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)) {
       throw new Error("Invalid color format. Please use a valid hex color.");
@@ -70,18 +98,112 @@ export async function handleSignerFieldsUpdate(
     // Calculate a lighter version for the background (20% opacity)
     const backgroundColor = color + "20"; // Hex with alpha
 
-    // Update all fields associated with this signer to use the same color scheme
-    await prisma.documentField.updateMany({
+    // Find signature and initial fields that need to be associated with this signer
+    const signatureFields = await prisma.documentField.findMany({
       where: {
-        signerId: signerId,
-      },
-      data: {
-        color: color,
-        borderColor: color,
-        backgroundColor: backgroundColor,
-        textColor: textColor,
+        documentId: signer.documentId,
+        type: {
+          in: ["signature", "initial"],
+        },
       },
     });
+
+    console.log(
+      `Found ${signatureFields.length} signature fields to update for signer ${signerId}`,
+    );
+
+    // Verify we have signature fields to update
+    if (signatureFields.length === 0) {
+      console.log(
+        `Warning: No signature fields found for document ${signer.documentId}`,
+      );
+    }
+
+    // Update signature and initial fields to be associated with this signer
+    for (const field of signatureFields) {
+      console.log(
+        `Updating field ${field.id} to associate with signer ${signerId}`,
+      );
+      await prisma.documentField.update({
+        where: {
+          id: field.id,
+        },
+        data: {
+          signerId: signerId,
+          color: color,
+          borderColor: color,
+          backgroundColor: backgroundColor,
+          textColor: textColor,
+        },
+      });
+    }
+
+    // Find required fields that should also be associated with this signer
+    const requiredFields = await prisma.documentField.findMany({
+      where: {
+        documentId: signer.documentId,
+        required: true,
+        type: {
+          notIn: ["signature", "initial"], // Exclude signature fields which we already handled
+        },
+      },
+    });
+
+    if (requiredFields.length > 0) {
+      console.log(
+        `Found ${requiredFields.length} required fields to associate with signer ${signerId}`,
+      );
+
+      // Update required fields with signer ID and appropriate styling
+      for (const field of requiredFields) {
+        await prisma.documentField.update({
+          where: {
+            id: field.id,
+          },
+          data: {
+            signerId: signerId,
+            // Apply more subtle styling for non-signature fields
+            borderColor: color,
+          },
+        });
+      }
+    }
+
+    // Find any fields that might be associated with a different signer
+    // This helps clean up any misconfigurations
+    const misconfiguredFields = await prisma.documentField.findMany({
+      where: {
+        documentId: signer.documentId,
+        signerId: {
+          not: null,
+        },
+        NOT: {
+          signerId: signerId,
+        },
+      },
+    });
+
+    if (misconfiguredFields.length > 0) {
+      console.log(
+        `Found ${misconfiguredFields.length} fields with wrong signer associations`,
+      );
+
+      // Fix signer IDs for misconfigured fields
+      for (const field of misconfiguredFields) {
+        await prisma.documentField.update({
+          where: {
+            id: field.id,
+          },
+          data: {
+            signerId: signerId,
+          },
+        });
+      }
+
+      console.log(
+        `Fixed signer assignment for ${misconfiguredFields.length} misconfigured fields`,
+      );
+    }
 
     // Get the document ID to revalidate paths
     const signerInfo = await prisma.signer.findUnique({

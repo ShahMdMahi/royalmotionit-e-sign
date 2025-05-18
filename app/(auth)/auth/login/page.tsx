@@ -16,9 +16,19 @@ export const metadata: Metadata = {
     "Secure authentication portal for Royal Sign, providing access to electronic signature and document management services developed by RoyalMotionIT",
 };
 
-export default async function Login() {
+export default async function Login({
+  searchParams,
+}: {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const isRegistrationActive = await getIsRegistrationActive();
   const isGoogleAuthActive = await getIsGoogleAuthActive();
+
+  // Get email and returnUrl from query parameters
+  const email = (await searchParams)?.email as string | undefined;
+  const password = (await searchParams)?.password as string | undefined;
+  const returnUrl = (await searchParams)?.returnUrl as string | undefined;
+
   const session = await auth();
   if (!session) {
     return (
@@ -43,6 +53,9 @@ export default async function Login() {
               <LoginForm
                 isGoogleAuthActive={isGoogleAuthActive}
                 isRegistrationActive={isRegistrationActive}
+                prefillEmail={email}
+                prefillPassword={password}
+                returnUrl={returnUrl}
               />
             </div>
           </div>

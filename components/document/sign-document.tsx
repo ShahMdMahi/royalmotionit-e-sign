@@ -311,6 +311,17 @@ export function SignDocumentComponent({
         // Close the confirmation dialog and show completion dialog
         setIsConfirmationModalOpen(false);
         setSigningCompleted(true);
+      } else if (result.requiresLogin) {
+        // Handle login requirement - redirect to login page with return URL
+        toast.error("Please login to continue signing");
+        setIsConfirmationModalOpen(false);
+
+        // Generate the redirect URL with return path
+        const returnUrl = encodeURIComponent(`/documents/${document.id}/sign`);
+        const loginUrl = `/auth/login?returnUrl=${returnUrl}&email=${encodeURIComponent(result.signerEmail || "")}`;
+
+        // Use router to redirect
+        router.push(loginUrl);
       } else {
         // If there's a server validation error, update our field errors
         if (

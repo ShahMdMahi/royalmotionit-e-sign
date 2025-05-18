@@ -19,7 +19,7 @@ export default async function AdminUsers() {
     redirect("/dashboard");
   } else if (session.user.role === Role.ADMIN) {
     const users = await prisma.user.findMany();
-    return <UsersComponent users={users} />;
+    return <UsersComponent users={users} currentUserId={session.user.id} />;
   } else {
     redirect("/");
   }

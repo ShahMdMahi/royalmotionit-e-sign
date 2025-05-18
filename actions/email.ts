@@ -8,6 +8,7 @@ import { AccountVerificationEmail } from "@/emails/account-verification-email";
 import { ResetPasswordEmail } from "@/emails/reset-password-email";
 import { DocumentSignEmail } from "@/emails/document-sign-email";
 import { DocumentSignedNotification } from "@/emails/document-signed-notification";
+import { NewSignerEmail } from "@/emails/new-signer-email";
 
 /**
  * Sends a welcome email to a new user
@@ -98,7 +99,18 @@ export async function sendResetPasswordEmail(
  * @param expirationDate - Optional expiration date for the document
  * @returns Promise that resolves when email is sent or rejects on error
  */
-export async function sendDocumentSignRequestEmail(
+/**
+ * Sends a document signing request email to a signer when document is saved after editing
+ * @param recipientName - The signer's name
+ * @param recipientEmail - The signer's email address
+ * @param documentTitle - The title of the document
+ * @param documentId - The ID of the document
+ * @param senderName - The name of the sender (admin)
+ * @param senderEmail - The email of the sender (admin)
+ * @param message - Optional message about the document update
+ * @returns Promise that resolves when email is sent or rejects on error
+ */
+export async function sendDocumentUpdateEmail(
   recipientName: string,
   recipientEmail: string,
   documentTitle: string,
@@ -106,6 +118,42 @@ export async function sendDocumentSignRequestEmail(
   senderName: string,
   senderEmail: string,
   message?: string,
+): Promise<void> {
+  try {
+    // Use the same email template but with a custom update message
+    const updateMessage =
+      message || "The document has been updated. Please review and sign.";
+
+    const emailContent = await render(
+      DocumentSignEmail({
+        recipientName,
+        recipientEmail,
+        documentTitle,
+        documentId,
+        message: updateMessage,
+        senderName,
+        senderEmail,
+      }),
+    );
+
+    await sendEmail({
+      recipient: recipientEmail,
+      subject: `Document updated: "${documentTitle}"`,
+      html: emailContent,
+    });
+  } catch (error) {
+    console.error("Error sending document update email:", error);
+  }
+}
+
+export async function sendDocumentSignRequestEmail(
+  recipientName: string,
+  recipientEmail: string,
+  documentTitle: string,
+  documentId: string,
+  message: string,
+  senderName?: string,
+  senderEmail?: string,
   expirationDate?: Date,
 ): Promise<void> {
   try {
@@ -119,16 +167,16 @@ export async function sendDocumentSignRequestEmail(
         recipientEmail,
         documentTitle,
         documentId,
+        message,
         senderName,
         senderEmail,
-        message,
         expirationDate: formattedExpirationDate,
       }),
     );
 
     await sendEmail({
       recipient: recipientEmail,
-      subject: `${senderName} has requested your signature: "${documentTitle}"`,
+      subject: `Document signing request: "${documentTitle}"`,
       html: emailContent,
     });
   } catch (error) {
@@ -175,5 +223,38 @@ export async function sendDocumentSignedNotification(
     });
   } catch (error) {
     console.error("Error sending document signed notification:", error);
+  }
+}
+
+/**
+ * Sends an email with login credentials to a newly created signer
+ * @param recipientName - The signer's name
+ * @param recipientEmail - The signer's email address
+ * @param senderName - The name of the sender
+ * @param senderEmail - The email of the sender
+ * @param temporaryPassword - The temporary password for the new account
+ * @returns Promise that resolves when email is sent or rejects on error
+ */
+export async function sendNewSignerCredentialsEmail(
+  recipientName: string,
+  recipientEmail: string,
+  temporaryPassword: string,
+): Promise<void> {
+  try {
+    const emailContent = await render(
+      NewSignerEmail({
+        username: recipientName,
+        userEmail: recipientEmail,
+        temporaryPassword,
+      }),
+    );
+
+    await sendEmail({
+      recipient: recipientEmail,
+      subject: "Your Royal Sign Account Information",
+      html: emailContent,
+    });
+  } catch (error) {
+    console.error("Error sending new signer credentials email:", error);
   }
 }
