@@ -11,7 +11,9 @@ import { Signer } from "@/types/document";
  * @param signer The signer data to save
  * @returns The saved signer
  */
-export async function saveDocumentSigner(signer: Signer & { color?: string }): Promise<{
+export async function saveDocumentSigner(
+  signer: Signer & { color?: string },
+): Promise<{
   success: boolean;
   signer?: any; // Using 'any' here to accommodate Prisma's type which differs from our Signer interface
   error?: string;
@@ -32,7 +34,9 @@ export async function saveDocumentSigner(signer: Signer & { color?: string }): P
     });
 
     if (!document) {
-      throw new Error("Document not found or you don't have permission to edit it");
+      throw new Error(
+        "Document not found or you don't have permission to edit it",
+      );
     }
 
     // Check if a signer already exists for this document
@@ -68,7 +72,9 @@ export async function saveDocumentSigner(signer: Signer & { color?: string }): P
         },
       });
 
-      console.log(`Updated signer ${savedSigner.id} for document ${signer.documentId}`);
+      console.log(
+        `Updated signer ${savedSigner.id} for document ${signer.documentId}`,
+      );
     }
     // Otherwise, create a new signer
     else {
@@ -80,7 +86,7 @@ export async function saveDocumentSigner(signer: Signer & { color?: string }): P
         where: { email: signer.email.toLowerCase() },
         select: { id: true },
       });
-      
+
       savedSigner = await prisma.signer.create({
         data: {
           id: signerId,
@@ -95,26 +101,31 @@ export async function saveDocumentSigner(signer: Signer & { color?: string }): P
         },
       });
 
-      console.log(`Created new signer ${savedSigner.id} for document ${signer.documentId}`);
-      
+      console.log(
+        `Created new signer ${savedSigner.id} for document ${signer.documentId}`,
+      );
+
       // Update any existing fields to use this signer
       const documentFields = await prisma.documentField.findMany({
-        where: { documentId: signer.documentId }
+        where: { documentId: signer.documentId },
       });
-      
+
       // Update signature/initial fields and any required fields to use this signer
-      const fieldsToUpdate = documentFields.filter(field => 
-        ['signature', 'initial'].includes(field.type) || field.required
+      const fieldsToUpdate = documentFields.filter(
+        (field) =>
+          ["signature", "initial"].includes(field.type) || field.required,
       );
-      
+
       if (fieldsToUpdate.length > 0) {
         for (const field of fieldsToUpdate) {
           await prisma.documentField.update({
             where: { id: field.id },
-            data: { signerId: savedSigner.id }
+            data: { signerId: savedSigner.id },
           });
         }
-        console.log(`Assigned ${fieldsToUpdate.length} fields to new signer ${savedSigner.id}`);
+        console.log(
+          `Assigned ${fieldsToUpdate.length} fields to new signer ${savedSigner.id}`,
+        );
       }
     }
 
@@ -133,7 +144,9 @@ export async function saveDocumentSigner(signer: Signer & { color?: string }): P
     if (documentWithAuthor) {
       try {
         // Import the sendDocumentSignRequestEmail to avoid circular dependencies
-        const { sendDocumentSignRequestEmail } = await import("@/actions/email");
+        const { sendDocumentSignRequestEmail } = await import(
+          "@/actions/email"
+        );
 
         // Send focused document signing email without account credentials
         await sendDocumentSignRequestEmail(
@@ -143,7 +156,7 @@ export async function saveDocumentSigner(signer: Signer & { color?: string }): P
           signer.documentId,
           "You have been assigned to sign this document. Please review and sign it at your earliest convenience.",
           documentWithAuthor.author?.name || "Document Owner",
-          documentWithAuthor.author?.email || ""
+          documentWithAuthor.author?.email || "",
         );
 
         // Update the notifiedAt timestamp
@@ -152,7 +165,9 @@ export async function saveDocumentSigner(signer: Signer & { color?: string }): P
           data: { notifiedAt: new Date() },
         });
 
-        console.log(`Sent signing notification email to ${savedSigner.email} for document ${signer.documentId}`);
+        console.log(
+          `Sent signing notification email to ${savedSigner.email} for document ${signer.documentId}`,
+        );
       } catch (emailError) {
         console.error("Error sending signer notification email:", emailError);
         // Non-fatal error, continue with the flow

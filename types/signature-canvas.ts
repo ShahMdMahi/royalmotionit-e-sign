@@ -1,8 +1,8 @@
 // Custom type definitions for react-signature-canvas
 // Since the original package doesn't have proper TypeScript types for refs
 
-declare module 'react-signature-canvas' {
-  import * as React from 'react';
+declare module "react-signature-canvas" {
+  import * as React from "react";
 
   export interface SignatureCanvasProps {
     canvasProps?: React.CanvasHTMLAttributes<HTMLCanvasElement>;
@@ -28,7 +28,10 @@ declare module 'react-signature-canvas' {
     off: () => void;
   }
 
-  class SignatureCanvas extends React.Component<SignatureCanvasProps, any> implements SignatureCanvasMethods {
+  class SignatureCanvas
+    extends React.Component<SignatureCanvasProps, any>
+    implements SignatureCanvasMethods
+  {
     clear(): void;
     isEmpty(): boolean;
     toDataURL(type?: string, encoderOptions?: number): string;

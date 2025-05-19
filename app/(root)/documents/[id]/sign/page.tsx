@@ -6,7 +6,11 @@ import { DocumentField } from "@/types/document";
 import { normalizeDatabaseDocument } from "@/actions/document-normalizers";
 import { SignDocumentClientWrapper } from "@/components/document/sign-document-client-wrapper";
 
-export default async function SignDocument({ params }: { params: Promise<{ id: string }> }) {
+export default async function SignDocument({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const session = await auth();
   if (!session || !session.user.id || !session.user.email) {
     redirect("/auth/login");
@@ -38,7 +42,10 @@ export default async function SignDocument({ params }: { params: Promise<{ id: s
     const signer = prismaDocument.signers?.[0];
 
     // Check if the current user is the authorized signer
-    if (!signer || signer.email.toLowerCase() !== (session.user.email || "").toLowerCase()) {
+    if (
+      !signer ||
+      signer.email.toLowerCase() !== (session.user.email || "").toLowerCase()
+    ) {
       redirect("/documents");
     }
 
@@ -61,17 +68,19 @@ export default async function SignDocument({ params }: { params: Promise<{ id: s
           userId: session.user.id,
         },
       });
-      
+
       // Make sure all fields are properly assigned to this signer
-      const unassignedFields = prismaDocument.fields.filter(f => !f.signerId);
+      const unassignedFields = prismaDocument.fields.filter((f) => !f.signerId);
       if (unassignedFields.length > 0) {
         for (const field of unassignedFields) {
           await prisma.documentField.update({
             where: { id: field.id },
-            data: { signerId: signer.id }
+            data: { signerId: signer.id },
           });
         }
-        console.log(`Assigned ${unassignedFields.length} unassigned fields to signer ${signer.id}`);
+        console.log(
+          `Assigned ${unassignedFields.length} unassigned fields to signer ${signer.id}`,
+        );
       }
 
       // Record in document history
@@ -91,8 +100,10 @@ export default async function SignDocument({ params }: { params: Promise<{ id: s
     const fields = normalizedDoc.fields || [];
     console.log(`Total fields in document: ${fields.length}`);
     console.log(`Signer ID: ${signer.id}`);
-    console.log(`Fields with signer ID assigned: ${fields.filter(field => field.signerId).length}`);
-    
+    console.log(
+      `Fields with signer ID assigned: ${fields.filter((field) => field.signerId).length}`,
+    );
+
     const signerFields = fields
       .filter((field) => field.signerId === signer.id)
       .map((field) => {
@@ -132,7 +143,13 @@ export default async function SignDocument({ params }: { params: Promise<{ id: s
     };
 
     // Return the client wrapper component with the properly structured data
-    return <SignDocumentClientWrapper document={documentForComponent} signer={signer} fields={signerFields} />;
+    return (
+      <SignDocumentClientWrapper
+        document={documentForComponent}
+        signer={signer}
+        fields={signerFields}
+      />
+    );
   } catch (error) {
     console.error("Error fetching document for signing:", error);
     redirect("/documents");

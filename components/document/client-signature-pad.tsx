@@ -1,12 +1,21 @@
 "use client";
 
-import { forwardRef, useRef, useImperativeHandle, ForwardRefRenderFunction } from "react";
+import {
+  forwardRef,
+  useRef,
+  useImperativeHandle,
+  ForwardRefRenderFunction,
+} from "react";
 import dynamic from "next/dynamic";
 
 // Import SignatureCanvas with SSR disabled
 const SignatureCanvas = dynamic(() => import("react-signature-canvas"), {
   ssr: false,
-  loading: () => <div className="h-full w-full flex items-center justify-center bg-muted/20">Loading signature pad...</div>,
+  loading: () => (
+    <div className="h-full w-full flex items-center justify-center bg-muted/20">
+      Loading signature pad...
+    </div>
+  ),
 });
 
 export interface ClientSignatureCanvasProps {
@@ -23,7 +32,10 @@ export interface SignatureCanvasRef {
   toDataURL: (type?: string, encoderOptions?: number) => string;
 }
 
-const ClientSignatureCanvas: ForwardRefRenderFunction<SignatureCanvasRef, ClientSignatureCanvasProps> = ({ canvasProps, penColor }, ref) => {
+const ClientSignatureCanvas: ForwardRefRenderFunction<
+  SignatureCanvasRef,
+  ClientSignatureCanvasProps
+> = ({ canvasProps, penColor }, ref) => {
   const sigCanvas = useRef<any>(null);
 
   useImperativeHandle(ref, () => ({
@@ -48,7 +60,13 @@ const ClientSignatureCanvas: ForwardRefRenderFunction<SignatureCanvasRef, Client
   // @ts-ignore - react-signature-canvas typing issue with refs  // TypeScript doesn't understand how to properly type the ref for SignatureCanvas
   // Using the dynamic import with custom typing makes this challenging
   // @ts-ignore - This is a valid usage, the component accepts these props
-  return <SignatureCanvas ref={sigCanvas} canvasProps={canvasProps} penColor={penColor} />;
+  return (
+    <SignatureCanvas
+      ref={sigCanvas}
+      canvasProps={canvasProps}
+      penColor={penColor}
+    />
+  );
 };
 
 // Add display name for better debugging

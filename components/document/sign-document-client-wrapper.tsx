@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { Document as PrismaDocument, Signer } from "@prisma/client"; 
+import { Document as PrismaDocument, Signer } from "@prisma/client";
 import { DocumentField } from "@/types/document";
 
 // Dynamically import the SignDocumentComponent to prevent SSR issues
 const SignDocumentComponent = dynamic(
-  () => import("@/components/document").then((mod) => mod.SignDocumentComponent),
+  () =>
+    import("@/components/document").then((mod) => mod.SignDocumentComponent),
   {
     ssr: false,
     loading: () => (
@@ -18,7 +19,7 @@ const SignDocumentComponent = dynamic(
         </div>
       </div>
     ),
-  }
+  },
 );
 
 interface SignDocumentClientWrapperProps {
@@ -30,10 +31,16 @@ interface SignDocumentClientWrapperProps {
   fields: DocumentField[];
 }
 
-export function SignDocumentClientWrapper({ 
-  document, 
-  signer, 
-  fields 
+export function SignDocumentClientWrapper({
+  document,
+  signer,
+  fields,
 }: SignDocumentClientWrapperProps) {
-  return <SignDocumentComponent document={document} signer={signer} fields={fields} />;
+  return (
+    <SignDocumentComponent
+      document={document}
+      signer={signer}
+      fields={fields}
+    />
+  );
 }

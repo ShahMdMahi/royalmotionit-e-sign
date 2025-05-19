@@ -26,8 +26,8 @@ export default async function Documents() {
               some: {
                 OR: [
                   { email: session.user.email ?? "" }, // Match by email
-                  { userId: session.user.id } // Match by userId
-                ]
+                  { userId: session.user.id }, // Match by userId
+                ],
               },
             },
           },
@@ -48,8 +48,8 @@ export default async function Documents() {
               some: {
                 OR: [
                   { email: session.user.email ?? "" }, // Match by email
-                  { userId: session.user.id } // Match by userId
-                ]
+                  { userId: session.user.id }, // Match by userId
+                ],
               },
             },
           },

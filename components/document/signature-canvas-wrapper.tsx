@@ -4,7 +4,9 @@ import { forwardRef, useRef, useImperativeHandle } from "react";
 import dynamic from "next/dynamic";
 
 // Dynamically import SignatureCanvas with SSR disabled
-const SignatureCanvas = dynamic(() => import("react-signature-canvas"), { ssr: false });
+const SignatureCanvas = dynamic(() => import("react-signature-canvas"), {
+  ssr: false,
+});
 
 // Create types for the signature canvas
 export interface SignatureCanvasRef {
@@ -15,11 +17,17 @@ export interface SignatureCanvasRef {
 
 interface SignatureCanvasWrapperProps {
   penColor?: string;
-  canvasProps?: React.DetailedHTMLProps<React.CanvasHTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>;
+  canvasProps?: React.DetailedHTMLProps<
+    React.CanvasHTMLAttributes<HTMLCanvasElement>,
+    HTMLCanvasElement
+  >;
 }
 
 // Create a forwardRef wrapper component for SignatureCanvas
-const SignatureCanvasWrapper = forwardRef<SignatureCanvasRef, SignatureCanvasWrapperProps>((props, ref) => {
+const SignatureCanvasWrapper = forwardRef<
+  SignatureCanvasRef,
+  SignatureCanvasWrapperProps
+>((props, ref) => {
   const { penColor = "black", canvasProps = {} } = props;
   const signatureRef = useRef<any>(null);
 
@@ -44,7 +52,13 @@ const SignatureCanvasWrapper = forwardRef<SignatureCanvasRef, SignatureCanvasWra
     },
   }));
 
-  return <SignatureCanvas ref={signatureRef} penColor={penColor} canvasProps={canvasProps} />;
+  return (
+    <SignatureCanvas
+      ref={signatureRef}
+      penColor={penColor}
+      canvasProps={canvasProps}
+    />
+  );
 });
 
 SignatureCanvasWrapper.displayName = "SignatureCanvasWrapper";
