@@ -24,7 +24,8 @@ export interface Document {
   enableWatermark?: boolean;
   watermarkText?: string;
   fields?: DocumentField[];
-  signer?: Signer; // Changed from signers: Signer[] to signer?: Signer
+  signer?: Signer; // Single signer system
+  signers?: Signer[]; // Added back for compatibility
 }
 
 export type DocumentFieldType =
@@ -85,7 +86,6 @@ export interface Signer {
   declinedAt?: Date;
   declineReason?: string;
   color?: string; // Custom property for UI display
-  order?: number; // Added back for compatibility with existing code
 }
 
 export interface DocumentHistory {

@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/prisma/prisma";
 import { redirect } from "next/navigation";
-import { toast } from "sonner";
 import { DocumentField } from "@/types/document";
 import { normalizeDatabaseDocument } from "@/actions/document-normalizers";
 import { SignDocumentClientWrapper } from "@/components/document/sign-document-client-wrapper";

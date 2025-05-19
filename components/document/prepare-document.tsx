@@ -15,7 +15,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
@@ -50,23 +49,10 @@ export function PrepareDocument({
   const [activeTab, setActiveTab] = useState<string>("design");
   const [documentFields, setDocumentFields] = useState<DocumentField[]>(fields);
   const [documentSigners, setDocumentSigners] = useState<Signer[]>(signers);
-  // Sequential signing removed for single signer model
-  const [isSequentialSigning, setIsSequentialSigning] =
-    useState<boolean>(false);
   const [completionMessage, setCompletionMessage] = useState<string>("");
   const [isSending, setIsSending] = useState<boolean>(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  // Handle signer changes from SignerManager component
-  const handleSignersChange = async (updatedSigners: Signer[]) => {
-    setDocumentSigners(updatedSigners);
-    const result = await saveDocumentSigners(document.id, updatedSigners);
-    if (result.success) {
-      toast.success("Signers updated");
-    } else {
-      toast.error(result.message || "Failed to update signers");
-    }
-  };
 
   // Validate document before sending
   const validateDocument = (): boolean => {

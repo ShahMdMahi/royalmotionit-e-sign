@@ -85,7 +85,6 @@ export function EditDocumentComponent({
     status: document.status as any, // Cast to the Document status type
     key: document.key || "",
     type: document.type || "",
-    sequentialSigning: document.sequentialSigning || false,
     createdAt: document.createdAt,
     updatedAt: document.updatedAt,
     signedAt: document.signedAt || undefined,

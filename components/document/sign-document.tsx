@@ -469,7 +469,7 @@ export function SignDocumentComponent({
             )}
           </Button>
         </div>
-      </div>{" "}
+      </div>
       <div className="container mx-auto py-4 sm:py-8 px-2 sm:px-4">
         {/* Show validation errors summary if there are any */}
         {fieldErrors.length > 0 && (
@@ -619,6 +619,7 @@ export function SignDocumentComponent({
                         return pages;
                       }}
                       onFieldClickAction={handleFieldClick}
+                      debug={true} // Enable debug mode to help diagnose positioning issues
                     />
                   </div>
                 )}

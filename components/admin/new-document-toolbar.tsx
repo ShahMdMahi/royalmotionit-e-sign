@@ -4,7 +4,6 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Save, Send, ArrowLeft, Settings, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { handleDocumentSave } from "@/actions/document-toolbar-actions";
 
 interface NewDocumentToolbarProps {
   document: {
@@ -14,14 +13,12 @@ interface NewDocumentToolbarProps {
     type: string;
     key: string;
     status: string;
-    sequentialSigning: boolean;
     signers: Array<{
       id: string;
       documentId: string;
       email: string;
       name?: string;
       role?: string;
-      order: number;
       status: string;
       color?: string;
     }>;

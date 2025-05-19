@@ -13,7 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -36,7 +35,6 @@ export function SendDocument({ document, signers }: SendDocumentProps) {
   const router = useRouter();
   const [isSending, setIsSending] = useState(false);
   // Sequential signing is not needed for single signer
-  const [sequentialSigning, setSequentialSigning] = useState(false);
   const [accessCodes, setAccessCodes] = useState<Record<string, string>>({});
   const [completionMessage, setCompletionMessage] = useState("");
   const [expirationDate, setExpirationDate] = useState<Date | undefined>(

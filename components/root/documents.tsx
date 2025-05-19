@@ -176,7 +176,7 @@ export function DocumentsComponent({
                           {doc.preparedAt && (
                             <div className="flex items-center justify-between text-xs">
                               <span className="text-muted-foreground flex items-center gap-1.5">
-                                <FileSignature className="h-3.5 w-3.5" />{" "}
+                                <FileSignature className="h-3.5 w-3.5" />
                                 Prepared:
                               </span>
                               <span className="font-medium">
@@ -374,7 +374,7 @@ export function DocumentsComponent({
                           View
                         </Link>
                       </Button>
-                      {doc.documentType === DocumentType.UNSIGNED && (
+                      {doc.documentType === DocumentType.UNSIGNED && doc.preparedAt && (
                         <Button size="sm" asChild className="w-full sm:w-auto">
                           <Link href={`/documents/${doc.id}/sign`}>
                             <FileSignature className="h-3.5 w-3.5 mr-1.5" />

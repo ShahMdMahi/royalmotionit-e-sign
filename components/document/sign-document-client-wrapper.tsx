@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Document as PrismaDocument, Signer } from "@prisma/client";
 import { DocumentField } from "@/types/document";

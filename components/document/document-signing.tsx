@@ -34,7 +34,6 @@ export function DocumentSigning({
   isLastSigner,
 }: DocumentSigningProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>

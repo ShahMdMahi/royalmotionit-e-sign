@@ -61,7 +61,6 @@ export default async function EditDocument({
       sentAt: document.sentAt || undefined,
       signedAt: document.signedAt || undefined,
       expiresAt: document.expiresAt || undefined,
-      sequentialSigning: document.sequentialSigning || false,
       enableWatermark: document.enableWatermark || false,
       watermarkText: document.watermarkText || undefined,
       fields: document.fields?.map((field) => ({
@@ -95,7 +94,7 @@ export default async function EditDocument({
           email: signer.email,
           name: signer.name || undefined,
           role: signer.role || undefined,
-          order: signer.order,
+          order: (signer as any).order ?? 0,
           status: signer.status,
           accessCode: signer.accessCode || undefined,
           invitedAt: signer.invitedAt || undefined,

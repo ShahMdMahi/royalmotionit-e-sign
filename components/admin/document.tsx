@@ -99,6 +99,7 @@ export function DocumentComponent({
         router.refresh();
       } catch (error) {
         toast.error("Failed to delete document");
+        console.error("Error deleting document:", error);
       } finally {
         closeDeleteModal();
       }

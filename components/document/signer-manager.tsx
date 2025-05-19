@@ -41,7 +41,6 @@ import { deleteDocumentSigner } from "@/actions/delete-document-signer";
 import { getDocumentSigner } from "@/actions/get-document-signer";
 import { ensureSignerAccount } from "@/actions/signer-account";
 import { Badge } from "@/components/ui/badge";
-import { getUserByEmail } from "@/actions/user-minimal";
 import { toast } from "sonner";
 
 interface SignerManagerProps {

@@ -113,15 +113,7 @@ export function SingleDocumentComponent({
     }
   };
 
-  const getInitials = (name: string | null | undefined) => {
-    if (!name) return "U";
-    return name
-      .split(" ")
-      .map((part) => part?.[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2);
-  };
+ 
 
   if (isLoading) {
     return (
@@ -177,7 +169,7 @@ export function SingleDocumentComponent({
     );
   }
 
-  const handleDocumentSave = async (doc: any) => {
+  const handleDocumentSave = async () => {
     setIsSaving(true);
     try {
       // Implement save functionality here
@@ -193,7 +185,6 @@ export function SingleDocumentComponent({
         status: document.status,
         key: document.key || null,
         type: document.type || null,
-        sequentialSigning: document.sequentialSigning || false,
         createdAt: document.createdAt || new Date(),
         updatedAt: new Date(),
       };
@@ -216,7 +207,6 @@ export function SingleDocumentComponent({
           type: document.type || "default",
           key: document.key || "",
           description: document.description || "",
-          sequentialSigning: document.sequentialSigning || false,
           signers:
             document.signers?.map((signer) => ({
               id: signer.id,
@@ -224,7 +214,6 @@ export function SingleDocumentComponent({
               email: signer.email,
               name: signer.name || undefined,
               role: signer.role || undefined,
-              order: 0, // Default order
               status: signer.status || "PENDING",
             })) || [],
         }}

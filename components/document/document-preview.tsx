@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { PDFViewer } from "@/components/common/pdf-viewer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Send, Download } from "lucide-react";
 import { useRouter } from "next/navigation";

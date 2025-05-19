@@ -29,6 +29,7 @@ import "react-pdf/dist/esm/Page/TextLayer.css";
 
 // Import local PDF viewer styles for additional customization
 import "@/app/pdf-viewer.css";
+import Image from "next/image";
 
 interface PDFViewerSimpleProps {
   pdfData: Uint8Array;
@@ -219,7 +220,7 @@ export function PDFViewerSimple({
           case "signature":
             return hasValue ? (
               <div className="absolute inset-0 flex items-center justify-center overflow-hidden w-full h-full">
-                <img
+                <Image
                   src={value}
                   alt="Signature"
                   className="max-w-full max-h-full object-contain"
@@ -234,7 +235,7 @@ export function PDFViewerSimple({
           case "initial":
             return hasValue ? (
               <div className="absolute inset-0 flex items-center justify-center overflow-hidden w-full h-full">
-                <img
+                <Image
                   src={value}
                   alt="Initial"
                   className="max-w-full max-h-full object-contain"
