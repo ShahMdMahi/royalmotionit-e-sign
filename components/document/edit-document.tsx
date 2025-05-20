@@ -7,6 +7,8 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  DragStartEvent,
+  DragEndEvent,
 } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import { v4 as uuidv4 } from "uuid";
@@ -28,7 +30,7 @@ import {
 } from "@/components/ui/sheet";
 
 // Types & Actions
-import { Document, DocumentField } from "@/types/document";
+import { Document, DocumentField, DocumentFieldType } from "@/types/document";
 import { saveDocumentFields } from "@/actions/document";
 import { handleAddField } from "@/actions/field-palette-actions";
 import {
@@ -79,15 +81,19 @@ export function EditDocument({
   const selectedField = fields.find((field) => field.id === selectedFieldId);
 
   // Handle DnD start from field palette
-  const handleDragStart = (event: any) => {
+  const handleDragStart = (event: DragStartEvent) => {
     if (event.active && event.active.data && event.active.data.current) {
-      const dragData = event.active.data.current;
+      const dragData = event.active.data.current as { 
+        isFieldPalette?: boolean; 
+        type: DocumentFieldType; 
+        label: string 
+      };
       if (dragData.isFieldPalette) {
         // Create a new field based on the palette item
         const newField: DocumentField = {
           id: uuidv4(),
           documentId: document.id,
-          type: dragData.type,
+          type: dragData.type as DocumentFieldType,
           label: dragData.label,
           placeholder: "",
           required: false,
@@ -118,7 +124,7 @@ export function EditDocument({
   };
 
   // Handle field drop from palette
-  const handleDragEnd = async (event: any) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     setActiveDragField(null);
 
     if (!event.over) return;
@@ -129,18 +135,28 @@ export function EditDocument({
       event.over.id === "pdf-container"
     ) {
       // Get dropped position
-      const { x, y } = event.over.rect;
-      const type = event.active.data.current.type;
-      const label = event.active.data.current.label; // Add field at position
+      const rect = event.over.rect;
+      const dragData = event.active.data.current as { 
+        isFieldPalette?: boolean; 
+        type: DocumentFieldType; 
+        label: string 
+      };
+      const type = dragData.type;
+      const label = dragData.label; // Add field at position
+      
+      // Calculate position - ensure we have the proper event type
+      const clientX = (event.activatorEvent as PointerEvent).clientX;
+      const clientY = (event.activatorEvent as PointerEvent).clientY;
+      
       const newField: DocumentField = {
         id: uuidv4(),
         documentId: document.id,
-        type: type,
+        type: type as DocumentFieldType,
         label,
         placeholder: "",
         required: false,
-        x: event.activatorEvent.clientX - x,
-        y: event.activatorEvent.clientY - y,
+        x: clientX - rect.left,
+        y: clientY - rect.top,
         width: type === "signature" || type === "initial" ? 200 : 150,
         height: type === "signature" || type === "initial" ? 80 : 40,
         pageNumber: currentPage,
@@ -155,7 +171,7 @@ export function EditDocument({
       setShowFieldProperties(true);
 
       // Call server actions
-      await handleAddField(type);
+      await handleAddField(type as DocumentFieldType);
       await saveDocumentFields(document.id, updatedFields);
 
       toast.success(`Added ${label} field`);
@@ -167,7 +183,7 @@ export function EditDocument({
       field.id === updatedField.id ? updatedField : field,
     );
     setFields(updatedFields);
-    const result = await handleFieldUpdate(updatedField);
+    await handleFieldUpdate(updatedField);
     await saveDocumentFields(document.id, updatedFields);
     toast.success("Field updated");
   };
@@ -394,7 +410,7 @@ export function EditDocument({
               <FieldProperties
                 field={selectedField}
                 onUpdateAction={(field) => {
-                  handleUpdateField(field as any);
+                  handleUpdateField(field as DocumentField);
                   return Promise.resolve(field);
                 }}
                 onCloseAction={() => {

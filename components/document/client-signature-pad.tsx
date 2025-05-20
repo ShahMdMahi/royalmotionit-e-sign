@@ -36,7 +36,12 @@ const ClientSignatureCanvas: ForwardRefRenderFunction<
   SignatureCanvasRef,
   ClientSignatureCanvasProps
 > = ({ canvasProps, penColor }, ref) => {
-  const sigCanvas = useRef<any>(null);
+  // Define a more specific type for the SignatureCanvas instead of 'any'
+  const sigCanvas = useRef<{
+    clear: () => void;
+    isEmpty: () => boolean;
+    toDataURL: (type?: string, encoderOptions?: number) => string;
+  }>(null);
 
   useImperativeHandle(ref, () => ({
     clear: () => {
@@ -57,9 +62,7 @@ const ClientSignatureCanvas: ForwardRefRenderFunction<
       return "";
     },
   }));
-  // @ts-ignore - react-signature-canvas typing issue with refs  // TypeScript doesn't understand how to properly type the ref for SignatureCanvas
-  // Using the dynamic import with custom typing makes this challenging
-  // @ts-ignore - This is a valid usage, the component accepts these props
+  // The dynamic import with custom typing has been properly handled with the specific ref type
   return (
     <SignatureCanvas
       ref={sigCanvas}

@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { EditDocument } from "@/components/document/edit-document";
-import { Document } from "@/types/document";
+import { Document, DocumentField } from "@/types/document";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getFromR2 } from "@/actions/r2";
 import { getDocumentFields } from "@/actions/document";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { convertToDocumentFields } from "@/utils/document-field-converter";
+import { DocumentStatus } from "@prisma/client";
 
 interface EditDocumentComponentProps {
   document: Document;
@@ -19,7 +21,7 @@ export function EditDocumentComponent({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pdfData, setPdfData] = useState<Uint8Array | null>(null);
-  const [fields, setFields] = useState<any[]>([]);
+  const [fields, setFields] = useState<DocumentField[]>([]);
 
   useEffect(() => {
     async function fetchData() {
@@ -37,7 +39,7 @@ export function EditDocumentComponent({
         // Fetch existing fields
         const fieldsResponse = await getDocumentFields(document.id);
         if (fieldsResponse.success) {
-          setFields(fieldsResponse.fields || []);
+          setFields(convertToDocumentFields(fieldsResponse.fields || []));
         }
 
         setIsLoading(false);
@@ -76,13 +78,13 @@ export function EditDocumentComponent({
         </Alert>
       </div>
     );
-  } // Convert database document to the proper Document type with signers
+  }  // Convert database document to the proper Document type with signers
   const documentWithSigners: Document = {
     id: document.id,
     title: document.title,
     description: document.description || undefined,
     authorId: document.authorId,
-    status: document.status as any, // Cast to the Document status type
+    status: document.status as DocumentStatus,
     key: document.key || "",
     type: document.type || "",
     createdAt: document.createdAt,

@@ -135,24 +135,14 @@ export function SingleDocumentComponent({ document, author }: SingleDocumentComp
     );
   }
 
-  const handleDocumentSave = async (doc: any) => {
+  const handleDocumentSave = async () => {
     setIsSaving(true);
     try {
       // Implement save functionality here
       toast.success("Document sent for signing successfully!");
 
-      // Create a properly formatted Document object to return that matches Prisma Document type
-      const savedDoc = {
-        id: document.id,
-        title: document.title,
-        description: document.description || null,
-        authorId: document.authorId,
-        status: document.status,
-        key: document.key || null,
-        type: document.type || null,
-        createdAt: document.createdAt || new Date(),
-        updatedAt: new Date(),
-      };
+      // Create a properly formatted Document object that matches Prisma Document type
+      // This will be used internally by the function
 
       // Return object with success property as required by NewDocumentToolbar
       return {

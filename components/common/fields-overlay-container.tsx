@@ -5,7 +5,7 @@ import { DocumentField } from "@/types/document";
 
 interface FieldsOverlayContainerProps {
   fields: DocumentField[];
-  currentPage: number;
+  currentPage?: number; // Made optional since it's not being used
   renderFieldAction: (field: DocumentField) => React.ReactNode;
   debug?: boolean;
   viewerContainerRef: React.RefObject<HTMLDivElement | null>;
@@ -15,9 +15,8 @@ interface FieldsOverlayContainerProps {
  * A container that positions fields correctly on PDF pages,
  * making them stick to their associated page even during scrolling.
  */
-export function FieldsOverlayContainer({ fields, currentPage, renderFieldAction, debug = false, viewerContainerRef }: FieldsOverlayContainerProps) {
-  const [pageElements, setPageElements] = useState<HTMLElement[]>([]);
-  const overlayRef = useRef<HTMLDivElement>(null); // Use a mutation observer to track changes to the PDF viewer's DOM more efficiently
+export function FieldsOverlayContainer({ fields, renderFieldAction, debug = false, viewerContainerRef }: FieldsOverlayContainerProps) {
+  const [pageElements, setPageElements] = useState<HTMLElement[]>([]);// Use a mutation observer to track changes to the PDF viewer's DOM more efficiently
   useEffect(() => {
     if (!viewerContainerRef.current) return;
 
@@ -102,9 +101,8 @@ export function FieldsOverlayContainer({ fields, currentPage, renderFieldAction,
       if (updateTimer) {
         clearTimeout(updateTimer);
       }
-      observer.disconnect();
-    };
-  }, [viewerContainerRef, debug]); // Removed pageElements dependency
+      observer.disconnect();    };
+  }, [viewerContainerRef, debug, pageElements]); // Added pageElements dependency
   // Removed duplicate fieldsByPage calculation - now using memoizedFieldsByPage// Set up an effect to reposition field overlays when the viewer scrolls, resizes or zooms
   useEffect(() => {
     if (!viewerContainerRef.current) return;

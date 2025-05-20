@@ -77,7 +77,7 @@ export function FieldProperties({
     return {};
   });
 
-  const handleChange = (key: keyof DocumentField, value: any) => {
+  const handleChange = (key: keyof DocumentField, value: string | number | boolean | undefined) => {
     setLocalField((prev) => ({
       ...prev,
       [key]: value,
@@ -124,14 +124,6 @@ export function FieldProperties({
       // Clear conditional logic if missing required parts
       handleChange("conditionalLogic", undefined);
     }
-  };
-
-  // Get a source field for display
-  const getFieldById = (id?: string) => {
-    // Prevent showing the current field as an option for itself
-    return availableFieldIds
-      .filter((fieldId) => fieldId !== localField.id)
-      .find((fieldId) => fieldId === id);
   };
 
   const handleSubmit = async () => {
@@ -379,10 +371,7 @@ export function FieldProperties({
                       <SelectItem value="">Unassigned</SelectItem>
                       {signers.map((signer) => (
                         <SelectItem key={signer.id} value={signer.id}>
-                          {signer.name || signer.email}{" "}
-                          {signer.order && signer.order > 0
-                            ? `(#${signer.order})`
-                            : ""}
+                          {signer.name || signer.email}
                         </SelectItem>
                       ))}
                     </SelectContent>

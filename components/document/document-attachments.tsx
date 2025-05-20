@@ -127,33 +127,42 @@ export function DocumentAttachments({
       setUploadProgress(0);
     }
   };
+  // Define specific types for the API response
+  type UrlResponse = { url: string };
+  type DataUrlResponse = { data: { url: string } };
+  type SuccessResponse = { success: boolean; message?: string } & (UrlResponse | DataUrlResponse | {});
+  type DownloadResponse = string | UrlResponse | SuccessResponse;
+
   const handleDownload = async (attachmentId: string) => {
     try {
-      const result = await getAttachmentDownloadUrl(attachmentId);
-
-      // Handle different result formats
+      const result = await getAttachmentDownloadUrl(attachmentId);        // Handle different result formats
       if (typeof result === "string") {
         // Handle direct URL string
         window.open(result, "_blank");
       } else if (result && typeof result === "object") {
         // Type guard to handle objects with url property
-        const hasUrlProperty = (obj: any): obj is { url: string } =>
-          "url" in obj && typeof obj.url === "string";
+        const hasUrlProperty = (obj: unknown): obj is UrlResponse =>
+          obj !== null && 
+          typeof obj === "object" && 
+          "url" in obj && 
+          typeof (obj as { url: unknown }).url === "string";
 
         // Type guard to handle objects with data.url property
         const hasDataUrlProperty = (
-          obj: any,
-        ): obj is { data: { url: string } } =>
+          obj: unknown,
+        ): obj is DataUrlResponse =>
+          obj !== null && 
+          typeof obj === "object" && 
           "data" in obj &&
-          obj.data &&
-          typeof obj.data === "object" &&
-          "url" in obj.data &&
-          typeof obj.data.url === "string";
+          (obj as { data: unknown }).data !== null &&
+          typeof (obj as { data: unknown }).data === "object" &&
+          "url" in ((obj as { data: object }).data) &&
+          typeof ((obj as { data: { url: string } }).data.url) === "string";
 
         if (hasUrlProperty(result)) {
           // Direct URL property
           window.open(result.url, "_blank");
-        } else if ("success" in result && result.success) {
+        } else if ("success" in result && (result as { success: boolean }).success) {
           // It's a success response, extract URL if possible
           if (hasUrlProperty(result)) {
             window.open(result.url, "_blank");

@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import { Viewer, Worker, SpecialZoomLevel, ViewMode } from "@react-pdf-viewer/core";
+import { Viewer, Worker, SpecialZoomLevel } from "@react-pdf-viewer/core";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
 import { zoomPlugin } from "@react-pdf-viewer/zoom";
 import { DocumentField } from "@/types/document";
 import { cn } from "@/lib/utils";
 import { handlePageChange, handleTotalPagesChange } from "@/actions/pdf-viewer-actions";
-import { preciseScaledValue } from "@/utils/pdf-utils";
 import { FieldsOverlayContainer } from "./fields-overlay-container";
 
 // Import styles for the viewer and default layout
@@ -22,7 +21,6 @@ interface PDFViewerProps {
   fields?: DocumentField[];
   fieldValues?: Record<string, string>;
   highlightFields?: boolean;
-  currentSignerId?: string;
   onPageChangeAction?: typeof handlePageChange;
   onTotalPagesChangeAction?: typeof handleTotalPagesChange;
   onFieldClickAction?: (fieldId: string) => void;
@@ -34,7 +32,6 @@ export function PDFViewer({
   fields = [],
   fieldValues = {},
   highlightFields = false,
-  currentSignerId,
   onPageChangeAction = handlePageChange,
   onTotalPagesChangeAction = handleTotalPagesChange,
   onFieldClickAction,
@@ -43,10 +40,6 @@ export function PDFViewer({
   const [viewerLoaded, setViewerLoaded] = useState(false);
   const [viewerScale, setViewerScale] = useState(1);
   const [currentPage, setCurrentPage] = useState(0); // Initialize with 0 to match PDF viewer's 0-based indexing
-  const [viewerDimensions, setViewerDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
   const viewerContainerRef = useRef<HTMLDivElement>(null);
 
   // Configure the default layout plugin
@@ -92,9 +85,6 @@ export function PDFViewer({
   useEffect(() => {
     const updateDimensions = () => {
       if (!viewerContainerRef.current) return;
-
-      const { width, height } = viewerContainerRef.current.getBoundingClientRect();
-      setViewerDimensions({ width, height });
 
       // Enhanced PDF page element detection
       // We try multiple selectors to ensure we find the right element regardless of PDF.js version

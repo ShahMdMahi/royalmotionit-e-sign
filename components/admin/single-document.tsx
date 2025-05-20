@@ -30,7 +30,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
-import { DocumentToolbar } from "./document-toolbar";
+import { DocumentToolbar } from "../document/safe-document-toolbar";
 import { toast } from "sonner";
 
 interface SingleDocumentComponentProps {
@@ -168,7 +168,7 @@ export function SingleDocumentComponent({
       </Card>
     );
   }
-  const handleDocumentSave = async (doc: any) => {
+  const handleDocumentSave = async (doc: Document) => {
     setIsSaving(true);
     try {
       // Implement save functionality here
@@ -190,7 +190,6 @@ export function SingleDocumentComponent({
 
   return (
     <div className="flex flex-col w-full">
-      {" "}
       <DocumentToolbar
         document={
           {
@@ -200,7 +199,7 @@ export function SingleDocumentComponent({
               document.signers && document.signers.length > 0
                 ? document.signers[0]
                 : undefined,
-          } as any
+          } as Document
         }
         isSaving={isSaving}
         onSaveAction={handleDocumentSave}
@@ -342,6 +341,14 @@ export function SingleDocumentComponent({
                         >
                           {document.status}
                         </Badge>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                          <Edit className="size-3.5" /> Created By:
+                        </p>
+                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                          {author.name || author.email}
+                        </p>
                       </div>
                       {document.hash && (
                         <div className="sm:col-span-2">
