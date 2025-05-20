@@ -23,7 +23,7 @@ interface NewDocumentToolbarProps {
       color?: string;
     }>;
   };
-  onSaveAction?: (doc: any) => Promise<any>;
+  onSaveAction?: (doc: NewDocumentToolbarProps['document']) => Promise<{ success: boolean; message?: string; error?: string }>;
   isSaving: boolean;
 }
 

@@ -29,6 +29,7 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full`}
+        suppressHydrationWarning
       >
         <ThemeProvider attribute="class" defaultTheme="light">
           {children}

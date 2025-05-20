@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
     resolveAlias: {
       // Handle browser-specific modules in SSR
       // For turbopack, use an empty string to effectively ignore the module
-      canvas: '',
+      canvas: "",
     },
   },
   // Keep webpack config for non-turbopack builds
