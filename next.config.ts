@@ -16,8 +16,8 @@ const nextConfig: NextConfig = {
     // Turbopack specific configurations
     resolveAlias: {
       // Handle browser-specific modules in SSR
-      // Use empty string instead of false for type compatibility
-      canvas: "",
+      // For turbopack, use an empty string to effectively ignore the module
+      canvas: '',
     },
   },
   // Keep webpack config for non-turbopack builds
@@ -25,8 +25,8 @@ const nextConfig: NextConfig = {
     // Handle browser-specific modules in SSR
     config.resolve.fallback = {
       ...config.resolve.fallback,
-      // Use null instead of false for proper type compatibility
-      canvas: null,
+      // Use false to ignore request and replace with empty module
+      canvas: false,
     };
 
     return config;
