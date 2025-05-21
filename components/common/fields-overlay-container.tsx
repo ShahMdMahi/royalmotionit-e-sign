@@ -350,7 +350,7 @@ export function FieldsOverlayContainer({
               boxSizing: "border-box", // Ensure dimensions are exact
             }}
           >
-            {/* Render fields for this page with position relative to page */}{" "}
+            {/* Render fields for this page with position relative to page */}
             {fieldsForPage.map((field) => {
               // Calculate the scale factor based on the page's current dimensions vs standard PDF dimensions
               // This is crucial for positioning fields correctly relative to the PDF page
@@ -424,7 +424,7 @@ export function FieldsOverlayContainer({
             {debug && (
               <div className="absolute inset-0 border-2 border-blue-500/30 z-10 pointer-events-none">
                 <div className="absolute top-0 right-0 bg-blue-500 text-white text-xs p-1">
-                  Page {documentPage} ({pageIndex}) - {fieldsForPage.length}{" "}
+                  Page {documentPage} ({pageIndex}) - {fieldsForPage.length}
                   fields
                 </div>
                 <div className="absolute bottom-0 right-0 bg-blue-500 text-white text-xs p-1">

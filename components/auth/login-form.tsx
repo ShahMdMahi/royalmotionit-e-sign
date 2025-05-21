@@ -185,7 +185,7 @@ export function LoginForm({
 
         {isRegistrationActive && (
           <div className="text-center text-xs pt-2">
-            Don&apos;t have an account?{" "}
+            Don&apos;t have an account? 
             <Link
               href="/auth/register"
               className="text-primary hover:underline"

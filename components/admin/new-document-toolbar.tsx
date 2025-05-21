@@ -81,21 +81,7 @@ export function NewDocumentToolbar({
           </Button>
         )}
 
-        {!isEditMode && document.status === "DRAFT" && (
-          <Button variant="default" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? (
-              <>
-                <span className="animate-pulse">Sending...</span>
-                <span className="ml-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-              </>
-            ) : (
-              <>
-                <Send className="h-4 w-4 mr-2" />
-                Send for Signing
-              </>
-            )}
-          </Button>
-        )}
+        {/* Send for Signing button removed */}
 
         {!isEditMode && (
           <Button variant="outline">

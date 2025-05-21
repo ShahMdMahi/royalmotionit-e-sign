@@ -50,7 +50,6 @@ export function ValidationErrorsSummary({
             <ul className="space-y-1">
               {errors.map((error, index) => (
                 <li key={index} className="flex items-start">
-                  {" "}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -61,7 +60,7 @@ export function ValidationErrorsSummary({
                     <span className="text-left">
                       {fieldLabels[error.fieldId] ? (
                         <span className="font-medium">
-                          {fieldLabels[error.fieldId]}:{" "}
+                          {fieldLabels[error.fieldId]}: 
                         </span>
                       ) : null}
                       {error.message}

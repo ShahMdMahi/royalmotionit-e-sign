@@ -673,13 +673,13 @@ export function PDFViewer({
               <>
                 <div className="absolute bottom-16 left-4 bg-black/80 text-white p-2 text-xs rounded z-50">
                   PDF Page: {currentPage} (Document Page: {currentPage + 1}) |
-                  Fields on this page:{" "}
+                  Fields on this page:
                   {
                     visibleFields.filter(
                       (f) => Number(f.pageNumber) === currentPage + 1,
                     ).length
-                  }{" "}
-                  | Scale: {viewerScale.toFixed(2)} | Calculated Scale:{" "}
+                  }
+                  | Scale: {viewerScale.toFixed(2)} | Calculated Scale:
                   {calculateScaleFactor().toFixed(3)}
                 </div>
 

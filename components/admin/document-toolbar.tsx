@@ -3,7 +3,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Document, DocumentField } from "@/types/document";
-import { Save, Send, ArrowLeft, Settings, Eye } from "lucide-react";
+import { Save, ArrowLeft, Settings, Eye, FileSignature } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { handleDocumentSave } from "@/actions/document-toolbar-actions";
 
@@ -12,6 +12,8 @@ interface DocumentToolbarProps {
   onSaveAction?: typeof handleDocumentSave;
   isSaving: boolean;
   fields?: DocumentField[];
+  isSigner?: boolean;
+  userRole?: string | null;
 }
 
 export function DocumentToolbar({
@@ -19,6 +21,8 @@ export function DocumentToolbar({
   onSaveAction = handleDocumentSave,
   isSaving,
   fields = [],
+  isSigner = false,
+  userRole = null,
 }: DocumentToolbarProps) {
   const router = useRouter();
   const pathname = window.location.pathname;
@@ -33,7 +37,11 @@ export function DocumentToolbar({
       router.push(`/admin/documents/${document.id}`);
     } else {
       // Otherwise go back to documents list
-      router.push("/admin/documents");
+      if (userRole === "ADMIN") {
+        router.push("/admin/documents");
+      } else {
+        router.push("/documents");
+      }
     }
   };
 
@@ -65,7 +73,20 @@ export function DocumentToolbar({
       </div>
 
       <div className="flex items-center space-x-2">
-        {!isEditMode && document.status === "DRAFT" && (
+        {/* Sign button for signers with pending documents */}
+        {isSigner && document.status === "PENDING" && !isEditMode && (
+          <Button
+            onClick={() => router.push(`/documents/${document.id}/sign`)}
+            variant="default"
+            data-testid="signer-sign-button"
+          >
+            <FileSignature className="h-4 w-4 mr-2" />
+            Sign Document
+          </Button>
+        )}
+        
+        {/* Admin edit button for draft documents */}
+        {!isEditMode && document.status === "DRAFT" && userRole === "ADMIN" && (
           <>
             <Button
               variant="outline"
@@ -75,20 +96,9 @@ export function DocumentToolbar({
               <Settings className="h-4 w-4 mr-2" />
               Edit
             </Button>
-
-            <Button
-              onClick={() => onSaveAction(document)}
-              disabled={isSaving || !hasFields}
-              title={
-                !hasFields ? "Add at least one field to send for signing" : ""
-              }
-              data-testid="admin-send-button"
-            >
-              <Send className="h-4 w-4 mr-2" />
-              {isSaving ? "Processing..." : "Send for Signing"}
-            </Button>
           </>
         )}
+        
         {isEditMode ? (
           <Button
             onClick={() => onSaveAction(document)}

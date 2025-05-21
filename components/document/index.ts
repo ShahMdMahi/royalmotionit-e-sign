@@ -2,7 +2,6 @@
 
 export { SignDocumentComponent } from "./sign-document";
 export { SignDocumentClientWrapper } from "./sign-document-client-wrapper";
-export { DocumentDetails } from "./document-details";
 export { DocumentFieldLayer } from "./document-field-layer";
 export { DocumentToolbar } from "./document-toolbar";
 export { DocumentSigning } from "./document-signing";

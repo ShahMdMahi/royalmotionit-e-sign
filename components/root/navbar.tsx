@@ -134,7 +134,7 @@ export default async function Navbar() {
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         <span>Dashboard</span>
                       </DropdownMenuItem>
-                    </Link>{" "}
+                    </Link>
                     <Link href="/documents">
                       <DropdownMenuItem>
                         <FileSignature className="mr-2 h-4 w-4" />

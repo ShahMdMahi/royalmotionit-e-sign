@@ -175,7 +175,7 @@ export function MobileMenu({
                 >
                   <LayoutDashboard className="h-4 w-4" />
                   Dashboard
-                </Button>{" "}
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"

@@ -569,7 +569,7 @@ export function FieldProperties({
                     <Alert>
                       <Info className="h-4 w-4" />
                       <AlertDescription>
-                        This field will{" "}
+                        This field will
                         {conditionalLogic.action === "hide"
                           ? "be hidden"
                           : "only appear"}

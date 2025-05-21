@@ -61,7 +61,6 @@ export function DocumentFieldLayer({
 
   return (
     <div className="absolute inset-0 pointer-events-none">
-      {" "}
       {fields.map((field) => {
         return (
           <DraggableField

@@ -172,7 +172,7 @@ export function UsersComponent({
             <CardDescription>
               Manage user accounts and permissions
             </CardDescription>
-          </CardHeader>{" "}
+          </CardHeader>
           <CardContent>
             {/* Search input */}
             <div className="mb-6 flex items-center gap-4">
@@ -291,7 +291,7 @@ export function UsersComponent({
               <AlertDialogDescription>
                 {userToDelete && (
                   <>
-                    Are you sure you want to delete{" "}
+                    Are you sure you want to delete
                     {userToDelete.name || userToDelete.email}? This action
                     cannot be undone and will permanently remove the user and
                     all associated data.

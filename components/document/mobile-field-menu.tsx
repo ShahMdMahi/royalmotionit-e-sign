@@ -107,7 +107,6 @@ export function MobileFieldMenu({
                 </h3>
 
                 <div className="space-y-1.5">
-                  {" "}
                   {fieldsByPage[page].map((field: any) => {
                     const fieldError = hasError(field.id);
                     const completed = isCompleted(field);

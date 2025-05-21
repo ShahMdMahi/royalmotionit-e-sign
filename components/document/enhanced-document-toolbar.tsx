@@ -142,8 +142,8 @@ export function EnhancedDocumentToolbar({
                   </>
                 ) : (
                   <>
-                    <Send className="mr-2 h-4 w-4" />
-                    Send for Signature
+                    <Save className="mr-2 h-4 w-4" />
+                    Save
                   </>
                 )}
               </Button>

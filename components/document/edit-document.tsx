@@ -317,7 +317,6 @@ export function EditDocument({
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
-            {" "}
             <PDFEditViewer
               pdfData={pdfData}
               fields={fields}

@@ -495,7 +495,6 @@ export default async function Home() {
                   <div className="text-3xl font-bold">
                     Custom
                     <span className="text-sm font-normal text-muted-foreground">
-                      {" "}
                       pricing
                     </span>
                   </div>

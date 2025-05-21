@@ -15,13 +15,6 @@ import {
 } from "@/actions/pdf-viewer-actions";
 import { usePdfWorker } from "@/hooks/use-pdf-worker";
 import { cn } from "@/lib/utils";
-import {
-  pdfToScreenCoordinates,
-  screenToPdfCoordinates,
-  getAccurateScaleFactor,
-  preciseScaledValue,
-  getExactFieldPosition,
-} from "@/utils/pdf-utils";
 
 // Import react-pdf styles for annotations
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
@@ -427,7 +420,7 @@ export function PDFViewerSimple({
       )}
 
       <div className="flex flex-col h-full">
-        {/* PDF Document */}{" "}
+        {/* PDF Document */}
         <div className="flex-grow relative overflow-auto flex items-center justify-center">
           <Document
             file={memoizedFile}

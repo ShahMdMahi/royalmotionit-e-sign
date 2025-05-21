@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Send, Download } from "lucide-react";
+import { ArrowLeft, Download, FileSignature } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getFromR2 } from "@/actions/r2";
 import { Document, DocumentField } from "@/types/document";
-import { sendDocumentForSigning } from "@/actions/document";
 import { toast } from "sonner";
 import { PDFViewerSimple } from "@/components/document/pdf-viewer-simple";
 
@@ -17,7 +16,6 @@ interface DocumentPreviewProps {
 
 export function DocumentPreview({ document, fields }: DocumentPreviewProps) {
   const [isLoading, setIsLoading] = useState(true);
-  const [isSending, setIsSending] = useState(false);
   const [pdfData, setPdfData] = useState<Uint8Array | null>(null);
 
   const router = useRouter();
@@ -61,29 +59,13 @@ export function DocumentPreview({ document, fields }: DocumentPreviewProps) {
     }
   };
 
-  const handleSendForSigning = async () => {
-    if (!document.id) {
-      toast.error("Document ID is missing");
-      return;
-    }
-
-    try {
-      setIsSending(true);
-      const result = await sendDocumentForSigning(document.id);
-
-      if (result.success) {
-        toast.success("Document sent for signing");
-        router.push("/documents");
-      } else {
-        toast.error(result.message || "Failed to send document");
-      }
-    } catch (error) {
-      console.error("Error sending document:", error);
-      toast.error("An unexpected error occurred");
-    } finally {
-      setIsSending(false);
+  const isAdminRoute = window.location.pathname.includes("/admin");
+  const handleSignRedirect = async () => {
+    if (!isAdminRoute) {
+      router.push(`/documents/${document.id}/sign`);
     }
   };
+
   const handleDownload = async () => {
     try {
       // Generate download URL from R2 key
@@ -94,11 +76,7 @@ export function DocumentPreview({ document, fields }: DocumentPreviewProps) {
         });
         if (result.success && result.data) {
           // Get the URL from data or create a temporary URL if needed
-          const url =
-            (typeof result.data === "string" ? result.data : null) ||
-            (result.data.Body instanceof Blob
-              ? URL.createObjectURL(result.data.Body)
-              : null);
+          const url = (typeof result.data === "string" ? result.data : null) || (result.data.Body instanceof Blob ? URL.createObjectURL(result.data.Body) : null);
           if (url) {
             window.open(url, "_blank");
           } else {
@@ -132,35 +110,27 @@ export function DocumentPreview({ document, fields }: DocumentPreviewProps) {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Document
           </Button>
-          <h1 className="text-lg font-medium hidden md:block">
-            {document.title || "Untitled Document"} - Preview
-          </h1>
+          <h1 className="text-lg font-medium hidden md:block">{document.title || "Untitled Document"} - Preview</h1>
         </div>
 
         <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            onClick={handleDownload}
-            disabled={!document.key}
-          >
+          <Button variant="outline" onClick={handleDownload} disabled={!document.key}>
             <Download className="h-4 w-4 mr-2" />
             Download
           </Button>
-          <Button onClick={handleSendForSigning} disabled={isSending}>
-            <Send className="h-4 w-4 mr-2" />
-            {isSending ? "Sending..." : "Send for Signing"}
-          </Button>
+
+          {!isAdminRoute && document.status === "PENDING" && (
+            <Button variant="outline" onClick={handleSignRedirect} disabled={!document.key}>
+              <FileSignature className="h-4 w-4 mr-2" />
+              Sign
+            </Button>
+          )}
         </div>
       </div>
 
       <div className="p-4 flex-grow">
         <div className="bg-muted rounded-lg overflow-hidden h-full">
-          <PDFViewerSimple
-            pdfData={pdfData}
-            fields={fields}
-            highlightFields={true}
-            debug={process.env.NODE_ENV === "development"}
-          />
+          <PDFViewerSimple pdfData={pdfData} fields={fields} highlightFields={true} debug={process.env.NODE_ENV === "development"} />
         </div>
       </div>
     </div>

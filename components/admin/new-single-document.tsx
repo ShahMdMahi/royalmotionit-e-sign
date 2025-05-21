@@ -1,42 +1,25 @@
 "use client";
 
-import { Document, User, DocumentField, DocumentType } from "@prisma/client";
+import { Document, User, DocumentField as PrismaDocumentField, DocumentType } from "@prisma/client";
 import { getFromR2 } from "@/actions/r2";
 import { PDFViewer } from "../common/pdf-viewer";
 import { useEffect, useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 
 import { Button } from "@/components/ui/button";
-import {
-  FileText,
-  AlertTriangle,
-  Check,
-  Clock,
-  Hash,
-  FileSignature,
-  Info,
-  Shield,
-  Edit,
-} from "lucide-react";
+import { FileText, AlertTriangle, Check, Clock, Hash, FileSignature, Info, Shield, Edit } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
-import { NewDocumentToolbar } from "./new-document-toolbar";
+import { DocumentToolbar } from "./document-toolbar";
 import { toast } from "sonner";
 
 interface SingleDocumentComponentProps {
   document: Document & {
-    fields?: DocumentField[];
+    fields?: PrismaDocumentField[];
     signers?: Array<{
       id: string;
       email: string;
@@ -48,14 +31,36 @@ interface SingleDocumentComponentProps {
   author: User;
 }
 
-export function SingleDocumentComponent({
-  document,
-  author,
-}: SingleDocumentComponentProps) {
+export function SingleDocumentComponent({ document, author }: SingleDocumentComponentProps) {
   const [pdfData, setPdfData] = useState<Uint8Array | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSigner, setIsSigner] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  // Check if the current user is a signer and get their role
+  useEffect(() => {
+    const checkUserRole = async () => {
+      try {
+        const response = await fetch("/api/auth/session");
+        if (response.ok) {
+          const session = await response.json();
+          setUserRole(session?.user?.role || null);
+
+          // Check if current user's email matches any of the document signers
+          if (session?.user?.email && document.signers) {
+            const isUserSigner = document.signers.some((signer) => signer.email.toLowerCase() === session.user.email.toLowerCase());
+            setIsSigner(isUserSigner);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking user role:", error);
+      }
+    };
+
+    checkUserRole();
+  }, [document.signers]);
 
   useEffect(() => {
     async function fetchDocument() {
@@ -74,24 +79,16 @@ export function SingleDocumentComponent({
             setPdfData(response.data.Body);
             setError(null);
           } else {
-            console.error(
-              "Failed to fetch PDF: Response successful but no body content.",
-            );
+            console.error("Failed to fetch PDF: Response successful but no body content.");
             setError("PDF content is missing in the response.");
           }
         } else {
-          console.error(
-            "Failed to fetch PDF:",
-            response.message,
-            response.error,
-          );
+          console.error("Failed to fetch PDF:", response.message, response.error);
           setError(response.message || "Failed to load PDF document.");
         }
       } catch (e) {
         console.error("Error fetching document:", e);
-        setError(
-          e instanceof Error ? e.message : "An unexpected error occurred.",
-        );
+        setError(e instanceof Error ? e.message : "An unexpected error occurred.");
       } finally {
         setIsLoading(false);
       }
@@ -123,9 +120,7 @@ export function SingleDocumentComponent({
             </div>
             Loading Document...
           </CardTitle>
-          <CardDescription>
-            Please wait while the document is being loaded.
-          </CardDescription>
+          <CardDescription>Please wait while the document is being loaded.</CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="flex flex-col justify-center items-center h-96 space-y-4">
@@ -147,9 +142,7 @@ export function SingleDocumentComponent({
             </div>
             Error Loading Document
           </CardTitle>
-          <CardDescription>
-            There was an issue retrieving the document.
-          </CardDescription>
+          <CardDescription>There was an issue retrieving the document.</CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="flex flex-col justify-center items-center h-96 text-destructive space-y-4">
@@ -167,19 +160,58 @@ export function SingleDocumentComponent({
     );
   }
 
-  const handleDocumentSave = async () => {
+  const handleDocumentSave = async (doc: Document | any) => {
     setIsSaving(true);
     try {
       // Implement save functionality here
       toast.success("Document sent for signing successfully!");
 
-      // Create a properly formatted Document object that matches Prisma Document type
-      // This will be used internally by the function
-
-      // Return object with success property as required by NewDocumentToolbar
+      // Return a Document object that matches the expected return type
       return {
-        success: true,
-        message: "Document sent for signing successfully",
+        ...doc,
+        id: doc.id,
+        title: doc.title,
+        description: doc.description ?? undefined,
+        authorId: doc.authorId,
+        status: doc.status,
+        key: doc.key,
+        type: doc.type || "default",
+        createdAt: doc.createdAt || new Date(),
+        updatedAt: new Date(),
+        // Properly handle optional fields that might be null
+        preparedAt: doc.preparedAt ?? undefined,
+        sentAt: doc.sentAt ?? undefined,
+        signedAt: doc.signedAt ?? undefined,
+        expiresAt: doc.expiresAt ?? undefined,
+        enableWatermark: doc.enableWatermark ?? undefined,
+        watermarkText: doc.watermarkText ?? undefined,
+        // Convert field types for proper typing
+        fields: doc.fields?.map((field: PrismaDocumentField) => ({
+          id: field.id,
+          documentId: field.documentId,
+          type: field.type as import("@/types/document").DocumentFieldType,
+          label: field.label,
+          required: field.required,
+          placeholder: field.placeholder ?? undefined,
+          x: field.x,
+          y: field.y,
+          width: field.width,
+          height: field.height,
+          pageNumber: field.pageNumber,
+          value: field.value ?? undefined,
+          signerId: field.signerId ?? undefined,
+          color: field.color ?? undefined,
+          fontFamily: field.fontFamily ?? undefined,
+          fontSize: field.fontSize ?? undefined,
+          validationRule: field.validationRule ?? undefined,
+          conditionalLogic: field.conditionalLogic ?? undefined,
+          options: field.options ?? undefined,
+          backgroundColor: field.backgroundColor ?? undefined,
+          borderColor: field.borderColor ?? undefined,
+          textColor: field.textColor ?? undefined,
+          createdAt: field.createdAt ?? undefined,
+          updatedAt: field.updatedAt ?? undefined,
+        })),
       };
     } catch (error) {
       console.error("Error saving document:", error);
@@ -191,13 +223,47 @@ export function SingleDocumentComponent({
   };
   return (
     <div className="flex flex-col w-full">
-      {" "}
-      <NewDocumentToolbar
+      <DocumentToolbar
         document={{
           ...document,
           type: document.type || "default",
           key: document.key || "",
           description: document.description || "",
+          // Convert potentially null fields to undefined to match Document type
+          preparedAt: document.preparedAt ?? undefined,
+          sentAt: document.sentAt ?? undefined,
+          // viewedAt doesn't exist on the document type from Prisma, so omit it
+          signedAt: document.signedAt ?? undefined,
+          expiresAt: document.expiresAt ?? undefined,
+          enableWatermark: document.enableWatermark ?? undefined,
+          watermarkText: document.watermarkText ?? undefined,
+          // Convert field types from string to DocumentFieldType
+          fields: document.fields?.map((field: PrismaDocumentField) => ({
+            id: field.id,
+            documentId: field.documentId,
+            type: field.type as import("@/types/document").DocumentFieldType,
+            label: field.label,
+            required: field.required,
+            placeholder: field.placeholder ?? undefined,
+            x: field.x,
+            y: field.y,
+            width: field.width,
+            height: field.height,
+            pageNumber: field.pageNumber,
+            value: field.value ?? undefined,
+            signerId: field.signerId ?? undefined,
+            color: field.color ?? undefined,
+            fontFamily: field.fontFamily ?? undefined,
+            fontSize: field.fontSize ?? undefined,
+            validationRule: field.validationRule ?? undefined,
+            conditionalLogic: field.conditionalLogic ?? undefined,
+            options: field.options ?? undefined,
+            backgroundColor: field.backgroundColor ?? undefined,
+            borderColor: field.borderColor ?? undefined,
+            textColor: field.textColor ?? undefined,
+            createdAt: field.createdAt ?? undefined,
+            updatedAt: field.updatedAt ?? undefined,
+          })),
           signers:
             document.signers?.map((signer) => ({
               id: signer.id,
@@ -205,11 +271,13 @@ export function SingleDocumentComponent({
               email: signer.email,
               name: signer.name || undefined,
               role: signer.role || undefined,
-              status: signer.status || "PENDING",
+              status: (signer.status as "PENDING" | "VIEWED" | "COMPLETED" | "DECLINED") || "PENDING",
             })) || [],
         }}
         isSaving={isSaving}
         onSaveAction={handleDocumentSave}
+        isSigner={isSigner}
+        userRole={userRole}
       />
       <Card className="w-full max-w-7xl mx-auto my-8 border-border card-hover shadow-lg">
         <CardHeader className="border-b border-border">
@@ -221,21 +289,11 @@ export function SingleDocumentComponent({
                 </div>
                 {document.title}
               </CardTitle>
-              <CardDescription className="text-sm sm:text-base">
-                {document.description ||
-                  "Review the document or check its details below."}
-              </CardDescription>
+              <CardDescription className="text-sm sm:text-base">{document.description || "Review the document or check its details below."}</CardDescription>
             </div>
-            <Badge
-              variant={getStatusBadgeVariant(document.status)}
-              className="text-xs sm:text-sm px-2 py-1 h-auto"
-            >
-              {document.status === "COMPLETED" && (
-                <Check className="size-3 mr-1" />
-              )}
-              {document.status === "PENDING" && (
-                <Clock className="size-3 mr-1" />
-              )}
+            <Badge variant={getStatusBadgeVariant(document.status)} className="text-xs sm:text-sm px-2 py-1 h-auto">
+              {document.status === "COMPLETED" && <Check className="size-3 mr-1" />}
+              {document.status === "PENDING" && <Clock className="size-3 mr-1" />}
               {document.status}
             </Badge>
           </div>
@@ -243,10 +301,7 @@ export function SingleDocumentComponent({
         <CardContent className="p-0">
           <Tabs defaultValue="document" className="w-full">
             <TabsList className="grid w-full grid-cols-2 p-0 bg-muted/50">
-              <TabsTrigger
-                value="document"
-                className="rounded-none border-r py-3"
-              >
+              <TabsTrigger value="document" className="rounded-none border-r py-3">
                 <FileText className="size-4 mr-2" />
                 Document
               </TabsTrigger>
@@ -260,9 +315,7 @@ export function SingleDocumentComponent({
               {error && pdfData && (
                 <div className="m-6 p-4 border border-destructive/50 bg-destructive/10 text-destructive rounded-md">
                   <p className="flex items-center gap-2">
-                    <AlertTriangle className="size-4" /> There was an issue
-                    refreshing the document: {error}. Displaying cached or
-                    previous version.
+                    <AlertTriangle className="size-4" /> There was an issue refreshing the document: {error}. Displaying cached or previous version.
                   </p>
                 </div>
               )}
@@ -270,9 +323,7 @@ export function SingleDocumentComponent({
               {!pdfData && !error && (
                 <div className="flex flex-col items-center justify-center h-96 border-b m-6 rounded-md bg-muted/20">
                   <FileText className="size-12 text-muted-foreground/50 mb-2" />
-                  <p className="text-muted-foreground">
-                    No document preview available.
-                  </p>
+                  <p className="text-muted-foreground">No document preview available.</p>
                 </div>
               )}
 
@@ -300,52 +351,39 @@ export function SingleDocumentComponent({
                         <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                           <Hash className="size-3.5" /> Document ID:
                         </p>
-                        <p className="text-muted-foreground break-all bg-background/50 p-1.5 rounded border text-xs font-mono">
-                          {document.id}
-                        </p>
+                        <p className="text-muted-foreground break-all bg-background/50 p-1.5 rounded border text-xs font-mono">{document.id}</p>
                       </div>
                       <div>
                         <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                           <FileText className="size-3.5" /> File Name:
                         </p>
-                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
-                          {document.fileName || "N/A"}
-                        </p>
+                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{document.fileName || "N/A"}</p>
                       </div>
                       <div>
                         <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                           <FileSignature className="size-3.5" /> Title:
                         </p>
-                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
-                          {document.title}
-                        </p>
+                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{document.title}</p>
                       </div>
                       <div>
                         <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                           <Shield className="size-3.5" /> Document Type:
                         </p>
-                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
-                          {document.documentType}
-                        </p>
+                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{document.documentType}</p>
                       </div>
                       {document.description && (
                         <div className="sm:col-span-2">
                           <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                             <Info className="size-3.5" /> Description:
                           </p>
-                          <p className="text-muted-foreground whitespace-pre-wrap bg-background/50 p-1.5 rounded border">
-                            {document.description}
-                          </p>
+                          <p className="text-muted-foreground whitespace-pre-wrap bg-background/50 p-1.5 rounded border">{document.description}</p>
                         </div>
                       )}
                       <div>
                         <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                           <Shield className="size-3.5" /> Status:
                         </p>
-                        <Badge
-                          variant={getStatusBadgeVariant(document.status)}
-                          className="mt-1"
-                        >
+                        <Badge variant={getStatusBadgeVariant(document.status)} className="mt-1">
                           {document.status}
                         </Badge>
                       </div>
@@ -353,18 +391,14 @@ export function SingleDocumentComponent({
                         <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                           <Shield className="size-3.5" /> Author:
                         </p>
-                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
-                          {author.name || author.email}
-                        </p>
+                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{author.name || author.email}</p>
                       </div>
                       {document.hash && (
                         <div className="sm:col-span-2">
                           <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                             <Hash className="size-3.5" /> File Hash (SHA256):
                           </p>
-                          <p className="text-muted-foreground break-all text-xs font-mono bg-background/50 p-1.5 rounded border">
-                            {document.hash}
-                          </p>
+                          <p className="text-muted-foreground break-all text-xs font-mono bg-background/50 p-1.5 rounded border">{document.hash}</p>
                         </div>
                       )}
                     </div>
@@ -377,10 +411,7 @@ export function SingleDocumentComponent({
         <CardFooter className="border-t p-4 flex justify-end gap-3">
           {document.documentType === DocumentType.UNSIGNED && (
             <Button size="sm">
-              <Link
-                href={`/admin/documents/${document.id}/edit`}
-                className="flex items-center"
-              >
+              <Link href={`/admin/documents/${document.id}/edit`} className="flex items-center">
                 <Edit className="size-4 mr-2" />
                 Edit
               </Link>

@@ -82,7 +82,7 @@ export const WelcomeEmail = ({ username, userEmail }: WelcomeEmailProps) => {
             <Text style={text}>
               Thank you for signing up for Royal Sign by Royal Motion IT. We're
               excited to have you on board! Your account has been created with
-              the email address:{" "}
+              the email address: 
               <span
                 style={{
                   ...highlight,
@@ -241,7 +241,7 @@ export const WelcomeEmail = ({ username, userEmail }: WelcomeEmailProps) => {
             />
             <Text style={footerText}>
               If you have any questions or need assistance, please contact our
-              support team at{" "}
+              support team at 
               <Link
                 href="mailto:support@royalmotionit.com"
                 style={{
@@ -259,7 +259,7 @@ export const WelcomeEmail = ({ username, userEmail }: WelcomeEmailProps) => {
                 borderLeft: `3px solid ${theme.primaryHex}`,
               }}
             >
-              Account email:{" "}
+              Account email: 
               <span
                 style={{
                   ...highlight,

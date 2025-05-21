@@ -296,7 +296,7 @@ export function SingleDocumentComponent({
         isSaving={isSaving}
         onSaveAction={handleDocumentSave}
       />
-      {/* Keep the original toolbar hidden for compatibility */}{" "}
+      {/* Keep the original toolbar hidden for compatibility */}
       <div className="hidden">
         <DocumentToolbar
           document={
@@ -324,7 +324,7 @@ export function SingleDocumentComponent({
           isSaving={isSaving}
           onSaveAction={handleDocumentSave}
         />
-      </div>{" "}
+      </div>
       {pdfData && (
         <div className="w-full border-b overflow-hidden p-0 mt-4">
           <div className="aspect-[1/1.4] w-full mx-auto">

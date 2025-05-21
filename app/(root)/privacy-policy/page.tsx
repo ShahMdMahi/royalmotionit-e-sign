@@ -443,7 +443,7 @@ export default function PrivacyPolicy() {
             <p>123 Tech Park Avenue, Suite 456</p>
             <p>Silicon Valley, CA 94123</p>
             <p className="mt-2">
-              Email:{" "}
+              Email: 
               <a
                 href="mailto:privacy@royalmotionit.com"
                 className="text-primary"
@@ -452,7 +452,7 @@ export default function PrivacyPolicy() {
               </a>
             </p>
             <p>
-              Phone:{" "}
+              Phone: 
               <a href="tel:+15551234567" className="text-primary">
                 +1 (555) 123-4567
               </a>

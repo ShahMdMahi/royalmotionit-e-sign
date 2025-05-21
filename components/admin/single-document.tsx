@@ -364,7 +364,7 @@ export function SingleDocumentComponent({
               </ScrollArea>
             </TabsContent>
           </Tabs>
-        </CardContent>{" "}
+        </CardContent>
         <CardFooter className="border-t p-4 flex justify-end gap-3">
           {document.documentType === "UNSIGNED" && (
             <Button size="sm">

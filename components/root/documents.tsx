@@ -315,7 +315,7 @@ export function DocumentsComponent({
                         {doc.preparedAt && (
                           <div className="flex items-center justify-between text-xs">
                             <span className="text-muted-foreground flex items-center gap-1.5">
-                              <FileSignature className="h-3.5 w-3.5" />{" "}
+                              <FileSignature className="h-3.5 w-3.5" />
                               Prepared:
                             </span>
                             <span className="font-medium">

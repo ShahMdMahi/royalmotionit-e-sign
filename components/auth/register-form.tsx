@@ -234,7 +234,7 @@ export function RegisterForm({
         )}
 
         <div className="text-center text-xs pt-2">
-          Already have an account?{" "}
+          Already have an account? 
           <Link href="/auth/login" className="text-primary hover:underline">
             Login
           </Link>

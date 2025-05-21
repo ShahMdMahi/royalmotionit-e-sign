@@ -96,7 +96,7 @@ export function SigningFieldsTab({
               )}
             >
               {field.label}
-            </Label>{" "}
+            </Label>
             <SignatureCapture
               height={120}
               width={300}
@@ -123,7 +123,7 @@ export function SigningFieldsTab({
               )}
             >
               {field.label}
-            </Label>{" "}
+            </Label>
             <SignatureCapture
               height={100}
               width={200}
@@ -153,7 +153,7 @@ export function SigningFieldsTab({
               )}
             >
               {field.label}
-            </Label>{" "}
+            </Label>
             <Input
               id={field.id}
               value={fieldValue}
@@ -202,7 +202,6 @@ export function SigningFieldsTab({
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
-                {" "}
                 <Calendar
                   mode="single"
                   selected={fieldValue ? new Date(fieldValue) : undefined}
@@ -220,7 +219,6 @@ export function SigningFieldsTab({
       case "checkbox":
         return (
           <div className="flex items-center space-x-2">
-            {" "}
             <Checkbox
               id={field.id}
               checked={fieldValue === "true"}
@@ -256,7 +254,7 @@ export function SigningFieldsTab({
               )}
             >
               {field.label}
-            </Label>{" "}
+            </Label>
             <Select
               value={fieldValue}
               onValueChange={(value) => handleChange(field.id, value)}
@@ -293,7 +291,7 @@ export function SigningFieldsTab({
               )}
             >
               {field.label}
-            </Label>{" "}
+            </Label>
             <RadioGroup
               value={fieldValue}
               onValueChange={(value) => handleChange(field.id, value)}
@@ -363,7 +361,7 @@ export function SigningFieldsTab({
                 ))
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  No fields to fill on{" "}
+                  No fields to fill on
                   {activeTab === "current" ? "this page" : "this document"}.
                 </div>
               )}

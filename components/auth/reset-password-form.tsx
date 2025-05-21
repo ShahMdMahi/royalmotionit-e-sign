@@ -157,7 +157,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
         {!state.success && (
           <div className="text-center text-xs pt-2">
-            Remember your password?{" "}
+            Remember your password? 
             <Link href="/auth/login" className="text-primary hover:underline">
               Back to login
             </Link>

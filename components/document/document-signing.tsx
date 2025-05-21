@@ -227,7 +227,6 @@ export function DocumentSigning({
       <div className="col-span-1 md:col-span-2">
         <div className="flex flex-col space-y-4">
           <div className="bg-background border rounded-lg overflow-hidden">
-            {" "}
             <PDFViewer
               pdfData={pdfData}
               onPageChangeAction={handlePageChange}
@@ -235,7 +234,6 @@ export function DocumentSigning({
               fields={fields}
               fieldValues={fieldValues}
               highlightFields={true}
-              currentSignerId={signer.id}
             />
           </div>
         </div>
@@ -251,10 +249,10 @@ export function DocumentSigning({
                   <p className="mb-2">{document.description}</p>
                 )}
                 <p>
-                  <span className="font-medium">From:</span>{" "}
+                  <span className="font-medium">From: </span>
                   {document.authorName || document.authorEmail}
                 </p>
-              </div>{" "}
+              </div>
               <SigningFieldsTab
                 fields={signerFields}
                 currentPage={currentPage}

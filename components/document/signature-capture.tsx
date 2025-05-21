@@ -268,7 +268,7 @@ export function SignatureCapture({
           <TabsTrigger value="draw">Draw</TabsTrigger>
           <TabsTrigger value="type">Type</TabsTrigger>
           <TabsTrigger value="upload">Upload</TabsTrigger>
-        </TabsList>{" "}
+        </TabsList>
         <TabsContent value="draw" className="w-full">
           <div className="border rounded-md bg-background">
             <div className="w-full flex justify-center">
@@ -344,7 +344,7 @@ export function SignatureCapture({
           >
             <span style={{ fontSize: "40px" }}>{typedName || "Preview"}</span>
           </div>
-        </TabsContent>{" "}
+        </TabsContent>
         <TabsContent value="upload" className="w-full space-y-4">
           <div className="flex items-center justify-center border-2 border-dashed rounded-md p-8 bg-background h-48">
             <div className="flex flex-col items-center space-y-2">

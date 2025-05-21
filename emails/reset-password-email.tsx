@@ -87,7 +87,7 @@ export const ResetPasswordEmail = ({
             <Text style={greeting}>Hello {username},</Text>
             <Text style={text}>
               We received a request to reset the password for your Royal Sign
-              account with email address:{" "}
+              account with email address: 
               <span
                 style={{
                   ...highlight,
@@ -218,7 +218,7 @@ export const ResetPasswordEmail = ({
             />
             <Text style={footerText}>
               If you have any questions or need assistance, please contact our
-              support team at{" "}
+              support team at 
               <Link
                 href="mailto:support@royalmotionit.com"
                 style={{
@@ -236,7 +236,7 @@ export const ResetPasswordEmail = ({
                 borderLeft: `3px solid ${theme.primaryHex}`,
               }}
             >
-              Account email:{" "}
+              Account email: 
               <span
                 style={{
                   ...highlight,

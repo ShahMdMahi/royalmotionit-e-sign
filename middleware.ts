@@ -1,6 +1,6 @@
 import authConfig from "@/auth.config";
 import NextAuth from "next-auth";
-import { privateRoutes, adminOnlyRoutes } from "@/routes";
+import { privateRoutes } from "@/routes";
 import { NextResponse } from "next/server";
 import { get } from "@vercel/edge-config";
 
@@ -16,9 +16,10 @@ export default auth(async (req) => {
 
   // Path detection
   const isPrivateRoute = privateRoutes.includes(nextUrl.pathname);
-  const isAdminOnlyRoute = adminOnlyRoutes.some(route => nextUrl.pathname.startsWith(route));
   // Check for document edit routes that might have dynamic IDs
   const isDocumentEditRoute = /\/documents\/[^\/]+\/edit/.test(nextUrl.pathname);
+  // Check for document sign routes
+  const isDocumentSignRoute = /\/documents\/[^\/]+\/sign/.test(nextUrl.pathname);
   const isAuthRoute = nextUrl.pathname.includes("/auth");
   const isApiRoute = nextUrl.pathname.includes("/api");
   const isRegistrationRoute = nextUrl.pathname.includes("/auth/register");
@@ -63,19 +64,11 @@ export default auth(async (req) => {
     return;
   }
 
-  // Redirect non-logged in users to login if they try to access private routes
-  if (!isLoggedIn && isPrivateRoute) {
+  // Redirect non-logged in users to login if they try to access private routes or document sign routes
+  if (!isLoggedIn && (isPrivateRoute || isDocumentSignRoute)) {
     const url = req.nextUrl.clone();
     url.pathname = "/auth/login";
     url.searchParams.set("callbackUrl", nextUrl.pathname);
-    return NextResponse.redirect(url);
-  }
-  
-  // Restrict admin-only routes to admin users
-  if (isLoggedIn && (isAdminOnlyRoute || isDocumentEditRoute) && req.auth?.user?.role !== 'ADMIN') {
-    // Redirect non-admin users attempting to access admin routes to dashboard
-    const url = req.nextUrl.clone();
-    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
