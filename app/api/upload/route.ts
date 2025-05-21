@@ -192,6 +192,7 @@ export async function POST(req: NextRequest) {
         { status: 401 },
       );
     }
+    
     if (!session.user) {
       return NextResponse.json(
         {
@@ -200,6 +201,18 @@ export async function POST(req: NextRequest) {
           message: "User not found",
         },
         { status: 401 },
+      );
+    }
+    
+    // Check if user is admin
+    if (session.user.role !== 'ADMIN') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: true,
+          message: "Only administrators can upload documents",
+        },
+        { status: 403 },
       );
     }
 
