@@ -1,12 +1,29 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Worker, Viewer, SpecialZoomLevel, ViewMode } from "@react-pdf-viewer/core";
+import {
+  Worker,
+  Viewer,
+  SpecialZoomLevel,
+  ViewMode,
+} from "@react-pdf-viewer/core";
 import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
 import { zoomPlugin } from "@react-pdf-viewer/zoom";
 import { DocumentField } from "@/types/document";
-import { DndContext, PointerSensor, useSensor, useSensors, MeasuringStrategy } from "@dnd-kit/core";
-import { handleFieldUpdate, handleFieldDelete, handleFieldSelect, handleEditPageChange, handleEditTotalPagesChange } from "@/actions/pdf-edit-actions";
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  MeasuringStrategy,
+} from "@dnd-kit/core";
+import {
+  handleFieldUpdate,
+  handleFieldDelete,
+  handleFieldSelect,
+  handleEditPageChange,
+  handleEditTotalPagesChange,
+} from "@/actions/pdf-edit-actions";
 import { ResizableField } from "./resizable-field";
 
 // Import styles
@@ -71,7 +88,7 @@ export function PDFEditViewer({
         delay: 0, // Remove delay for immediate drag start
         tolerance: 0, // Zero tolerance for immediate activation
       },
-    })
+    }),
   );
 
   // Get fields for current page - strictly filter by exact page number match
@@ -126,7 +143,8 @@ export function PDFEditViewer({
   useEffect(() => {
     const updateDimensions = () => {
       if (viewerContainerRef.current) {
-        const { width, height } = viewerContainerRef.current.getBoundingClientRect();
+        const { width, height } =
+          viewerContainerRef.current.getBoundingClientRect();
         setViewerDimensions({ width, height });
       }
     };
@@ -164,7 +182,7 @@ export function PDFEditViewer({
         console.error("Error updating field position:", error);
       }
     },
-    [fields, onFieldDragEnd, onFieldUpdateAction]
+    [fields, onFieldDragEnd, onFieldUpdateAction],
   );
 
   // Handle field resize with enhanced precision and reliability
@@ -197,7 +215,7 @@ export function PDFEditViewer({
         console.error("Error updating field dimensions:", error);
       }
     },
-    [fields, onFieldResize, onFieldUpdateAction]
+    [fields, onFieldResize, onFieldUpdateAction],
   );
   // Handle field selection
   const handleFieldSelectInternal = async (field: DocumentField | null) => {
@@ -237,7 +255,7 @@ export function PDFEditViewer({
         }
       }
     },
-    [fields, viewerScale, handleFieldDragEnd, onFieldSelectAction]
+    [fields, viewerScale, handleFieldDragEnd, onFieldSelectAction],
   );
 
   return (
@@ -265,7 +283,9 @@ export function PDFEditViewer({
               viewMode={ViewMode.SinglePage}
               renderLoader={(percentages: number) => (
                 <div className="w-full h-full flex items-center justify-center">
-                  <div className="text-primary">Loading document... {Math.round(percentages)}%</div>
+                  <div className="text-primary">
+                    Loading document... {Math.round(percentages)}%
+                  </div>
                 </div>
               )}
               onDocumentLoad={async (e) => {
@@ -349,7 +369,8 @@ export function PDFEditViewer({
                 className="absolute inset-0 grid"
                 style={{
                   backgroundSize: `${GRID_SIZE}px ${GRID_SIZE}px`,
-                  backgroundImage: "linear-gradient(to right, rgba(81, 92, 230, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(81, 92, 230, 0.05) 1px, transparent 1px)",
+                  backgroundImage:
+                    "linear-gradient(to right, rgba(81, 92, 230, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(81, 92, 230, 0.05) 1px, transparent 1px)",
                   backgroundPosition: "0 0",
                   backgroundRepeat: "repeat",
                 }}
@@ -363,8 +384,16 @@ export function PDFEditViewer({
                   isSelected={field.id === selectedFieldId}
                   onSelectAction={() => handleFieldSelectInternal(field)}
                   onDeleteAction={() => onFieldDeleteAction(field.id)}
-                  onDragEndAction={(x: number, y: number) => (onFieldDragEnd ? onFieldDragEnd(field.id, x, y) : Promise.resolve())}
-                  onResizeAction={(width: number, height: number) => (onFieldResize ? onFieldResize(field.id, width, height) : Promise.resolve())}
+                  onDragEndAction={(x: number, y: number) =>
+                    onFieldDragEnd
+                      ? onFieldDragEnd(field.id, x, y)
+                      : Promise.resolve()
+                  }
+                  onResizeAction={(width: number, height: number) =>
+                    onFieldResize
+                      ? onFieldResize(field.id, width, height)
+                      : Promise.resolve()
+                  }
                   viewerScale={viewerScale}
                 />
               ))}

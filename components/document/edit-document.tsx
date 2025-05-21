@@ -83,10 +83,10 @@ export function EditDocument({
   // Handle DnD start from field palette
   const handleDragStart = (event: DragStartEvent) => {
     if (event.active && event.active.data && event.active.data.current) {
-      const dragData = event.active.data.current as { 
-        isFieldPalette?: boolean; 
-        type: DocumentFieldType; 
-        label: string 
+      const dragData = event.active.data.current as {
+        isFieldPalette?: boolean;
+        type: DocumentFieldType;
+        label: string;
       };
       if (dragData.isFieldPalette) {
         // Create a new field based on the palette item
@@ -136,18 +136,18 @@ export function EditDocument({
     ) {
       // Get dropped position
       const rect = event.over.rect;
-      const dragData = event.active.data.current as { 
-        isFieldPalette?: boolean; 
-        type: DocumentFieldType; 
-        label: string 
+      const dragData = event.active.data.current as {
+        isFieldPalette?: boolean;
+        type: DocumentFieldType;
+        label: string;
       };
       const type = dragData.type;
       const label = dragData.label; // Add field at position
-      
+
       // Calculate position - ensure we have the proper event type
       const clientX = (event.activatorEvent as PointerEvent).clientX;
       const clientY = (event.activatorEvent as PointerEvent).clientY;
-      
+
       const newField: DocumentField = {
         id: uuidv4(),
         documentId: document.id,

@@ -113,8 +113,6 @@ export function SingleDocumentComponent({
     }
   };
 
-
-
   if (isLoading) {
     return (
       <Card className="w-full max-w-7xl mx-auto my-8 border-border card-hover shadow-lg">

@@ -130,39 +130,44 @@ export function DocumentAttachments({
   // Define specific types for the API response
   type UrlResponse = { url: string };
   type DataUrlResponse = { data: { url: string } };
-  type SuccessResponse = { success: boolean; message?: string } & (UrlResponse | DataUrlResponse | {});
+  type SuccessResponse = { success: boolean; message?: string } & (
+    | UrlResponse
+    | DataUrlResponse
+    | {}
+  );
   type DownloadResponse = string | UrlResponse | SuccessResponse;
 
   const handleDownload = async (attachmentId: string) => {
     try {
-      const result = await getAttachmentDownloadUrl(attachmentId);        // Handle different result formats
+      const result = await getAttachmentDownloadUrl(attachmentId); // Handle different result formats
       if (typeof result === "string") {
         // Handle direct URL string
         window.open(result, "_blank");
       } else if (result && typeof result === "object") {
         // Type guard to handle objects with url property
         const hasUrlProperty = (obj: unknown): obj is UrlResponse =>
-          obj !== null && 
-          typeof obj === "object" && 
-          "url" in obj && 
+          obj !== null &&
+          typeof obj === "object" &&
+          "url" in obj &&
           typeof (obj as { url: unknown }).url === "string";
 
         // Type guard to handle objects with data.url property
-        const hasDataUrlProperty = (
-          obj: unknown,
-        ): obj is DataUrlResponse =>
-          obj !== null && 
-          typeof obj === "object" && 
+        const hasDataUrlProperty = (obj: unknown): obj is DataUrlResponse =>
+          obj !== null &&
+          typeof obj === "object" &&
           "data" in obj &&
           (obj as { data: unknown }).data !== null &&
           typeof (obj as { data: unknown }).data === "object" &&
-          "url" in ((obj as { data: object }).data) &&
-          typeof ((obj as { data: { url: string } }).data.url) === "string";
+          "url" in (obj as { data: object }).data &&
+          typeof (obj as { data: { url: string } }).data.url === "string";
 
         if (hasUrlProperty(result)) {
           // Direct URL property
           window.open(result.url, "_blank");
-        } else if ("success" in result && (result as { success: boolean }).success) {
+        } else if (
+          "success" in result &&
+          (result as { success: boolean }).success
+        ) {
           // It's a success response, extract URL if possible
           if (hasUrlProperty(result)) {
             window.open(result.url, "_blank");

@@ -15,8 +15,13 @@ interface FieldsOverlayContainerProps {
  * A container that positions fields correctly on PDF pages,
  * making them stick to their associated page even during scrolling.
  */
-export function FieldsOverlayContainer({ fields, renderFieldAction, debug = false, viewerContainerRef }: FieldsOverlayContainerProps) {
-  const [pageElements, setPageElements] = useState<HTMLElement[]>([]);// Use a mutation observer to track changes to the PDF viewer's DOM more efficiently
+export function FieldsOverlayContainer({
+  fields,
+  renderFieldAction,
+  debug = false,
+  viewerContainerRef,
+}: FieldsOverlayContainerProps) {
+  const [pageElements, setPageElements] = useState<HTMLElement[]>([]); // Use a mutation observer to track changes to the PDF viewer's DOM more efficiently
   useEffect(() => {
     if (!viewerContainerRef.current) return;
 
@@ -29,14 +34,22 @@ export function FieldsOverlayContainer({ fields, renderFieldAction, debug = fals
 
       // Get all page layers - each page is in its own layer
       // Use a more specific selector to avoid unnecessary DOM traversal
-      const pagesContainer = viewerContainerRef.current.querySelector(".rpv-core__viewer-layers");
+      const pagesContainer = viewerContainerRef.current.querySelector(
+        ".rpv-core__viewer-layers",
+      );
       if (!pagesContainer) return;
 
-      const pages = Array.from(pagesContainer.querySelectorAll(".rpv-core__page-layer")) as HTMLElement[];
+      const pages = Array.from(
+        pagesContainer.querySelectorAll(".rpv-core__page-layer"),
+      ) as HTMLElement[];
 
       // Only update state if pages have actually changed
       // This prevents unnecessary re-renders
-      if (pages.length > 0 && (pages.length !== pageElements.length || !pages.every((page, i) => pageElements[i] === page))) {
+      if (
+        pages.length > 0 &&
+        (pages.length !== pageElements.length ||
+          !pages.every((page, i) => pageElements[i] === page))
+      ) {
         // Associate each page with its page number for better tracking - do this only once
         pages.forEach((page, index) => {
           if (!page.hasAttribute("data-page-number")) {
@@ -67,7 +80,12 @@ export function FieldsOverlayContainer({ fields, renderFieldAction, debug = fals
       let hasRelevantChanges = false;
       for (const mutation of mutations) {
         // Only check for child list changes or specific attribute changes
-        if (mutation.type === "childList" || (mutation.type === "attributes" && (mutation.attributeName === "style" || mutation.attributeName === "class"))) {
+        if (
+          mutation.type === "childList" ||
+          (mutation.type === "attributes" &&
+            (mutation.attributeName === "style" ||
+              mutation.attributeName === "class"))
+        ) {
           hasRelevantChanges = true;
           break;
         }
@@ -81,7 +99,8 @@ export function FieldsOverlayContainer({ fields, renderFieldAction, debug = fals
 
     // More targeted observation
     // Only observe the main viewer element for structure changes
-    const targetNode = viewerContainerRef.current.querySelector(".rpv-core__viewer");
+    const targetNode =
+      viewerContainerRef.current.querySelector(".rpv-core__viewer");
     if (targetNode) {
       observer.observe(targetNode, {
         childList: true,
@@ -101,7 +120,8 @@ export function FieldsOverlayContainer({ fields, renderFieldAction, debug = fals
       if (updateTimer) {
         clearTimeout(updateTimer);
       }
-      observer.disconnect();    };
+      observer.disconnect();
+    };
   }, [viewerContainerRef, debug, pageElements]); // Added pageElements dependency
   // Removed duplicate fieldsByPage calculation - now using memoizedFieldsByPage// Set up an effect to reposition field overlays when the viewer scrolls, resizes or zooms
   useEffect(() => {
@@ -128,7 +148,9 @@ export function FieldsOverlayContainer({ fields, renderFieldAction, debug = fals
     const viewerElement = viewerContainerRef.current;
 
     // Use passive event listeners for better performance
-    viewerElement.addEventListener("scroll", handleViewerChange, { passive: true });
+    viewerElement.addEventListener("scroll", handleViewerChange, {
+      passive: true,
+    });
     window.addEventListener("resize", handleViewerChange, { passive: true });
 
     // Simplify zoom detection - only observe key UI elements for changes
@@ -140,7 +162,10 @@ export function FieldsOverlayContainer({ fields, renderFieldAction, debug = fals
       let hasZoomChange = false;
 
       for (const mutation of mutations) {
-        if (mutation.type === "attributes" && mutation.attributeName === "style") {
+        if (
+          mutation.type === "attributes" &&
+          mutation.attributeName === "style"
+        ) {
           hasZoomChange = true;
           break;
         }
@@ -152,7 +177,9 @@ export function FieldsOverlayContainer({ fields, renderFieldAction, debug = fals
     });
 
     // Only observe the layers container for zoom changes
-    const mainLayerContainer = viewerElement.querySelector(".rpv-core__viewer-layers");
+    const mainLayerContainer = viewerElement.querySelector(
+      ".rpv-core__viewer-layers",
+    );
     if (mainLayerContainer) {
       zoomObserver.observe(mainLayerContainer, {
         attributes: true,
@@ -198,7 +225,9 @@ export function FieldsOverlayContainer({ fields, renderFieldAction, debug = fals
       if (!viewerContainerRef.current) return;
 
       // Try to find the zoom level indicator element
-      const zoomIndicator = viewerContainerRef.current.querySelector(".rpv-zoom__popover-target-scale");
+      const zoomIndicator = viewerContainerRef.current.querySelector(
+        ".rpv-zoom__popover-target-scale",
+      );
       if (zoomIndicator && zoomIndicator.textContent) {
         const match = zoomIndicator.textContent.match(/(\d+(?:\.\d+)?)%/);
         if (match && match[1]) {
@@ -208,7 +237,9 @@ export function FieldsOverlayContainer({ fields, renderFieldAction, debug = fals
 
           // Only log in debug mode
           if (debug) {
-            console.log(`Current zoom level: ${zoomPercentage}%, factor: ${zoomPercentage / 100}`);
+            console.log(
+              `Current zoom level: ${zoomPercentage}%, factor: ${zoomPercentage / 100}`,
+            );
           }
         }
       }
@@ -228,7 +259,9 @@ export function FieldsOverlayContainer({ fields, renderFieldAction, debug = fals
     });
 
     // Only observe the zoom indicator target
-    const zoomTarget = viewerContainerRef.current.querySelector(".rpv-zoom__popover-target");
+    const zoomTarget = viewerContainerRef.current.querySelector(
+      ".rpv-zoom__popover-target",
+    );
     if (zoomTarget) {
       zoomChangeObserver.observe(zoomTarget, {
         characterData: true,
@@ -271,15 +304,22 @@ export function FieldsOverlayContainer({ fields, renderFieldAction, debug = fals
         if (fieldsForPage.length === 0) return null;
         // Get page position to create a perfectly aligned overlay that's positioned relative to the PDF page
         const pageBounds = pageElement.getBoundingClientRect();
-        const viewerBounds = viewerContainerRef.current?.getBoundingClientRect();
+        const viewerBounds =
+          viewerContainerRef.current?.getBoundingClientRect();
 
         // Skip if we can't get proper boundaries
         if (!viewerBounds || !viewerContainerRef.current) return null;
 
         // Calculate position of the page relative to the viewer's scroll position
         // This ensures the overlay is always aligned with the PDF page, regardless of scrolling
-        const relativeTop = pageBounds.top - viewerBounds.top + viewerContainerRef.current.scrollTop;
-        const relativeLeft = pageBounds.left - viewerBounds.left + viewerContainerRef.current.scrollLeft;
+        const relativeTop =
+          pageBounds.top -
+          viewerBounds.top +
+          viewerContainerRef.current.scrollTop;
+        const relativeLeft =
+          pageBounds.left -
+          viewerBounds.left +
+          viewerContainerRef.current.scrollLeft;
 
         // Only log in debug mode and limit frequency of logging
         if (debug && viewerContainerRef.current && Math.random() < 0.05) {
@@ -319,10 +359,22 @@ export function FieldsOverlayContainer({ fields, renderFieldAction, debug = fals
               const scaleY = pageBounds.height / 842; // standard PDF height in points
 
               // Force numeric values to ensure consistent calculations
-              const numX = typeof field.x === "string" ? parseFloat(field.x) : Number(field.x);
-              const numY = typeof field.y === "string" ? parseFloat(field.y) : Number(field.y);
-              const numWidth = typeof field.width === "string" ? parseFloat(field.width) : Number(field.width);
-              const numHeight = typeof field.height === "string" ? parseFloat(field.height) : Number(field.height);
+              const numX =
+                typeof field.x === "string"
+                  ? parseFloat(field.x)
+                  : Number(field.x);
+              const numY =
+                typeof field.y === "string"
+                  ? parseFloat(field.y)
+                  : Number(field.y);
+              const numWidth =
+                typeof field.width === "string"
+                  ? parseFloat(field.width)
+                  : Number(field.width);
+              const numHeight =
+                typeof field.height === "string"
+                  ? parseFloat(field.height)
+                  : Number(field.height);
 
               // Apply proper scaling for the current zoom level to ensure fields are positioned
               // accurately relative to the PDF page
@@ -358,7 +410,13 @@ export function FieldsOverlayContainer({ fields, renderFieldAction, debug = fals
                     overflow: "visible", // Allow content to overflow if needed for interaction elements
                   }}
                 >
-                  {renderFieldAction({ ...field, x: 0, y: 0, width: numWidth, height: numHeight })}
+                  {renderFieldAction({
+                    ...field,
+                    x: 0,
+                    y: 0,
+                    width: numWidth,
+                    height: numHeight,
+                  })}
                 </div>
               );
             })}
@@ -366,7 +424,8 @@ export function FieldsOverlayContainer({ fields, renderFieldAction, debug = fals
             {debug && (
               <div className="absolute inset-0 border-2 border-blue-500/30 z-10 pointer-events-none">
                 <div className="absolute top-0 right-0 bg-blue-500 text-white text-xs p-1">
-                  Page {documentPage} ({pageIndex}) - {fieldsForPage.length} fields
+                  Page {documentPage} ({pageIndex}) - {fieldsForPage.length}{" "}
+                  fields
                 </div>
                 <div className="absolute bottom-0 right-0 bg-blue-500 text-white text-xs p-1">
                   {Math.round(pageBounds.width)}x{Math.round(pageBounds.height)}

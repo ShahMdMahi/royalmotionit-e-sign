@@ -78,7 +78,7 @@ export function EditDocumentComponent({
         </Alert>
       </div>
     );
-  }  // Convert database document to the proper Document type with signers
+  } // Convert database document to the proper Document type with signers
   const documentWithSigners: Document = {
     id: document.id,
     title: document.title,

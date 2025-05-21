@@ -77,7 +77,10 @@ export function FieldProperties({
     return {};
   });
 
-  const handleChange = (key: keyof DocumentField, value: string | number | boolean | undefined) => {
+  const handleChange = (
+    key: keyof DocumentField,
+    value: string | number | boolean | undefined,
+  ) => {
     setLocalField((prev) => ({
       ...prev,
       [key]: value,

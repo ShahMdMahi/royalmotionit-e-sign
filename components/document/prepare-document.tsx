@@ -53,7 +53,6 @@ export function PrepareDocument({
   const [isSending, setIsSending] = useState<boolean>(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-
   // Validate document before sending
   const validateDocument = (): boolean => {
     const errors: string[] = [];

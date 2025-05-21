@@ -7,7 +7,10 @@ import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
 import { zoomPlugin } from "@react-pdf-viewer/zoom";
 import { DocumentField } from "@/types/document";
 import { cn } from "@/lib/utils";
-import { handlePageChange, handleTotalPagesChange } from "@/actions/pdf-viewer-actions";
+import {
+  handlePageChange,
+  handleTotalPagesChange,
+} from "@/actions/pdf-viewer-actions";
 import { FieldsOverlayContainer } from "./fields-overlay-container";
 
 // Import styles for the viewer and default layout
@@ -48,7 +51,18 @@ export function PDFViewer({
     renderToolbar: (Toolbar) => (
       <Toolbar>
         {(slots) => {
-          const { CurrentPageInput, Download, EnterFullScreen, GoToNextPage, GoToPreviousPage, NumberOfPages, Print, Zoom, ZoomIn, ZoomOut } = slots;
+          const {
+            CurrentPageInput,
+            Download,
+            EnterFullScreen,
+            GoToNextPage,
+            GoToPreviousPage,
+            NumberOfPages,
+            Print,
+            Zoom,
+            ZoomIn,
+            ZoomOut,
+          } = slots;
 
           return (
             <div className="rpv-toolbar">
@@ -225,15 +239,17 @@ export function PDFViewer({
     const processedFields = fields.map((field) => {
       // Convert page number to number type, default to 1 if not set
       const pageNumber = Number(field.pageNumber || 1);
-      
+
       return {
         ...field,
         pageNumber,
         // Add debugging info if needed
-        _debug: debug ? {
-          originalPageNumber: field.pageNumber,
-          processedPageNumber: pageNumber
-        } : undefined
+        _debug: debug
+          ? {
+              originalPageNumber: field.pageNumber,
+              processedPageNumber: pageNumber,
+            }
+          : undefined,
       };
     });
 
@@ -262,7 +278,12 @@ export function PDFViewer({
       console.log("Total Fields:", fields.length);
       console.log(
         "Fields by Document Page (1-based):",
-        Object.fromEntries(Array.from({ length: 10 }, (_, i) => i + 1).map((page) => [`Page ${page}` as string, fields.filter((f) => Number(f.pageNumber) === page).length]))
+        Object.fromEntries(
+          Array.from({ length: 10 }, (_, i) => i + 1).map((page) => [
+            `Page ${page}` as string,
+            fields.filter((f) => Number(f.pageNumber) === page).length,
+          ]),
+        ),
       );
       console.log(
         "Current Page Fields:",
@@ -275,7 +296,7 @@ export function PDFViewer({
             dim: `${f.width}x${f.height}`,
             scaledPos: `(${f.x * pageViewport.scale}, ${f.y * pageViewport.scale})`,
             scaledDim: `${f.width * pageViewport.scale}x${f.height * pageViewport.scale}`,
-          }))
+          })),
       );
       console.groupEnd();
     }
@@ -283,54 +304,62 @@ export function PDFViewer({
 
   // Function to calculate scale factor for field positioning
   const calculateScaleFactor = useCallback(() => {
-    // For our new overlay-based approach, we're going to rely on 
-    // the FieldsOverlayContainer to handle scaling, but still provide 
+    // For our new overlay-based approach, we're going to rely on
+    // the FieldsOverlayContainer to handle scaling, but still provide
     // this function for the debug overlays or for legacy components
     if (!viewerContainerRef.current) return viewerScale;
-    
+
     // Try to get the actual scale from the viewer
     let calculatedScale = viewerScale;
-    
+
     try {
       // First, look for the zoom indicator which shows precise scaling information
-      const zoomIndicator = viewerContainerRef.current.querySelector('.rpv-zoom__popover-target-scale');
+      const zoomIndicator = viewerContainerRef.current.querySelector(
+        ".rpv-zoom__popover-target-scale",
+      );
       if (zoomIndicator && zoomIndicator.textContent) {
         const match = zoomIndicator.textContent.match(/(\d+(?:\.\d+)?)%/);
         if (match && match[1]) {
           calculatedScale = parseFloat(match[1]) / 100;
-          
+
           if (debug) {
             console.log(`Scale from zoom indicator: ${calculatedScale}`);
           }
         }
       }
-      
+
       // If we couldn't get it from the indicator, try getting it from page dimensions
       if (calculatedScale === viewerScale && pageViewport.width > 0) {
         // Try to get the rendered page element
-        const pageElement = viewerContainerRef.current.querySelector('.rpv-core__page-layer');
+        const pageElement = viewerContainerRef.current.querySelector(
+          ".rpv-core__page-layer",
+        );
         if (pageElement) {
           const pageBounds = pageElement.getBoundingClientRect();
           const standardWidth = 595; // Standard A4 width in PDF units
           calculatedScale = pageBounds.width / standardWidth;
-          
+
           if (debug) {
-            console.log(`Scale calculated from page dimensions: ${calculatedScale}`);
+            console.log(
+              `Scale calculated from page dimensions: ${calculatedScale}`,
+            );
           }
         }
       }
     } catch (err) {
       // If any errors occur, fall back to the viewer scale
-      console.error('Error calculating scale factor:', err);
+      console.error("Error calculating scale factor:", err);
       calculatedScale = viewerScale;
     }
-    
+
     // If we have valid viewport dimensions, add debug information
     if (pageViewport.width > 0 && debug) {
       // First try to get the page element directly
       if (viewerContainerRef.current) {
         // Try to get canvas directly to use its actual dimensions for debug info
-        const canvas = viewerContainerRef.current.querySelector(".rpv-core__canvas-layer canvas") as HTMLCanvasElement;
+        const canvas = viewerContainerRef.current.querySelector(
+          ".rpv-core__canvas-layer canvas",
+        ) as HTMLCanvasElement;
         if (canvas) {
           // Get the canvas's internal dimensions (original PDF size)
           const canvasWidth = canvas.width;
@@ -342,14 +371,18 @@ export function PDFViewer({
               canvasWidth,
               displayWidth,
               actualCalculatedScale: displayWidth / canvasWidth,
-              calculatedScale
+              calculatedScale,
             });
           }
         }
 
         // If we can't get the canvas, try other page elements for debug info
         if (debug) {
-          const selectors = [".rpv-core__page-layer", ".rpv-core__viewer-canvas", ".rpv-core__page-canvas"];
+          const selectors = [
+            ".rpv-core__page-layer",
+            ".rpv-core__viewer-canvas",
+            ".rpv-core__page-canvas",
+          ];
 
           let pageElement = null;
           for (const selector of selectors) {
@@ -360,20 +393,20 @@ export function PDFViewer({
           if (pageElement) {
             // Get the page bounds
             const pageBounds = pageElement.getBoundingClientRect();
-            
+
             console.log("Page-based scaling calculation (debug info):", {
               pageWidth: pageViewport.width,
               renderedWidth: pageBounds.width,
               viewerScale,
-              calculatedScale
+              calculatedScale,
             });
           }
         }
       }
     }
-    
+
     return calculatedScale;
-  }, [pageViewport.width, viewerScale, debug, viewerContainerRef]);  // Generate a signature preview component
+  }, [pageViewport.width, viewerScale, debug, viewerContainerRef]); // Generate a signature preview component
   const renderFieldOverlay = (field: DocumentField) => {
     const value = fieldValues[field.id] || "";
     const isAssignedToCurrentSigner = true; // All fields belong to the single signer
@@ -387,65 +420,92 @@ export function PDFViewer({
             return (
               <div className="w-full h-full flex items-center justify-center">
                 {/* Using img tag directly here for performance and simplicity with data URIs */}
-                <Image src={value} alt={field.type} className="max-w-full max-h-full object-contain" />
+                <Image
+                  src={value}
+                  alt={field.type}
+                  className="max-w-full max-h-full object-contain"
+                />
               </div>
             );
           }
           return (
             <div className="w-full h-full flex items-center justify-center border border-dashed border-primary/50">
-              <span className="text-xs text-muted-foreground">{field.type === "signature" ? "Sign here" : "Initial here"}</span>
+              <span className="text-xs text-muted-foreground">
+                {field.type === "signature" ? "Sign here" : "Initial here"}
+              </span>
             </div>
           );
 
         case "checkbox":
           return (
             <div className="w-full h-full flex items-center justify-center">
-              {hasValue && value === "true" ? <div className="h-5 w-5 flex items-center justify-center bg-primary text-white rounded">✓</div> : <div className="h-5 w-5 border rounded"></div>}
+              {hasValue && value === "true" ? (
+                <div className="h-5 w-5 flex items-center justify-center bg-primary text-white rounded">
+                  ✓
+                </div>
+              ) : (
+                <div className="h-5 w-5 border rounded"></div>
+              )}
             </div>
           );
 
         case "date":
           return (
             <div className="w-full h-full flex items-center">
-              {hasValue ? <span className="text-sm">{new Date(value).toLocaleDateString()}</span> : <span className="text-xs text-muted-foreground">Date</span>}
+              {hasValue ? (
+                <span className="text-sm">
+                  {new Date(value).toLocaleDateString()}
+                </span>
+              ) : (
+                <span className="text-xs text-muted-foreground">Date</span>
+              )}
             </div>
           );
 
         default:
           return (
             <div className="w-full h-full flex items-center">
-              {hasValue ? <span className="text-sm truncate">{value}</span> : <span className="text-xs text-muted-foreground">{field.placeholder || field.label}</span>}
+              {hasValue ? (
+                <span className="text-sm truncate">{value}</span>
+              ) : (
+                <span className="text-xs text-muted-foreground">
+                  {field.placeholder || field.label}
+                </span>
+              )}
             </div>
           );
       }
     };
-    
+
     // When using FieldsOverlayContainer, we don't need to do position calculations here
     // The container has already positioned this element correctly
     // We just need to handle the actual display and interaction within the correctly positioned container
-    
+
     // x and y should be 0 since the parent container is already positioned correctly
     // We only need to render the content itself
     return (
       <div
         className={cn(
           "absolute rounded bg-background/20 backdrop-blur-[1px]",
-          highlightFields && isAssignedToCurrentSigner && !hasValue && "animate-pulse",
+          highlightFields &&
+            isAssignedToCurrentSigner &&
+            !hasValue &&
+            "animate-pulse",
           hasValue && "bg-background/40",
           highlightFields && isAssignedToCurrentSigner && "cursor-pointer",
-          debug && "outline-2 outline-red-500 z-50" // Make fields more visible when debugging
+          debug && "outline-2 outline-red-500 z-50", // Make fields more visible when debugging
         )}
         style={{
-          position: 'absolute',
+          position: "absolute",
           left: 0,
           top: 0,
-          width: '100%', 
-          height: '100%',
+          width: "100%",
+          height: "100%",
           border: `2px solid ${field.color || (isAssignedToCurrentSigner ? "rgba(59, 130, 246, 0.6)" : "rgba(156, 163, 175, 0.4)")}`,
           zIndex: 40, // Ensure field overlays appear above the PDF and overlay container
-          pointerEvents: 'auto', // Always enable pointer events for better interactivity
-          boxSizing: 'border-box', // Ensure borders don't affect dimensions
-          overflow: 'visible', // Allow content to overflow for better interaction
+          pointerEvents: "auto", // Always enable pointer events for better interactivity
+          boxSizing: "border-box", // Ensure borders don't affect dimensions
+          overflow: "visible", // Allow content to overflow for better interaction
         }}
         onClick={(e) => {
           e.stopPropagation(); // Stop event propagation to prevent conflicts
@@ -460,11 +520,18 @@ export function PDFViewer({
   };
 
   return (
-    <div className="relative h-[calc(100vh-200px)] w-full overflow-hidden" ref={viewerContainerRef}>
+    <div
+      className="relative h-[calc(100vh-200px)] w-full overflow-hidden"
+      ref={viewerContainerRef}
+    >
       <Worker workerUrl="/pdf.worker.min.js">
         <Viewer
           fileUrl={pdfData}
-          plugins={[defaultLayoutPluginInstance, pageNavigationPluginInstance, zoomPluginInstance]}
+          plugins={[
+            defaultLayoutPluginInstance,
+            pageNavigationPluginInstance,
+            zoomPluginInstance,
+          ]}
           defaultScale={SpecialZoomLevel.PageFit}
           onDocumentLoad={async (e) => {
             setViewerLoaded(true);
@@ -473,7 +540,9 @@ export function PDFViewer({
             // Attempt to detect page dimensions after document loads
             setTimeout(() => {
               if (viewerContainerRef.current) {
-                const pageElement = viewerContainerRef.current.querySelector(".rpv-core__page-layer");
+                const pageElement = viewerContainerRef.current.querySelector(
+                  ".rpv-core__page-layer",
+                );
                 if (pageElement) {
                   const pageBounds = pageElement.getBoundingClientRect();
                   setPageViewport({
@@ -510,7 +579,9 @@ export function PDFViewer({
             // Update viewport dimensions after page changes
             setTimeout(() => {
               if (viewerContainerRef.current) {
-                const pageElement = viewerContainerRef.current.querySelector(".rpv-core__page-layer");
+                const pageElement = viewerContainerRef.current.querySelector(
+                  ".rpv-core__page-layer",
+                );
                 if (pageElement) {
                   const pageBounds = pageElement.getBoundingClientRect();
                   setPageViewport({
@@ -520,11 +591,17 @@ export function PDFViewer({
                   });
 
                   if (debug) {
-                    console.log(`Page dimensions: ${pageBounds.width}x${pageBounds.height}`);
+                    console.log(
+                      `Page dimensions: ${pageBounds.width}x${pageBounds.height}`,
+                    );
 
                     // Count fields for the current document page (1-based)
-                    const fieldsOnPage = fields.filter((f) => Number(f.pageNumber) === documentPage);
-                    console.log(`Fields on document page ${documentPage}: ${fieldsOnPage.length}`);
+                    const fieldsOnPage = fields.filter(
+                      (f) => Number(f.pageNumber) === documentPage,
+                    );
+                    console.log(
+                      `Fields on document page ${documentPage}: ${fieldsOnPage.length}`,
+                    );
 
                     // Log each field's details to help with troubleshooting
                     if (fieldsOnPage.length > 0) {
@@ -535,10 +612,12 @@ export function PDFViewer({
                           page: f.pageNumber,
                           pos: `(${f.x}, ${f.y})`,
                           dim: `${f.width}x${f.height}`,
-                        }))
+                        })),
                       );
                     } else {
-                      console.log(`No fields found on document page ${documentPage}`);
+                      console.log(
+                        `No fields found on document page ${documentPage}`,
+                      );
                     }
                     console.groupEnd();
                   }
@@ -556,7 +635,9 @@ export function PDFViewer({
             setTimeout(() => {
               // Find the PDF page element to get its dimensions after zoom
               if (viewerContainerRef.current) {
-                const pageElement = viewerContainerRef.current.querySelector(".rpv-core__page-layer");
+                const pageElement = viewerContainerRef.current.querySelector(
+                  ".rpv-core__page-layer",
+                );
                 if (pageElement) {
                   const pageBounds = pageElement.getBoundingClientRect();
                   setPageViewport({
@@ -571,15 +652,17 @@ export function PDFViewer({
         />
 
         {viewerLoaded && visibleFields.length > 0 && (
-          <div className="absolute inset-0 w-full h-full overflow-visible" 
-               style={{
-                 pointerEvents: "none", 
-                 zIndex: 30, 
-                 position: "absolute"
-               }}>
+          <div
+            className="absolute inset-0 w-full h-full overflow-visible"
+            style={{
+              pointerEvents: "none",
+              zIndex: 30,
+              position: "absolute",
+            }}
+          >
             {/* Use a MutationObserver to track page locations */}
-            <FieldsOverlayContainer 
-              fields={visibleFields} 
+            <FieldsOverlayContainer
+              fields={visibleFields}
               currentPage={currentPage}
               renderFieldAction={renderFieldOverlay}
               debug={debug}
@@ -589,8 +672,15 @@ export function PDFViewer({
             {debug && (
               <>
                 <div className="absolute bottom-16 left-4 bg-black/80 text-white p-2 text-xs rounded z-50">
-                  PDF Page: {currentPage} (Document Page: {currentPage + 1}) | Fields on this page: {visibleFields.filter((f) => Number(f.pageNumber) === currentPage + 1).length} | Scale:{" "}
-                  {viewerScale.toFixed(2)} | Calculated Scale: {calculateScaleFactor().toFixed(3)}
+                  PDF Page: {currentPage} (Document Page: {currentPage + 1}) |
+                  Fields on this page:{" "}
+                  {
+                    visibleFields.filter(
+                      (f) => Number(f.pageNumber) === currentPage + 1,
+                    ).length
+                  }{" "}
+                  | Scale: {viewerScale.toFixed(2)} | Calculated Scale:{" "}
+                  {calculateScaleFactor().toFixed(3)}
                 </div>
 
                 {/* Special indicators for fields to help debug positioning/display issues */}
@@ -598,40 +688,60 @@ export function PDFViewer({
                   .filter((f) => Number(f.pageNumber) === currentPage + 1)
                   .map((field) => {
                     // Get the actual page element for this field
-                    const pageElement = viewerContainerRef.current?.querySelector(
-                      `.rpv-core__page-layer[data-page-number="${currentPage}"]`
-                    ) as HTMLElement;
-                    
+                    const pageElement =
+                      viewerContainerRef.current?.querySelector(
+                        `.rpv-core__page-layer[data-page-number="${currentPage}"]`,
+                      ) as HTMLElement;
+
                     let debugStyle = {};
-                    
+
                     if (pageElement) {
                       // Get page position to create a perfectly aligned debug overlay
                       const pageBounds = pageElement.getBoundingClientRect();
-                      const viewerBounds = viewerContainerRef.current?.getBoundingClientRect();
-                      
+                      const viewerBounds =
+                        viewerContainerRef.current?.getBoundingClientRect();
+
                       if (viewerBounds && viewerContainerRef.current) {
                         // Calculate relative position of the page within the viewer
-                        const relativeTop = pageBounds.top - viewerBounds.top + viewerContainerRef.current.scrollTop;
-                        const relativeLeft = pageBounds.left - viewerBounds.left + viewerContainerRef.current.scrollLeft;
-                        
+                        const relativeTop =
+                          pageBounds.top -
+                          viewerBounds.top +
+                          viewerContainerRef.current.scrollTop;
+                        const relativeLeft =
+                          pageBounds.left -
+                          viewerBounds.left +
+                          viewerContainerRef.current.scrollLeft;
+
                         // Calculate scale based on page dimensions
                         const scaleX = pageBounds.width / 595; // standard PDF width
                         const scaleY = pageBounds.height / 842; // standard PDF height
-                        
+
                         // Force numeric values
-                        const numX = typeof field.x === "string" ? parseFloat(field.x) : Number(field.x);
-                        const numY = typeof field.y === "string" ? parseFloat(field.y) : Number(field.y);
-                        const numWidth = typeof field.width === "string" ? parseFloat(field.width) : Number(field.width);
-                        const numHeight = typeof field.height === "string" ? parseFloat(field.height) : Number(field.height);
-                        
+                        const numX =
+                          typeof field.x === "string"
+                            ? parseFloat(field.x)
+                            : Number(field.x);
+                        const numY =
+                          typeof field.y === "string"
+                            ? parseFloat(field.y)
+                            : Number(field.y);
+                        const numWidth =
+                          typeof field.width === "string"
+                            ? parseFloat(field.width)
+                            : Number(field.width);
+                        const numHeight =
+                          typeof field.height === "string"
+                            ? parseFloat(field.height)
+                            : Number(field.height);
+
                         debugStyle = {
-                          position: 'absolute',
-                          left: `${relativeLeft + (numX * scaleX)}px`,
-                          top: `${relativeTop + (numY * scaleY)}px`,
+                          position: "absolute",
+                          left: `${relativeLeft + numX * scaleX}px`,
+                          top: `${relativeTop + numY * scaleY}px`,
                           width: `${numWidth * scaleX}px`,
                           height: `${numHeight * scaleY}px`,
                           boxShadow: "0 0 0 4px rgba(255,0,0,0.3)",
-                          pointerEvents: 'none'
+                          pointerEvents: "none",
                         };
                       }
                     } else {
@@ -644,7 +754,7 @@ export function PDFViewer({
                         boxShadow: "0 0 0 4px rgba(255,0,0,0.3)",
                       };
                     }
-                    
+
                     return (
                       <div
                         key={`debug-${field.id}`}
