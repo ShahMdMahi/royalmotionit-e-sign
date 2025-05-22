@@ -23,12 +23,12 @@ import { FileText, AlertTriangle, ArrowLeft, Info, Clock, Check, Shield, Hash, U
 import Link from "next/link";
 import { DocumentToolbar } from "../document/document-toolbar";
 import { toast } from "sonner";
-import { Document as DocumentType, Signer } from "@/types/document";
+import { Document as DocumentType } from "@/types/document";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { formatDate, formatDateOnly } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 
 interface SingleDocumentComponentProps {
   document: PrismaDocument & {
@@ -111,16 +111,6 @@ export function SingleDocumentComponent({
       default:
         return "secondary";
     }
-  };
-
-  const getInitials = (name: string | null | undefined) => {
-    if (!name) return "U";
-    return name
-      .split(" ")
-      .map((part) => part?.[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2);
   };
 
   // Handle document actions
