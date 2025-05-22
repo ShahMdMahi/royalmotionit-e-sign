@@ -18,7 +18,6 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
-  saveDocumentSigners,
   sendDocumentForSigning,
 } from "@/actions/document";
 import { SignerManager } from "@/components/document/signer-manager";
@@ -47,8 +46,8 @@ export function PrepareDocument({
 }: PrepareDocumentProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>("design");
-  const [documentFields, setDocumentFields] = useState<DocumentField[]>(fields);
-  const [documentSigners, setDocumentSigners] = useState<Signer[]>(signers);
+  const [documentFields] = useState<DocumentField[]>(fields);
+  const [documentSigners] = useState<Signer[]>(signers);
   const [completionMessage, setCompletionMessage] = useState<string>("");
   const [isSending, setIsSending] = useState<boolean>(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);

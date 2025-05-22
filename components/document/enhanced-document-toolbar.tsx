@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Save, Send, ArrowLeft, RotateCcw, Settings, Eye } from "lucide-react";
+import { Save, ArrowLeft, RotateCcw, Settings, Eye } from "lucide-react";
 import { Document } from "@/types/document";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

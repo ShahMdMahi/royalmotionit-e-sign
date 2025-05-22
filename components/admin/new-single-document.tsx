@@ -1,6 +1,7 @@
 "use client";
 
-import { Document, User, DocumentField as PrismaDocumentField, DocumentType } from "@prisma/client";
+import { Document as PrismaDocument, User, DocumentField as PrismaDocumentField, DocumentType } from "@prisma/client";
+import { Document } from "@/types/document";
 import { getFromR2 } from "@/actions/r2";
 import { PDFViewer } from "../common/pdf-viewer";
 import { useEffect, useState } from "react";
@@ -18,7 +19,7 @@ import { DocumentToolbar } from "./document-toolbar";
 import { toast } from "sonner";
 
 interface SingleDocumentComponentProps {
-  document: Document & {
+  document: PrismaDocument & {
     fields?: PrismaDocumentField[];
     signers?: Array<{
       id: string;
@@ -160,7 +161,7 @@ export function SingleDocumentComponent({ document, author }: SingleDocumentComp
     );
   }
 
-  const handleDocumentSave = async (doc: Document | any) => {
+  const handleDocumentSave = async (doc: Document | PrismaDocument) => {
     setIsSaving(true);
     try {
       // Implement save functionality here

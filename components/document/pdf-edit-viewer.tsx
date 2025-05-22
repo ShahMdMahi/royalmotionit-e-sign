@@ -63,10 +63,6 @@ export function PDFEditViewer({
   const [viewerLoaded, setViewerLoaded] = useState(false);
   // Properties are handled elsewhere
   const [viewerScale, setViewerScale] = useState(1);
-  const [viewerDimensions, setViewerDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
   const viewerContainerRef = useRef<HTMLDivElement>(null);
 
   // Page navigation plugin with custom configuration for single page view
@@ -76,9 +72,6 @@ export function PDFEditViewer({
   // Zoom plugin with custom configuration
   const zoomPluginInstance = zoomPlugin();
   const {} = zoomPluginInstance; // Zoom controls managed by plugin
-
-  // Track the initial render to force proper page loading
-  const [initialRender, setInitialRender] = useState(true);
 
   // DnD sensors for drag and drop - improved configuration for more precise dragging
   const sensors = useSensors(
@@ -96,7 +89,7 @@ export function PDFEditViewer({
     // Explicitly convert to numbers to ensure accurate comparison
     return Number(field.pageNumber) === Number(currentPage);
   });
-  const selectedField = fields.find((field) => field.id === selectedFieldId);
+  // const selectedField = fields.find((field) => field.id === selectedFieldId);
 
   // Effect to jump to page when currentPage changes
   // This is critical to ensure we can add fields to any page
@@ -186,37 +179,37 @@ export function PDFEditViewer({
   );
 
   // Handle field resize with enhanced precision and reliability
-  const handleFieldResize = useCallback(
-    async (id: string, width: number, height: number) => {
-      try {
-        const field = fields.find((f) => f.id === id);
-        if (!field) return;
+  // const handleFieldResize = useCallback(
+  //   async (id: string, width: number, height: number) => {
+  //     try {
+  //       const field = fields.find((f) => f.id === id);
+  //       if (!field) return;
 
-        // Cast to explicit number type to prevent string conversion issues
-        // Enforce minimum sizes but preserve exact decimal values
-        const finalWidth = Math.max(50, Number(width));
-        const finalHeight = Math.max(30, Number(height));
+  //       // Cast to explicit number type to prevent string conversion issues
+  //       // Enforce minimum sizes but preserve exact decimal values
+  //       const finalWidth = Math.max(50, Number(width));
+  //       const finalHeight = Math.max(30, Number(height));
 
-        // Skip update if dimensions haven't changed to prevent unneeded rerenders
-        if (field.width === finalWidth && field.height === finalHeight) return;
+  //       // Skip update if dimensions haven't changed to prevent unneeded rerenders
+  //       if (field.width === finalWidth && field.height === finalHeight) return;
 
-        // Apply the update directly with exact values
-        if (onFieldResize) {
-          await onFieldResize(id, finalWidth, finalHeight);
-        } else {
-          const updatedField = {
-            ...field,
-            width: finalWidth,
-            height: finalHeight,
-          };
-          await onFieldUpdateAction(updatedField);
-        }
-      } catch (error) {
-        console.error("Error updating field dimensions:", error);
-      }
-    },
-    [fields, onFieldResize, onFieldUpdateAction],
-  );
+  //       // Apply the update directly with exact values
+  //       if (onFieldResize) {
+  //         await onFieldResize(id, finalWidth, finalHeight);
+  //       } else {
+  //         const updatedField = {
+  //           ...field,
+  //           width: finalWidth,
+  //           height: finalHeight,
+  //         };
+  //         await onFieldUpdateAction(updatedField);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error updating field dimensions:", error);
+  //     }
+  //   },
+  //   [fields, onFieldResize, onFieldUpdateAction],
+  // );
   // Handle field selection
   const handleFieldSelectInternal = async (field: DocumentField | null) => {
     await onFieldSelectAction(field);

@@ -2,13 +2,12 @@
 
 import {
   Document as PrismaDocument,
-  User,
+  User as PrismaUser,
   DocumentField as PrismaDocumentField,
 } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { getFromR2 } from "@/actions/r2";
 import { PDFViewer } from "../common/pdf-viewer";
-import { format } from "date-fns";
 
 import {
   Card,
@@ -20,16 +19,16 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { FileText, AlertTriangle, ArrowLeft } from "lucide-react";
+import { FileText, AlertTriangle, ArrowLeft, Info, Clock, Check, Shield, Hash, User as UserIcon, Calendar } from "lucide-react";
 import Link from "next/link";
 import { DocumentToolbar } from "../document/document-toolbar";
 import { toast } from "sonner";
 import { Document as DocumentType, Signer } from "@/types/document";
-
-// Define a custom signer type that aligns with both the DB schema and our type
-type DocumentSigner = Omit<Signer, "name"> & {
-  name?: string | undefined; // Replace null with undefined
-};
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { formatDate, formatDateOnly } from "@/lib/utils";
 
 interface SingleDocumentComponentProps {
   document: PrismaDocument & {
@@ -44,7 +43,7 @@ interface SingleDocumentComponentProps {
       // Note: order field removed as it's not needed for single signer
     }>;
   };
-  author?: User;
+  author?: PrismaUser;
   backLink?: string;
 }
 
@@ -124,10 +123,6 @@ export function SingleDocumentComponent({
       .substring(0, 2);
   };
 
-  const formatDateTime = (date: Date | string) => {
-    return format(new Date(date), "PPP p");
-  };
-
   // Handle document actions
   const handleDocumentSave = async (doc: any) => {
     setIsSaving(true);
@@ -151,7 +146,6 @@ export function SingleDocumentComponent({
         updatedAt: new Date(),
         preparedAt: doc.preparedAt,
         sentAt: doc.sentAt,
-        viewedAt: doc.viewedAt,
         signedAt: doc.signedAt,
         expiresAt: doc.expiresAt,
         enableWatermark: doc.enableWatermark,
@@ -296,42 +290,272 @@ export function SingleDocumentComponent({
         isSaving={isSaving}
         onSaveAction={handleDocumentSave}
       />
-      {/* Keep the original toolbar hidden for compatibility */}
-      <div className="hidden">
-        <DocumentToolbar
-          document={
-            {
-              ...document,
-              type: "default",
-              description: document.description || undefined, // Convert null to undefined
-              key: document.key || "", // Ensure key is never null
-              signer:
-                document.signers && document.signers.length > 0
-                  ? {
-                      ...document.signers[0],
-                      documentId: document.signers[0].documentId || document.id,
-                      name: document.signers[0].name || undefined, // Convert null to undefined
-                      role: document.signers[0].role || undefined, // Convert null to undefined
-                      status: document.signers[0].status as
-                        | "PENDING"
-                        | "COMPLETED"
-                        | "DECLINED"
-                        | "VIEWED",
-                    }
-                  : undefined,
-            } as DocumentType
-          }
-          isSaving={isSaving}
-          onSaveAction={handleDocumentSave}
-        />
-      </div>
-      {pdfData && (
-        <div className="w-full border-b overflow-hidden p-0 mt-4">
-          <div className="aspect-[1/1.4] w-full mx-auto">
-            <PDFViewer pdfData={pdfData} />
+      
+      <Card className="w-full max-w-7xl mx-auto my-6 border-border shadow-lg">
+        <CardHeader className="border-b border-border">
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
+                <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <FileText className="size-4 text-primary" />
+                </div>
+                {document.title}
+              </CardTitle>
+              <CardDescription className="text-sm sm:text-base">
+                {document.description || "View the document and check its details below."}
+              </CardDescription>
+            </div>
+            <Badge
+              variant={getStatusBadgeVariant(document.status)}
+              className="text-xs sm:text-sm px-2 py-1 h-auto"
+            >
+              {document.status === "COMPLETED" && <Check className="size-3 mr-1" />}
+              {document.status === "PENDING" && <Clock className="size-3 mr-1" />}
+              {document.status}
+            </Badge>
           </div>
-        </div>
-      )}
+        </CardHeader>
+        <CardContent className="p-0">
+          <Tabs defaultValue="document" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 p-0 bg-muted/50">
+              <TabsTrigger value="document" className="rounded-none border-r py-3">
+                <FileText className="size-4 mr-2" />
+                Document
+              </TabsTrigger>
+              <TabsTrigger value="details" className="rounded-none py-3">
+                <Info className="size-4 mr-2" />
+                Details
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="document" className="p-0 border-t">
+              {error && pdfData && (
+                <div className="m-6 p-4 border border-destructive/50 bg-destructive/10 text-destructive rounded-md">
+                  <p className="flex items-center gap-2">
+                    <AlertTriangle className="size-4" /> There was an issue refreshing the document: {error}. Displaying cached or previous version.
+                  </p>
+                </div>
+              )}
+
+              {!pdfData && !error && (
+                <div className="flex flex-col items-center justify-center h-96 border-b m-6 rounded-md bg-muted/20">
+                  <FileText className="size-12 text-muted-foreground/50 mb-2" />
+                  <p className="text-muted-foreground">No document preview available.</p>
+                </div>
+              )}
+
+              {pdfData && (
+                <div className="w-full border-b overflow-hidden p-0">
+                  <div className="aspect-[1/1.4] w-full mx-auto">
+                    <PDFViewer pdfData={pdfData} />
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="details" className="pt-0 border-t">
+              <ScrollArea className="h-full">
+                <div className="p-6 space-y-8">
+                  {/* Document Information */}
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-medium flex items-center gap-2">
+                      <Shield className="size-5 text-primary" />
+                      Document Information
+                    </h3>
+                    <Separator />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm rounded-lg bg-muted/20 p-4">
+                      <div>
+                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                          <FileText className="size-3.5" /> Title:
+                        </p>
+                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                          {document.title}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                          <Shield className="size-3.5" /> Status:
+                        </p>
+                        <Badge
+                          variant={getStatusBadgeVariant(document.status)}
+                          className="mt-1"
+                        >
+                          {document.status}
+                        </Badge>
+                      </div>
+                      {document.description && (
+                        <div className="sm:col-span-2">
+                          <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                            <Info className="size-3.5" /> Description:
+                          </p>
+                          <p className="text-muted-foreground whitespace-pre-wrap bg-background/50 p-1.5 rounded border">
+                            {document.description}
+                          </p>
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                          <UserIcon className="size-3.5" /> Author:
+                        </p>
+                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                          {author?.name || author?.email || "Unknown"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                          <Calendar className="size-3.5" /> Created:
+                        </p>
+                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                          {formatDate(document.createdAt)}
+                        </p>
+                      </div>
+                      {document.hash && (
+                        <div className="sm:col-span-2">
+                          <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                            <Hash className="size-3.5" /> Document Hash:
+                          </p>
+                          <p className="text-muted-foreground break-all text-xs font-mono bg-background/50 p-1.5 rounded border">
+                            {document.hash}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Timeline Information */}
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-medium flex items-center gap-2">
+                      <Clock className="size-5 text-primary" />
+                      Document Timeline
+                    </h3>
+                    <Separator />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm rounded-lg bg-muted/20 p-4">
+                      <div>
+                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                          <Calendar className="size-3.5" /> Created At:
+                        </p>
+                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                          {formatDate(document.createdAt)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                          <Calendar className="size-3.5" /> Updated At:
+                        </p>
+                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                          {formatDate(document.updatedAt)}
+                        </p>
+                      </div>
+                      {document.preparedAt && (
+                        <div>
+                          <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                            <Calendar className="size-3.5" /> Prepared At:
+                          </p>
+                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                            {formatDate(document.preparedAt)}
+                          </p>
+                        </div>
+                      )}
+                      {document.sentAt && (
+                        <div>
+                          <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                            <Calendar className="size-3.5" /> Sent At:
+                          </p>
+                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                            {formatDate(document.sentAt)}
+                          </p>
+                        </div>
+                      )}
+                      {/* Remove viewedAt since it's not available in the document type */}
+                      {document.signedAt && (
+                        <div>
+                          <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                            <Calendar className="size-3.5" /> Signed At:
+                          </p>
+                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                            {formatDate(document.signedAt)}
+                          </p>
+                        </div>
+                      )}
+                      {document.expiresAt && (
+                        <div>
+                          <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                            <Calendar className="size-3.5" /> Expires At:
+                          </p>
+                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                            {formatDate(document.expiresAt)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Signer Information */}
+                  {document.signers && document.signers.length > 0 && (
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-medium flex items-center gap-2">
+                        <UserIcon className="size-5 text-primary" />
+                        Signer Information
+                      </h3>
+                      <Separator />
+                      <div className="rounded-lg bg-muted/20 p-4">
+                        {document.signers.map((signer) => (
+                          <div key={signer.id} className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                            <div>
+                              <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                                <UserIcon className="size-3.5" /> Name:
+                              </p>
+                              <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                                {signer.name || "Not specified"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                                <Info className="size-3.5" /> Email:
+                              </p>
+                              <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                                {signer.email}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                                <Info className="size-3.5" /> Status:
+                              </p>
+                              <Badge
+                                variant={getStatusBadgeVariant(signer.status)}
+                                className="mt-1"
+                              >
+                                {signer.status}
+                              </Badge>
+                            </div>
+                            {signer.role && (
+                              <div>
+                                <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                                  <Info className="size-3.5" /> Role:
+                                </p>
+                                <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                                  {signer.role}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+        <CardFooter className="border-t p-4 flex justify-between">
+          <Button variant="outline" size="sm" asChild>
+            <Link href={backLink}>
+              <ArrowLeft className="size-4 mr-2" /> Back
+            </Link>
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

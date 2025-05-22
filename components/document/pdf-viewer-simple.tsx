@@ -130,6 +130,7 @@ export function PDFViewerSimple({
 
         // Store the original size for reference
         setPageSize(originalSize);
+        console.log(pageSize)
 
         if (debug) {
           console.log(
@@ -186,19 +187,19 @@ export function PDFViewerSimple({
     setViewerScale((prev) => Math.max(0.5, prev - 0.1));
   }, []);
   // Track blob URLs to clean up
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  // const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
   // Memoize the file prop value to prevent unnecessary reloads
   const memoizedFile = useMemo(() => ({ data: pdfData }), [pdfData]);
 
   // Clean up blob URLs on unmount to prevent memory leaks
-  useEffect(() => {
-    return () => {
-      if (blobUrl) {
-        URL.revokeObjectURL(blobUrl);
-      }
-    };
-  }, [blobUrl]);
+  // useEffect(() => {
+  //   return () => {
+  //     if (blobUrl) {
+  //       URL.revokeObjectURL(blobUrl);
+  //     }
+  //   };
+  // }, [blobUrl]);
 
   // Generate a field overlay component
   const renderFieldOverlay = useCallback(

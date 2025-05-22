@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Save, Send, ArrowLeft, Settings, Eye } from "lucide-react";
+import { Save, ArrowLeft, Settings, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface NewDocumentToolbarProps {

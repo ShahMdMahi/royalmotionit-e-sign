@@ -103,11 +103,17 @@ export function SingleDocumentComponent({
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case "APPROVED":
+      case "COMPLETED":
         return "success";
       case "REJECTED":
+      case "DECLINED":
         return "destructive";
       case "PENDING":
         return "default";
+      case "CANCELED":
+        return "outline";
+      case "EXPIRED":
+        return "warning";
       default:
         return "secondary";
     }
@@ -340,6 +346,83 @@ export function SingleDocumentComponent({
                           {document.status}
                         </Badge>
                       </div>
+                      
+                      {/* Time Information */}
+                      <div className="sm:col-span-2">
+                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                          <Clock className="size-3.5" /> Timestamps:
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-background/50 p-1.5 rounded border">
+                          <div>
+                            <span className="text-xs font-medium">Created:</span>
+                            <div className="text-muted-foreground text-xs">
+                              {document.createdAt ? new Date(document.createdAt).toLocaleString() : "N/A"}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-xs font-medium">Updated:</span>
+                            <div className="text-muted-foreground text-xs">
+                              {document.updatedAt ? new Date(document.updatedAt).toLocaleString() : "N/A"}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-xs font-medium">Prepared:</span>
+                            <div className="text-muted-foreground text-xs">
+                              {document.preparedAt ? new Date(document.preparedAt).toLocaleString() : "N/A"}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-xs font-medium">Signed:</span>
+                            <div className="text-muted-foreground text-xs">
+                              {document.signedAt ? new Date(document.signedAt).toLocaleString() : "N/A"}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Signer Information */}
+                      {document.signers && document.signers.length > 0 && (
+                        <div className="sm:col-span-2">
+                          <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
+                            <FileSignature className="size-3.5" /> Signer Details:
+                          </p>
+                          <div className="bg-background/50 p-1.5 rounded border">
+                            <p>
+                              <span className="text-xs font-medium">Name:</span>{" "}
+                              <span className="text-muted-foreground">
+                                {document.signers[0].name || "Not provided"}
+                              </span>
+                            </p>
+                            <p>
+                              <span className="text-xs font-medium">Email:</span>{" "}
+                              <span className="text-muted-foreground">
+                                {document.signers[0].email}
+                              </span>
+                            </p>
+                            <p>
+                              <span className="text-xs font-medium">ID:</span>{" "}
+                              <span className="text-muted-foreground text-xs font-mono">
+                                {document.signers[0].id}
+                              </span>
+                            </p>
+                            {document.signers[0].role && (
+                              <p>
+                                <span className="text-xs font-medium">Role:</span>{" "}
+                                <span className="text-muted-foreground">
+                                  {document.signers[0].role}
+                                </span>
+                              </p>
+                            )}
+                            <p>
+                              <span className="text-xs font-medium">Status:</span>{" "}
+                              <Badge variant={getStatusBadgeVariant(document.signers[0].status)} className="ml-1 text-xs">
+                                {document.signers[0].status}
+                              </Badge>
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      
                       <div>
                         <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                           <Edit className="size-3.5" /> Created By:

@@ -39,6 +39,16 @@ export function ResizableField({
     data: {
       field,
     },
+    // Add onDragEnd callback to handle position update
+    onDragEnd: ({ delta }) => {
+      if (delta.x !== 0 || delta.y !== 0) {
+        // Calculate the new position based on the delta
+        const newX = Number(field.x) + delta.x / viewerScale;
+        const newY = Number(field.y) + delta.y / viewerScale;
+        // Call the provided callback with the new position
+        onDragEndAction(newX, newY);
+      }
+    },
   });
 
   // Store the field's original position when drag starts with precise values
