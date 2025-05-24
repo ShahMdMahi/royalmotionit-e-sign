@@ -4,7 +4,7 @@ import { prisma } from "@/prisma/prisma";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -17,8 +17,8 @@ export async function GET(
       );
     }
 
-    // Safely get the document ID from params
-    const { id: documentId } = await Promise.resolve(params);
+    // Get the document ID from params
+    const documentId = (await params).id;
 
     // Check if document exists and user has permission
     const document = await prisma.document.findFirst({
