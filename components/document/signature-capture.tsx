@@ -57,7 +57,7 @@ export function SignatureCapture({
   const [selectedFont, setSelectedFont] = useState("Homemade Apple");
   const [isEmpty, setIsEmpty] = useState(true);
 
-  const signatureRef = useRef<any>(null);
+  const signatureRef = useRef<SignatureCanvasLib | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // State for responsive canvas dimensions
