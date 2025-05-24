@@ -133,9 +133,8 @@ export function DocumentAttachments({
   type SuccessResponse = { success: boolean; message?: string } & (
     | UrlResponse
     | DataUrlResponse
-    | {}
+    | object
   );
-  type DownloadResponse = string | UrlResponse | SuccessResponse;
 
   const handleDownload = async (attachmentId: string) => {
     try {

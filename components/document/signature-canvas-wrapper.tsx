@@ -2,6 +2,7 @@
 
 import { forwardRef, useRef, useImperativeHandle } from "react";
 import dynamic from "next/dynamic";
+import type { SignatureCanvasMethods } from "react-signature-canvas";
 
 // Dynamically import SignatureCanvas with SSR disabled
 const SignatureCanvas = dynamic(() => import("react-signature-canvas"), {
@@ -29,7 +30,7 @@ const SignatureCanvasWrapper = forwardRef<
   SignatureCanvasWrapperProps
 >((props, ref) => {
   const { penColor = "black", canvasProps = {} } = props;
-  const signatureRef = useRef<any>(null);
+  const signatureRef = useRef<SignatureCanvasMethods>(null);
 
   // Forward the methods we need from the SignatureCanvas component
   useImperativeHandle(ref, () => ({

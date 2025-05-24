@@ -42,6 +42,7 @@ export function DocumentSigning({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter(); // These are just wrappers for the imported server actions
 
+  // This function is used by the SigningFieldsTab component
   const navigateToField = async (page: number) => {
     setCurrentPage(page);
     await handleNavigateToField(page);
@@ -53,8 +54,9 @@ export function DocumentSigning({
     return fields.filter((field) => field.signerId === signer.id);
   }, [fields, signer.id]);
 
-  // Group fields by page
-  const fieldsByPage = useMemo(() => {
+  // Group fields by page - can be used for future optimizations
+  // Removed due to unused variable warning
+  /* const fieldsByPage = useMemo(() => {
     const grouped: Record<number, DocumentField[]> = {};
     signerFields.forEach((field) => {
       if (!grouped[field.pageNumber]) {
@@ -63,7 +65,7 @@ export function DocumentSigning({
       grouped[field.pageNumber].push(field);
     });
     return grouped;
-  }, [signerFields]);
+  }, [signerFields]); */
 
   // Get required field ids
   const requiredFieldIds = useMemo(() => {
@@ -130,8 +132,10 @@ export function DocumentSigning({
       // Custom validation rule if specified
       if (field.validationRule && value) {
         try {
-          const rule = JSON.parse(field.validationRule);
-          // Implement custom validation logic here
+          // Currently not implementing JSON-based rules
+          // const rule = JSON.parse(field.validationRule);
+          // Future: Implement custom validation logic here
+          JSON.parse(field.validationRule); // Just check if it's valid JSON
         } catch {
           // If not valid JSON, use as regex pattern
           try {

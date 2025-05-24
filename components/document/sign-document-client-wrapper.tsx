@@ -23,7 +23,7 @@ const SignDocumentComponent = dynamic(
 
 interface SignDocumentClientWrapperProps {
   document: PrismaDocument & {
-    fields?: any[];
+    fields?: DocumentField[];
     signers: Signer[];
   };
   signer: Signer;

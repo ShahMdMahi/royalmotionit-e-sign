@@ -12,9 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Menu, CheckSquare, AlertCircle, ChevronUp } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FieldValidationError } from "@/types/validation";
+import { DocumentField } from "@/types/document";
 
 interface MobileFieldMenuProps {
-  fields: any[];
+  fields: DocumentField[];
   fieldValues: Record<string, string>;
   fieldErrors: FieldValidationError[];
   onFieldClickAction: (fieldId: string) => void;
@@ -40,7 +41,7 @@ export function MobileFieldMenu({
       acc[page].push(field);
       return acc;
     },
-    {} as Record<number, any[]>,
+    {} as Record<number, DocumentField[]>,
   );
 
   // Sort pages
@@ -54,7 +55,7 @@ export function MobileFieldMenu({
   };
 
   // Check if field is completed
-  const isCompleted = (field: any) => {
+  const isCompleted = (field: DocumentField) => {
     const value = fieldValues[field.id];
     return field.required ? !!value : true;
   };
@@ -107,7 +108,7 @@ export function MobileFieldMenu({
                 </h3>
 
                 <div className="space-y-1.5">
-                  {fieldsByPage[page].map((field: any) => {
+                  {fieldsByPage[page].map((field: DocumentField) => {
                     const fieldError = hasError(field.id);
                     const completed = isCompleted(field);
 
