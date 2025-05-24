@@ -287,7 +287,7 @@ export function EditDocumentComponent({
                   y,
                 });
               }
-              return { id, x, y };
+              // Don't return anything to match the Promise<void> type
             }}
             onFieldResize={async (id, width, height) => {
               const field = fields.find((f) => f.id === id);
@@ -298,7 +298,7 @@ export function EditDocumentComponent({
                   height,
                 });
               }
-              return { id, width, height };
+              // Don't return anything to match the Promise<void> type
             }}
           />
           <PageNavigation
