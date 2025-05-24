@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, FileSignature } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { getFromR2 } from "@/actions/r2";
 import { Document, DocumentField } from "@/types/document";
 import { toast } from "sonner";
@@ -19,11 +19,12 @@ export function DocumentPreview({ document, fields }: DocumentPreviewProps) {
   const [pdfData, setPdfData] = useState<Uint8Array | null>(null);
 
   const router = useRouter();
-
+  const pathname = usePathname();
+  
   // Fetch PDF data from R2
   useEffect(() => {
     const fetchPdf = async () => {
-      if (!document.key) {
+      if (!document?.key) {
         toast.error("Document key is missing");
         return;
       }
@@ -48,18 +49,17 @@ export function DocumentPreview({ document, fields }: DocumentPreviewProps) {
     };
 
     fetchPdf();
-  }, [document.key]);
+  }, [document?.key]);
   const handleBack = () => {
-    // Check if we're in admin path
-    const isAdmin = window.location.pathname.includes("/admin/");
+    // Check if we're in admin path using the pathname hook
+    const isAdmin = pathname?.includes("/admin/");
     if (isAdmin) {
       router.push(`/admin/documents/${document.id}`);
     } else {
       router.push(`/documents/${document.id}`);
     }
   };
-
-  const isAdminRoute = window.location.pathname.includes("/admin");
+  const isAdminRoute = pathname?.includes("/admin");
   const handleSignRedirect = async () => {
     if (!isAdminRoute) {
       router.push(`/documents/${document.id}/sign`);
@@ -69,7 +69,7 @@ export function DocumentPreview({ document, fields }: DocumentPreviewProps) {
   const handleDownload = async () => {
     try {
       // Generate download URL from R2 key
-      if (document.key) {
+      if (document?.key) {
         const result = await getFromR2({
           Key: document.key,
           ResponseContentDisposition: `attachment; filename="${document.title || "document"}.pdf"`,

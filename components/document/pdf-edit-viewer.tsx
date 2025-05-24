@@ -64,7 +64,7 @@ export function PDFEditViewer({
   const [viewerLoaded, setViewerLoaded] = useState(false);
   // Properties are handled elsewhere
   const [viewerScale, setViewerScale] = useState(1);
-  const [viewerDimensions, setViewerDimensions] = useState({ width: 0, height: 0 });
+  // const [viewerDimensions, setViewerDimensions] = useState({ width: 0, height: 0 });
   const viewerContainerRef = useRef<HTMLDivElement>(null);
 
   // Page navigation plugin with custom configuration for single page view
@@ -138,9 +138,9 @@ export function PDFEditViewer({
   useEffect(() => {
     const updateDimensions = () => {
       if (viewerContainerRef.current) {
-        const { width, height } =
+        // const { width, height } =
           viewerContainerRef.current.getBoundingClientRect();
-        setViewerDimensions({ width, height });
+        // setViewerDimensions({ width, height });
       }
     };
 

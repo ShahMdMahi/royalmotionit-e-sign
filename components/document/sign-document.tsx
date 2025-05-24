@@ -26,7 +26,7 @@ import { FieldValidationError } from "@/types/validation";
 
 interface SignDocumentComponentProps {
   document: PrismaDocument & {
-    fields?: any[];
+    fields?: DocumentField[];
     signers: Signer[];
   };
   signer: Signer;

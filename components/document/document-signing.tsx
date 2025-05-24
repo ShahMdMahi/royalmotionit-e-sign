@@ -44,11 +44,11 @@ export function DocumentSigning({
 
   // This function is used by the SigningFieldsTab component
   // Prefixed with underscore to indicate it's defined for future use
-  const _navigateToField = async (page: number) => {
-    setCurrentPage(page);
-    await handleNavigateToField(page);
-    return page;
-  };
+  // const navigateToField = async (page: number) => {
+  //   setCurrentPage(page);
+  //   await handleNavigateToField(page);
+  //   return page;
+  // };
 
   // Filter fields assigned to this signer
   const signerFields = useMemo(() => {
