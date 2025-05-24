@@ -8,7 +8,7 @@ import { PDFViewer } from "../common/pdf-viewer";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { FileText, AlertTriangle, ArrowLeft, Info, Clock, Check, Shield, Hash, User as UserIcon, Calendar, Save } from "lucide-react";
+import { FileText, AlertTriangle, ArrowLeft, Info, Clock, Check, Shield, Hash, User as UserIcon, Calendar } from "lucide-react";
 import Link from "next/link";
 import { DocumentToolbar } from "../document/document-toolbar";
 import { toast } from "sonner";
@@ -18,43 +18,6 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDate } from "@/lib/utils";
-
-interface SaveDocumentInput {
-  id: string;
-  title: string;
-  description?: string;
-  authorId: string;
-  authorName?: string;
-  authorEmail?: string;
-  status: "DRAFT" | "PENDING" | "COMPLETED" | "EXPIRED" | "DECLINED" | "CANCELED";
-  key?: string;
-  type?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  preparedAt?: Date;
-  sentAt?: Date;
-  signedAt?: Date;
-  expiresAt?: Date;
-  enableWatermark?: boolean;
-  watermarkText?: string;
-  fields?: DocumentField[];
-  signer?: {
-    id: string;
-    documentId?: string;
-    email: string;
-    name?: string;
-    role?: string;
-    status?: "PENDING" | "COMPLETED" | "DECLINED" | "VIEWED";
-    accessCode?: string;
-    invitedAt?: Date;
-    viewedAt?: Date;
-    completedAt?: Date;
-    notifiedAt?: Date;
-    declinedAt?: Date;
-    declineReason?: string;
-    color?: string;
-  };
-}
 
 interface SingleDocumentComponentProps {
   document: PrismaDocument & {

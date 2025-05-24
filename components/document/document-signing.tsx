@@ -33,7 +33,7 @@ export function DocumentSigning({
   signer,
   isLastSigner,
 }: DocumentSigningProps) {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage] = useState(1);
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
