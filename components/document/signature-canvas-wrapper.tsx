@@ -2,12 +2,18 @@
 
 import { forwardRef, useRef, useImperativeHandle } from "react";
 import dynamic from "next/dynamic";
-import type { SignatureCanvasMethods } from "react-signature-canvas";
+import type { SignatureCanvasMethods, SignatureCanvasProps } from "react-signature-canvas";
+import React from "react";
+
+// Create a typed interface for the dynamically imported component
+interface DynamicSignatureCanvasProps extends SignatureCanvasProps {
+  ref?: React.Ref<SignatureCanvasMethods>;
+}
 
 // Dynamically import SignatureCanvas with SSR disabled
 const SignatureCanvas = dynamic(() => import("react-signature-canvas"), {
   ssr: false,
-});
+}) as React.ComponentType<DynamicSignatureCanvasProps>;
 
 // Create types for the signature canvas
 export interface SignatureCanvasRef {

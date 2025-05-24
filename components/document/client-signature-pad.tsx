@@ -2,12 +2,19 @@
 
 import { forwardRef, useRef, useImperativeHandle, ForwardRefRenderFunction } from "react";
 import dynamic from "next/dynamic";
+import type { SignatureCanvasMethods, SignatureCanvasProps } from "react-signature-canvas";
+import React from "react";
+
+// Create a typed interface for the dynamically imported component
+interface DynamicSignatureCanvasProps extends SignatureCanvasProps {
+  ref?: React.Ref<SignatureCanvasMethods>;
+}
 
 // Import SignatureCanvas with SSR disabled and explicitly type it
-const SignatureCanvas = dynamic<any>(() => import("react-signature-canvas"), {
+const SignatureCanvas = dynamic(() => import("react-signature-canvas"), {
   ssr: false,
   loading: () => <div className="h-full w-full flex items-center justify-center bg-muted/20">Loading signature pad...</div>,
-});
+}) as React.ComponentType<DynamicSignatureCanvasProps>;
 
 export interface ClientSignatureCanvasProps {
   canvasProps: {
@@ -25,11 +32,7 @@ export interface SignatureCanvasRef {
 
 const ClientSignatureCanvas: ForwardRefRenderFunction<SignatureCanvasRef, ClientSignatureCanvasProps> = ({ canvasProps, penColor }, ref) => {
   // Define a more specific type for the SignatureCanvas instead of 'any'
-  const sigCanvas = useRef<{
-    clear: () => void;
-    isEmpty: () => boolean;
-    toDataURL: (type?: string, encoderOptions?: number) => string;
-  }>(null);
+  const sigCanvas = useRef<SignatureCanvasMethods | null>(null);
 
   useImperativeHandle(ref, () => ({
     clear: () => {
@@ -50,12 +53,8 @@ const ClientSignatureCanvas: ForwardRefRenderFunction<SignatureCanvasRef, Client
       return "";
     },
   }));
-  // We're using a callback ref to properly handle the dynamic component
-  const setSignatureCanvasRef = (el: any) => {
-    sigCanvas.current = el;
-  };
 
-  return <SignatureCanvas canvasProps={canvasProps} penColor={penColor} ref={setSignatureCanvasRef} />;
+  return <SignatureCanvas canvasProps={canvasProps} penColor={penColor} ref={sigCanvas} />;
 };
 
 // Add display name for better debugging
