@@ -6,37 +6,14 @@ import { PDFViewer } from "@/components/common/pdf-viewer";
 import { getFromR2 } from "@/actions/r2";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
-} from "@/components/ui/card";
-import {
-  ArrowLeft,
-  CheckCircle,
-  Save,
-  Send,
-  AlertTriangle,
-  AlertCircle,
-} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { ArrowLeft, CheckCircle, Save, Send, AlertTriangle, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useRouter } from "next/navigation";
 import { PageNavigation } from "@/components/document/page-navigation";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import SignatureCanvasWrapper, {
-  SignatureCanvasRef,
-} from "./signature-canvas-wrapper";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import SignatureCanvasWrapper, { SignatureCanvasRef } from "./signature-canvas-wrapper";
 import { format } from "date-fns";
 import { completeDocumentSigning } from "@/actions/sign-document";
 import { getUserAgent } from "@/lib/client-info";
@@ -47,11 +24,6 @@ import { FieldErrorTooltip } from "@/components/document/field-error-tooltip";
 import { ValidationErrorsSummary } from "@/components/document/validation-errors-summary";
 import { FieldValidationError } from "@/types/validation";
 
-interface ValidationError {
-  fieldId: string;
-  message: string;
-}
-
 interface SignDocumentComponentProps {
   document: PrismaDocument & {
     fields?: any[];
@@ -61,11 +33,7 @@ interface SignDocumentComponentProps {
   fields: DocumentField[];
 }
 
-export function SignDocumentComponent({
-  document,
-  signer,
-  fields,
-}: SignDocumentComponentProps) {
+export function SignDocumentComponent({ document, signer, fields }: SignDocumentComponentProps) {
   const router = useRouter();
   const [pdfData, setPdfData] = useState<Uint8Array | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -83,6 +51,8 @@ export function SignDocumentComponent({
   const [isLastSigner, setIsLastSigner] = useState(false);
   const signatureRef = useRef<SignatureCanvasRef | null>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [isTextModalOpen, setIsTextModalOpen] = useState(false);
+  const [textInputValue, setTextInputValue] = useState("");
 
   // Fetch PDF data from R2
   useEffect(() => {
@@ -102,24 +72,16 @@ export function SignDocumentComponent({
             setPdfData(response.data.Body);
             setError(null);
           } else {
-            console.error(
-              "Failed to fetch PDF: Response successful but no body content.",
-            );
+            console.error("Failed to fetch PDF: Response successful but no body content.");
             setError("PDF content is missing in the response.");
           }
         } else {
-          console.error(
-            "Failed to fetch PDF:",
-            response.message,
-            response.error,
-          );
+          console.error("Failed to fetch PDF:", response.message, response.error);
           setError(response.message || "Failed to load PDF document.");
         }
       } catch (e) {
         console.error("Error fetching document:", e);
-        setError(
-          e instanceof Error ? e.message : "An unexpected error occurred.",
-        );
+        setError(e instanceof Error ? e.message : "An unexpected error occurred.");
       } finally {
         setIsLoading(false);
       }
@@ -146,9 +108,7 @@ export function SignDocumentComponent({
       return value !== undefined && value !== "";
     });
 
-    const percentage = Math.round(
-      (completedFields.length / requiredFields.length) * 100,
-    );
+    const percentage = Math.round((completedFields.length / requiredFields.length) * 100);
     setCompletionPercentage(percentage);
   }, [fields, fieldValues]);
 
@@ -157,15 +117,52 @@ export function SignDocumentComponent({
     const field = fields.find((f) => f.id === fieldId);
     if (!field) return;
 
-    switch (field.type) {
-      case "signature":
-      case "initial":
-        setActiveFieldId(fieldId);
-        setIsSignatureModalOpen(true);
-        break;
-      case "date":
-        handleFieldChange(fieldId, format(date || new Date(), "yyyy-MM-dd"));
-        break;
+    try {
+      switch (field.type) {
+        case "signature":
+        case "initial":
+          setActiveFieldId(fieldId);
+          setIsSignatureModalOpen(true);
+          break;
+        case "date":
+          handleFieldChange(fieldId, format(date || new Date(), "yyyy-MM-dd"));
+          break;
+        case "text":
+        case "email":
+        case "phone":
+        case "number":
+          setActiveFieldId(fieldId);
+          // Pre-fill field with existing value if available
+          const existingValue = fieldValues[fieldId] || "";
+          setTextInputValue(existingValue);
+          setIsTextModalOpen(true);
+          break;
+        case "checkbox":
+          // Toggle checkbox value
+          const currentValue = fieldValues[fieldId];
+          handleFieldChange(fieldId, currentValue === "true" ? "" : "true");
+          break;
+        case "dropdown":
+        case "radio":
+          // For dropdown and radio, focus on the side panel tab where users can select options
+          try {
+            if (window.innerWidth < 768) {
+              // On mobile, toggle the mobile field menu
+              const menuTrigger = window.document.getElementById("mobile-field-menu-trigger");
+              if (menuTrigger) {
+                menuTrigger.click();
+              } else {
+                console.warn("Mobile field menu trigger element not found");
+              }
+            }
+          } catch (error) {
+            console.error("Error interacting with field selector:", error);
+          }
+          break;
+      }
+    } catch (error) {
+      console.error(`Error handling field click for field ${fieldId}:`, error);
+      toast?.error?.("Failed to interact with the field. Please try again.");
     }
   };
 
@@ -298,16 +295,14 @@ export function SignDocumentComponent({
         document.id,
         signer.id,
         fieldValues,
-        { userAgent, ipAddress: "127.0.0.1" }, // In a real app, IP would be collected server-side
+        { userAgent, ipAddress: "127.0.0.1" } // In a real app, IP would be collected server-side
       );
 
       if (result.success) {
         toast.success(result.message || "Document signed successfully!");
 
         // Check if this was the last signer
-        const remainingSigners = document.signers.filter(
-          (s) => s.id !== signer.id && s.status !== "COMPLETED",
-        );
+        const remainingSigners = document.signers.filter((s) => s.id !== signer.id && s.status !== "COMPLETED");
         setIsLastSigner(remainingSigners.length === 0);
 
         // Close the confirmation dialog and show completion dialog
@@ -326,10 +321,7 @@ export function SignDocumentComponent({
         router.push(loginUrl);
       } else {
         // If there's a server validation error, update our field errors
-        if (
-          result?.validationErrors &&
-          Array.isArray(result.validationErrors)
-        ) {
+        if (result?.validationErrors && Array.isArray(result.validationErrors)) {
           setFieldErrors(result.validationErrors);
           // Scroll to the first field with an error
           if (result.validationErrors && result.validationErrors.length > 0) {
@@ -361,9 +353,7 @@ export function SignDocumentComponent({
             </div>
             Loading Document for Signing...
           </CardTitle>
-          <CardDescription>
-            Please wait while we prepare the document for your signature.
-          </CardDescription>
+          <CardDescription>Please wait while we prepare the document for your signature.</CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="flex flex-col justify-center items-center h-[60vh] space-y-4">
@@ -385,9 +375,7 @@ export function SignDocumentComponent({
             </div>
             Error Loading Document
           </CardTitle>
-          <CardDescription>
-            There was an issue retrieving the document.
-          </CardDescription>
+          <CardDescription>There was an issue retrieving the document.</CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="flex flex-col justify-center items-center h-96 text-destructive space-y-4">
@@ -402,11 +390,7 @@ export function SignDocumentComponent({
           </div>
         </CardContent>
         <CardFooter className="border-t p-4 flex justify-between">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push(`/documents/${document.id}`)}
-          >
+          <Button variant="outline" size="sm" onClick={() => router.push(`/documents/${document.id}`)}>
             <ArrowLeft className="size-4 mr-2" /> Back
           </Button>
         </CardFooter>
@@ -418,34 +402,25 @@ export function SignDocumentComponent({
     <div className="flex flex-col w-full">
       <div className="p-4 border-b flex items-center justify-between bg-background shadow-sm">
         <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            onClick={() => router.push(`/documents/${document.id}`)}
-          >
+          <Button variant="ghost" onClick={() => router.push(`/documents/${document.id}`)}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Document
           </Button>
 
-          <h1 className="text-lg font-medium hidden md:block">
-            {document.title || "Untitled Document"}
-          </h1>
+          <h1 className="text-lg font-medium hidden md:block">{document.title || "Untitled Document"}</h1>
         </div>
 
         <div className="flex items-center space-x-3">
           <div className="hidden md:block">
             <div className="flex items-center space-x-2">
               <Progress value={completionPercentage} className="w-40 h-2" />
-              <span className="text-sm text-muted-foreground">
-                {completionPercentage}%
-              </span>
+              <span className="text-sm text-muted-foreground">{completionPercentage}%</span>
             </div>
           </div>
           <Button
             onClick={() => {
               if (!validateFields()) {
-                toast.error(
-                  "Please complete all required fields before signing",
-                );
+                toast.error("Please complete all required fields before signing");
                 return;
               }
 
@@ -474,13 +449,7 @@ export function SignDocumentComponent({
         {/* Show validation errors summary if there are any */}
         {fieldErrors.length > 0 && (
           <div className="mb-4 sm:mb-6">
-            <ValidationErrorsSummary
-              errors={fieldErrors}
-              onFieldClickAction={handleFieldClick}
-              fieldLabels={Object.fromEntries(
-                fields.map((f) => [f.id, f.label || f.type]),
-              )}
-            />
+            <ValidationErrorsSummary errors={fieldErrors} onFieldClickAction={handleFieldClick} fieldLabels={Object.fromEntries(fields.map((f) => [f.id, f.label || f.type]))} />
           </div>
         )}
 
@@ -489,25 +458,14 @@ export function SignDocumentComponent({
           <div className="space-y-4 sm:space-y-6">
             <Card>
               <CardHeader className="py-3 sm:py-6">
-                <CardTitle className="text-base sm:text-lg">
-                  Signing Instructions
-                </CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
-                  Complete all required fields to sign this document
-                </CardDescription>
+                <CardTitle className="text-base sm:text-lg">Signing Instructions</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Complete all required fields to sign this document</CardDescription>
               </CardHeader>
               <CardContent className="py-2 px-3 sm:py-4 sm:px-6 space-y-3 sm:space-y-4">
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">
-                    Required fields: {fields.filter((f) => f.required).length}
-                  </p>
-                  <Progress
-                    value={completionPercentage}
-                    className="w-full h-2"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {completionPercentage}% complete
-                  </p>
+                  <p className="text-sm font-medium">Required fields: {fields.filter((f) => f.required).length}</p>
+                  <Progress value={completionPercentage} className="w-full h-2" />
+                  <p className="text-xs text-muted-foreground">{completionPercentage}% complete</p>
                 </div>
 
                 <div className="pt-2">
@@ -528,9 +486,7 @@ export function SignDocumentComponent({
               </CardHeader>
               <CardContent className="space-y-3">
                 {fields.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No fields assigned to you
-                  </p>
+                  <p className="text-sm text-muted-foreground">No fields assigned to you</p>
                 ) : (
                   fields.map((field) => {
                     const isCompleted = !!fieldValues[field.id];
@@ -540,54 +496,25 @@ export function SignDocumentComponent({
                           backgroundColor: `${field.color}10`,
                         }
                       : {};
-                    const fieldError = fieldErrors.find(
-                      (err) => err.fieldId === field.id,
-                    );
+                    const fieldError = fieldErrors.find((err) => err.fieldId === field.id);
                     return (
-                      <FieldErrorTooltip
-                        key={field.id}
-                        fieldId={field.id}
-                        fieldErrors={fieldErrors}
-                      >
+                      <FieldErrorTooltip key={field.id} fieldId={field.id} fieldErrors={fieldErrors}>
                         <div
                           className={`flex items-center justify-between p-1.5 sm:p-2 rounded border ${
-                            fieldError
-                              ? "border-destructive bg-destructive/5"
-                              : isCompleted
-                                ? "border-primary/40 bg-primary/5"
-                                : "border-border"
+                            fieldError ? "border-destructive bg-destructive/5" : isCompleted ? "border-primary/40 bg-primary/5" : "border-border"
                           } hover:bg-muted/50 active:bg-muted/70 cursor-pointer transition-colors`}
                           style={fieldError || isCompleted ? {} : fieldStyle}
                           onClick={() => handleFieldClick(field.id)}
                         >
                           <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                            {fieldError ? (
-                              <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-destructive" />
-                            ) : null}
-                            <span
-                              className={`text-xs font-medium truncate ${field.required ? "text-primary" : ""}`}
-                            >
+                            {fieldError ? <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-destructive" /> : null}
+                            <span className={`text-xs font-medium truncate ${field.required ? "text-primary" : ""}`}>
                               {field.label || field.type}
-                              {field.required && (
-                                <span className="text-primary">*</span>
-                              )}
+                              {field.required && <span className="text-primary">*</span>}
                             </span>
                           </div>
-                          <Badge
-                            variant={
-                              fieldError
-                                ? "destructive"
-                                : isCompleted
-                                  ? "default"
-                                  : "outline"
-                            }
-                            className="text-[9px] sm:text-[10px] whitespace-nowrap ml-1"
-                          >
-                            {fieldError
-                              ? "Error"
-                              : isCompleted
-                                ? "Completed"
-                                : "Pending"}
+                          <Badge variant={fieldError ? "destructive" : isCompleted ? "default" : "outline"} className="text-[9px] sm:text-[10px] whitespace-nowrap ml-1">
+                            {fieldError ? "Error" : isCompleted ? "Completed" : "Pending"}
                           </Badge>
                         </div>
                       </FieldErrorTooltip>
@@ -609,7 +536,6 @@ export function SignDocumentComponent({
                       fields={fields}
                       fieldValues={fieldValues}
                       highlightFields={true}
-                      currentSignerId={signer.id}
                       onPageChangeAction={async (page) => {
                         setCurrentPage(page);
                         return page;
@@ -639,16 +565,11 @@ export function SignDocumentComponent({
         </div>
       </div>
       {/* Signature Dialog */}
-      <Dialog
-        open={isSignatureModalOpen}
-        onOpenChange={setIsSignatureModalOpen}
-      >
+      <Dialog open={isSignatureModalOpen} onOpenChange={setIsSignatureModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Add your signature</DialogTitle>
-            <DialogDescription>
-              Please sign in the box below using your mouse or touch screen.
-            </DialogDescription>
+            <DialogDescription>Please sign in the box below using your mouse or touch screen.</DialogDescription>
           </DialogHeader>
           <div className="h-64 border border-border rounded-md">
             <SignatureCanvasWrapper
@@ -675,11 +596,7 @@ export function SignDocumentComponent({
       {/* Show completion dialog when signing is completed */}
       <Dialog open={signingCompleted} onOpenChange={setSigningCompleted}>
         <DialogContent className="sm:max-w-md">
-          <SigningCompletedDialog
-            documentId={document.id}
-            documentTitle={document.title || "Document"}
-            isLastSigner={isLastSigner}
-          />
+          <SigningCompletedDialog documentId={document.id} documentTitle={document.title || "Document"} isLastSigner={isLastSigner} />
         </DialogContent>
       </Dialog>
       {/* Signing confirmation dialog */}
