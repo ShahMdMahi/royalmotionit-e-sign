@@ -113,7 +113,7 @@ export function SingleDocumentComponent({
       case "CANCELED":
         return "outline";
       case "EXPIRED":
-        return "warning";
+        return "secondary"; // Changed from "warning" to "secondary" as "warning" is not a valid variant
       default:
         return "secondary";
     }
@@ -172,7 +172,7 @@ export function SingleDocumentComponent({
       </Card>
     );
   }
-  const handleDocumentSave = async (doc: Document) => {
+  const handleDocumentSave = async (doc: Document | any) => {
     setIsSaving(true);
     try {
       // Implement save functionality here
@@ -195,18 +195,23 @@ export function SingleDocumentComponent({
   return (
     <div className="flex flex-col w-full">
       <DocumentToolbar
-        document={
-          {
-            ...document,
-            type: document.type || "default",
-            signer:
-              document.signers && document.signers.length > 0
-                ? document.signers[0]
-                : undefined,
-          } as Document
-        }
+        document={{
+          ...document,
+          type: document.type || "default",
+          // Convert null values to undefined where needed
+          key: document.key || undefined,
+          // Add any required properties for PartialDocument
+          authorId: document.authorId || author.id,
+          authorName: author.name || undefined,
+          authorEmail: author.email || undefined,
+          // Add the signer separately as it's not part of PartialDocument interface
+          signer:
+            document.signers && document.signers.length > 0
+              ? document.signers[0]
+              : undefined,
+        }}
         isSaving={isSaving}
-        onSaveAction={handleDocumentSave}
+        onSaveAction={(doc) => handleDocumentSave(doc as Document)}
       />
       <Card className="w-full max-w-7xl mx-auto my-8 border-border card-hover shadow-lg">
         <CardHeader className="border-b border-border">

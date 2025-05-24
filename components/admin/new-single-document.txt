@@ -161,7 +161,7 @@ export function SingleDocumentComponent({ document, author }: SingleDocumentComp
     );
   }
 
-  const handleDocumentSave = async (doc: Document | PrismaDocument) => {
+  const handleDocumentSave = async (doc: Document | PrismaDocument): Promise<Document> => {
     setIsSaving(true);
     try {
       // Implement save functionality here
@@ -175,7 +175,7 @@ export function SingleDocumentComponent({ document, author }: SingleDocumentComp
         description: doc.description ?? undefined,
         authorId: doc.authorId,
         status: doc.status,
-        key: doc.key,
+        key: doc.key || "", // Ensure key is never null
         type: doc.type || "default",
         createdAt: doc.createdAt || new Date(),
         updatedAt: new Date(),
@@ -187,32 +187,33 @@ export function SingleDocumentComponent({ document, author }: SingleDocumentComp
         enableWatermark: doc.enableWatermark ?? undefined,
         watermarkText: doc.watermarkText ?? undefined,
         // Convert field types for proper typing
-        fields: doc.fields?.map((field: PrismaDocumentField) => ({
-          id: field.id,
-          documentId: field.documentId,
-          type: field.type as import("@/types/document").DocumentFieldType,
-          label: field.label,
-          required: field.required,
-          placeholder: field.placeholder ?? undefined,
-          x: field.x,
-          y: field.y,
-          width: field.width,
-          height: field.height,
-          pageNumber: field.pageNumber,
-          value: field.value ?? undefined,
-          signerId: field.signerId ?? undefined,
-          color: field.color ?? undefined,
-          fontFamily: field.fontFamily ?? undefined,
-          fontSize: field.fontSize ?? undefined,
-          validationRule: field.validationRule ?? undefined,
-          conditionalLogic: field.conditionalLogic ?? undefined,
-          options: field.options ?? undefined,
-          backgroundColor: field.backgroundColor ?? undefined,
-          borderColor: field.borderColor ?? undefined,
-          textColor: field.textColor ?? undefined,
-          createdAt: field.createdAt ?? undefined,
-          updatedAt: field.updatedAt ?? undefined,
-        })),
+        fields: ('fields' in doc && doc.fields) ? 
+          doc.fields.map((field: PrismaDocumentField) => ({
+            id: field.id,
+            documentId: field.documentId,
+            type: field.type as import("@/types/document").DocumentFieldType,
+            label: field.label,
+            required: field.required,
+            placeholder: field.placeholder ?? undefined,
+            x: field.x,
+            y: field.y,
+            width: field.width,
+            height: field.height,
+            pageNumber: field.pageNumber,
+            value: field.value ?? undefined,
+            signerId: field.signerId ?? undefined,
+            color: field.color ?? undefined,
+            fontFamily: field.fontFamily ?? undefined,
+            fontSize: field.fontSize ?? undefined,
+            validationRule: field.validationRule ?? undefined,
+            conditionalLogic: field.conditionalLogic ?? undefined,
+            options: field.options ?? undefined,
+            backgroundColor: field.backgroundColor ?? undefined,
+            borderColor: field.borderColor ?? undefined,
+            textColor: field.textColor ?? undefined,
+            createdAt: field.createdAt || new Date(),
+            updatedAt: field.updatedAt || new Date(),
+          })) : [],
       };
     } catch (error) {
       console.error("Error saving document:", error);
@@ -262,8 +263,8 @@ export function SingleDocumentComponent({ document, author }: SingleDocumentComp
             backgroundColor: field.backgroundColor ?? undefined,
             borderColor: field.borderColor ?? undefined,
             textColor: field.textColor ?? undefined,
-            createdAt: field.createdAt ?? undefined,
-            updatedAt: field.updatedAt ?? undefined,
+            createdAt: field.createdAt || new Date(),
+            updatedAt: field.updatedAt || new Date(),
           })),
           signers:
             document.signers?.map((signer) => ({
