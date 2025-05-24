@@ -16,6 +16,7 @@ import {
   useSensor,
   useSensors,
   MeasuringStrategy,
+  DragEndEvent,
 } from "@dnd-kit/core";
 import {
   handleFieldUpdate,
@@ -43,8 +44,8 @@ interface PDFEditViewerProps {
   onFieldDeleteAction?: typeof handleFieldDelete;
   selectedFieldId?: string;
   onFieldSelectAction?: typeof handleFieldSelect;
-  onFieldDragEnd?: (id: string, x: number, y: number) => Promise<any>;
-  onFieldResize?: (id: string, width: number, height: number) => Promise<any>;
+  onFieldDragEnd?: (id: string, x: number, y: number) => Promise<void>;
+  onFieldResize?: (id: string, width: number, height: number) => Promise<void>;
 }
 
 export function PDFEditViewer({
@@ -63,6 +64,7 @@ export function PDFEditViewer({
   const [viewerLoaded, setViewerLoaded] = useState(false);
   // Properties are handled elsewhere
   const [viewerScale, setViewerScale] = useState(1);
+  const [viewerDimensions, setViewerDimensions] = useState({ width: 0, height: 0 });
   const viewerContainerRef = useRef<HTMLDivElement>(null);
 
   // Page navigation plugin with custom configuration for single page view
@@ -220,10 +222,9 @@ export function PDFEditViewer({
 
   // Don't use grid snapping for now as it can cause positioning issues
   // We'll just use the grid for visual reference
-
   // Handler for when drag operations end - absolutely ensures exact positioning
   const handleDragEnd = useCallback(
-    (event: any) => {
+    (event: DragEndEvent) => {
       const { active, delta } = event;
       if (active) {
         const id = active.id;
@@ -239,7 +240,7 @@ export function PDFEditViewer({
           const newY = field.y + deltaY;
 
           // Apply the update without delay for immediate response
-          handleFieldDragEnd(id, newX, newY);
+          handleFieldDragEnd(String(id), newX, newY);
 
           // Make sure field stays selected
           if (onFieldSelectAction) {

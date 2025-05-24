@@ -130,11 +130,6 @@ export function DocumentAttachments({
   // Define specific types for the API response
   type UrlResponse = { url: string };
   type DataUrlResponse = { data: { url: string } };
-  type SuccessResponse = { success: boolean; message?: string } & (
-    | UrlResponse
-    | DataUrlResponse
-    | object
-  );
 
   const handleDownload = async (attachmentId: string) => {
     try {

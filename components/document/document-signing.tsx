@@ -43,7 +43,8 @@ export function DocumentSigning({
   const router = useRouter(); // These are just wrappers for the imported server actions
 
   // This function is used by the SigningFieldsTab component
-  const navigateToField = async (page: number) => {
+  // Prefixed with underscore to indicate it's defined for future use
+  const _navigateToField = async (page: number) => {
     setCurrentPage(page);
     await handleNavigateToField(page);
     return page;
