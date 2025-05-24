@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { DocumentField } from "@/types/document";
-import { DndContext, PointerSensor, useSensor, useSensors, MeasuringStrategy } from "@dnd-kit/core";
+import { DndContext, PointerSensor, useSensor, useSensors, MeasuringStrategy, DragEndEvent } from "@dnd-kit/core";
 import { handleFieldUpdate, handleFieldDelete, handleFieldSelect, handleEditPageChange, handleEditTotalPagesChange } from "@/actions/pdf-edit-actions";
 import { ResizableField } from "./resizable-field";
 import { preparePdfData } from "@/utils/pdf-utils";
@@ -48,10 +48,13 @@ export function PDFEditViewerSimple({
   const { isLoaded: workerLoaded, error: workerError } = usePdfWorker();
 
   // Function to snap a value to the nearest grid line
-  const snapToGridValue = (value: number): number => {
-    if (!snapToGrid) return value;
-    return Math.round(value / gridSize) * gridSize;
-  };
+  const snapToGridValue = useCallback(
+    (value: number): number => {
+      if (!snapToGrid) return value;
+      return Math.round(value / gridSize) * gridSize;
+    },
+    [snapToGrid, gridSize]
+  );
 
   // Function to calculate scale factor for field positioning based on rendered page size
   const calculateScaleFactor = useCallback(() => {
@@ -313,10 +316,10 @@ export function PDFEditViewerSimple({
 
   // Handler for when drag operations end with optional grid snapping
   const handleDragEnd = useCallback(
-    (event: any) => {
+    (event: DragEndEvent) => {
       const { active, delta } = event;
       if (active) {
-        const id = active.id;
+        const id = active.id as string;
         const field = fields.find((f) => f.id === id);
 
         if (field) {
@@ -350,7 +353,7 @@ export function PDFEditViewerSimple({
         }
       }
     },
-    [fields, calculateScaleFactor, handleFieldDragEnd, onFieldSelectAction, snapToGrid]
+    [fields, calculateScaleFactor, handleFieldDragEnd, onFieldSelectAction, snapToGrid, snapToGridValue]
   );
   // Helper to increment zoom level
   const zoomIn = () => {
