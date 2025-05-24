@@ -12,7 +12,7 @@ import { FileText, AlertTriangle, ArrowLeft, Info, Clock, Check, Shield, Hash, U
 import Link from "next/link";
 import { DocumentToolbar } from "../document/document-toolbar";
 import { toast } from "sonner";
-import { DocumentField, Document as DocumentType } from "@/types/document";
+import { Document as DocumentType } from "@/types/document";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
