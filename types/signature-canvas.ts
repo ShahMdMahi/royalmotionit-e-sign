@@ -14,7 +14,8 @@ declare module "react-signature-canvas" {
     maxWidth?: number;
     throttle?: number;
     velocityFilterWeight?: number;
-    ref?: React.Ref<any>;
+    readOnly?: boolean;
+    onEnd?: () => void;
   }
 
   export interface SignatureCanvasMethods {
@@ -26,12 +27,10 @@ declare module "react-signature-canvas" {
     fromData: (data: any) => void;
     on: () => void;
     off: () => void;
+    getCanvas: () => HTMLCanvasElement;
   }
 
-  class SignatureCanvas
-    extends React.Component<SignatureCanvasProps, any>
-    implements SignatureCanvasMethods
-  {
+  export default class SignatureCanvas extends React.Component<SignatureCanvasProps> {
     clear(): void;
     isEmpty(): boolean;
     toDataURL(type?: string, encoderOptions?: number): string;
@@ -40,7 +39,6 @@ declare module "react-signature-canvas" {
     fromData(data: any): void;
     on(): void;
     off(): void;
+    getCanvas(): HTMLCanvasElement;
   }
-
-  export default SignatureCanvas;
 }

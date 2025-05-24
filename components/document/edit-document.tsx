@@ -339,11 +339,11 @@ export function EditDocument({
               }}
               onFieldDragEnd={(id, x, y) => {
                 handleFieldPosition(id, x, y);
-                return Promise.resolve({ id, x, y });
+                return Promise.resolve();
               }}
               onFieldResize={(id, width, height) => {
                 handleFieldDimensionChange(id, width, height);
-                return Promise.resolve({ id, width, height });
+                return Promise.resolve();
               }}
               selectedFieldId={selectedFieldId || undefined}
               onFieldSelectAction={(field) => {

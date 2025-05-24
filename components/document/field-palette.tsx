@@ -118,7 +118,7 @@ export function FieldPalette({
     },
   ];
   const handleAddField = async (fieldType: DocumentFieldType) => {
-    await onAddFieldAction(fieldType);
+    await onAddFieldAction(fieldType, currentPage);
   };
 
   return (
@@ -136,7 +136,7 @@ export function FieldPalette({
                 key={field.type}
                 variant="outline"
                 className="flex flex-col items-center justify-center h-20 p-2 hover:bg-accent"
-                onClick={() => handleAddField(field.type, currentPage)}
+                onClick={() => handleAddField(field.type)}
                 title={field.description}
               >
                 {field.icon}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import SignatureCanvas from "react-signature-canvas";
+import SignatureCanvasLib from "react-signature-canvas";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -57,7 +57,7 @@ export function SignatureCapture({
   const [selectedFont, setSelectedFont] = useState("Homemade Apple");
   const [isEmpty, setIsEmpty] = useState(true);
 
-  const signatureRef = useRef<SignatureCanvas>(null);
+  const signatureRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // State for responsive canvas dimensions
@@ -121,14 +121,15 @@ export function SignatureCapture({
   }, [mode]);
 
   // Handle drawn signature changes
-  const handleDrawEnd = async () => {
+  const handleDrawEnd = () => {
     if (signatureRef.current) {
       const isEmpty = signatureRef.current.isEmpty();
       setIsEmpty(isEmpty);
 
       if (!isEmpty) {
         const dataURL = signatureRef.current.toDataURL();
-        await onChangeAction(dataURL);
+        // Asynchronously call the action without awaiting
+        onChangeAction(dataURL);
       }
     }
   };
@@ -272,7 +273,7 @@ export function SignatureCapture({
         <TabsContent value="draw" className="w-full">
           <div className="border rounded-md bg-background">
             <div className="w-full flex justify-center">
-              <SignatureCanvas
+              <SignatureCanvasLib
                 ref={signatureRef}
                 penColor="black"
                 canvasProps={{

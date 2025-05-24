@@ -38,17 +38,7 @@ export function ResizableField({
     id: field.id,
     data: {
       field,
-    },
-    // Add onDragEnd callback to handle position update
-    onDragEnd: ({ delta }) => {
-      if (delta.x !== 0 || delta.y !== 0) {
-        // Calculate the new position based on the delta
-        const newX = Number(field.x) + delta.x / viewerScale;
-        const newY = Number(field.y) + delta.y / viewerScale;
-        // Call the provided callback with the new position
-        onDragEndAction(newX, newY);
-      }
-    },
+    }
   });
 
   // Store the field's original position when drag starts with precise values
@@ -65,6 +55,21 @@ export function ResizableField({
       current: { x: Number(field.x), y: Number(field.y) },
     };
   }, [field.x, field.y]);
+  
+  // Handle transform changes to update position when dragging ends
+  useEffect(() => {
+    if (transform && (transform.x !== 0 || transform.y !== 0)) {
+      return () => {
+        // This cleanup function will run when the transform changes or component unmounts
+        // If we have a non-zero transform, it means dragging has occurred
+        if (transform.x !== 0 || transform.y !== 0) {
+          const newX = Number(field.x) + transform.x / viewerScale;
+          const newY = Number(field.y) + transform.y / viewerScale;
+          onDragEndAction(newX, newY);
+        }
+      };
+    }
+  }, [transform, field.x, field.y, viewerScale, onDragEndAction]);
 
   // Handle mouse events for resizing using useCallback to ensure stable function references
   const handleResizeStart = useCallback(
