@@ -1,6 +1,6 @@
 "use client";
 
-import { User, DocumentField, DocumentType } from "@prisma/client";
+import { User, DocumentField } from "@prisma/client";
 import { Document as PrismaDocument } from "@prisma/client";
 import { Document } from "@/types/document";
 import { getFromR2 } from "@/actions/r2";
