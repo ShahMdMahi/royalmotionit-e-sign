@@ -8,16 +8,53 @@ import { PDFViewer } from "../common/pdf-viewer";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { FileText, AlertTriangle, ArrowLeft, Info, Clock, Check, Shield, Hash, User as UserIcon, Calendar } from "lucide-react";
+import { FileText, AlertTriangle, ArrowLeft, Info, Clock, Check, Shield, Hash, User as UserIcon, Calendar, Save } from "lucide-react";
 import Link from "next/link";
 import { DocumentToolbar } from "../document/document-toolbar";
 import { toast } from "sonner";
-import { Document as DocumentType } from "@/types/document";
+import { DocumentField, Document as DocumentType } from "@/types/document";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDate } from "@/lib/utils";
+
+interface SaveDocumentInput {
+  id: string;
+  title: string;
+  description?: string;
+  authorId: string;
+  authorName?: string;
+  authorEmail?: string;
+  status: "DRAFT" | "PENDING" | "COMPLETED" | "EXPIRED" | "DECLINED" | "CANCELED";
+  key?: string;
+  type?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  preparedAt?: Date;
+  sentAt?: Date;
+  signedAt?: Date;
+  expiresAt?: Date;
+  enableWatermark?: boolean;
+  watermarkText?: string;
+  fields?: DocumentField[];
+  signer?: {
+    id: string;
+    documentId?: string;
+    email: string;
+    name?: string;
+    role?: string;
+    status?: "PENDING" | "COMPLETED" | "DECLINED" | "VIEWED";
+    accessCode?: string;
+    invitedAt?: Date;
+    viewedAt?: Date;
+    completedAt?: Date;
+    notifiedAt?: Date;
+    declinedAt?: Date;
+    declineReason?: string;
+    color?: string;
+  };
+}
 
 interface SingleDocumentComponentProps {
   document: PrismaDocument & {
@@ -91,7 +128,7 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
   };
 
   // Handle document actions
-  const handleDocumentSave = async (inputDoc: any) => {
+  const handleDocumentSave = async (inputDoc: DocumentType) => {
     setIsSaving(true);
     try {
       // Here you would normally implement save functionality
@@ -100,42 +137,11 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
 
       // Return a properly formatted Document type
       const savedDoc: DocumentType = {
-        id: inputDoc.id,
-        title: inputDoc.title,
-        description: inputDoc.description,
-        authorId: inputDoc.authorId,
-        authorName: inputDoc.authorName,
-        authorEmail: inputDoc.authorEmail,
-        status: inputDoc.status,
+        ...inputDoc,
+        description: inputDoc.description ?? undefined,
         key: inputDoc.key || "",
         type: inputDoc.type || "default",
-        createdAt: inputDoc.createdAt || new Date(),
         updatedAt: new Date(),
-        preparedAt: inputDoc.preparedAt,
-        sentAt: inputDoc.sentAt,
-        signedAt: inputDoc.signedAt,
-        expiresAt: inputDoc.expiresAt,
-        enableWatermark: inputDoc.enableWatermark,
-        watermarkText: inputDoc.watermarkText,
-        fields: inputDoc.fields,
-        signer: inputDoc.signer
-          ? {
-              id: inputDoc.signer.id,
-              documentId: inputDoc.signer.documentId || inputDoc.id,
-              email: inputDoc.signer.email,
-              name: inputDoc.signer.name,
-              role: inputDoc.signer.role,
-              status: inputDoc.signer.status || "PENDING",
-              accessCode: inputDoc.signer.accessCode,
-              invitedAt: inputDoc.signer.invitedAt,
-              viewedAt: inputDoc.signer.viewedAt,
-              completedAt: inputDoc.signer.completedAt,
-              notifiedAt: inputDoc.signer.notifiedAt,
-              declinedAt: inputDoc.signer.declinedAt,
-              declineReason: inputDoc.signer.declineReason,
-              color: inputDoc.signer.color,
-            }
-          : undefined,
       };
 
       return savedDoc;
@@ -247,7 +253,14 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
           } as DocumentType
         }
         isSaving={isSaving}
-        onSaveAction={handleDocumentSave}
+        onSaveAction={async (inputDoc) => {
+          // Ensure description is never null
+          const safeDoc = {
+            ...inputDoc,
+            description: inputDoc.description ?? undefined,
+          };
+          return handleDocumentSave(safeDoc as DocumentType);
+        }}
       />
 
       <Card className="w-full max-w-7xl mx-auto my-6 border-border shadow-lg">
