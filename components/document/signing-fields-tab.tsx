@@ -78,11 +78,6 @@ export function SigningFieldsTab({
   const renderField = (field: DocumentField) => {
     const fieldValue = fieldValues[field.id] || "";
     const error = validationErrors[field.id];
-    const navigateToFieldPage = () => {
-      if (field.pageNumber !== currentPage) {
-        handleNavigate(field.pageNumber);
-      }
-    };
 
     switch (field.type) {
       case "signature":

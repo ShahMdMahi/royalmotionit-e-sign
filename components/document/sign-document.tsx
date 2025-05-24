@@ -50,9 +50,7 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
   const [signingCompleted, setSigningCompleted] = useState(false);
   const [isLastSigner, setIsLastSigner] = useState(false);
   const signatureRef = useRef<SignatureCanvasRef | null>(null);
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [isTextModalOpen, setIsTextModalOpen] = useState(false);
-  const [textInputValue, setTextInputValue] = useState("");
+  const [date] = useState<Date | undefined>(new Date());
 
   // Fetch PDF data from R2
   useEffect(() => {
@@ -132,10 +130,7 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
         case "phone":
         case "number":
           setActiveFieldId(fieldId);
-          // Pre-fill field with existing value if available
-          const existingValue = fieldValues[fieldId] || "";
-          setTextInputValue(existingValue);
-          setIsTextModalOpen(true);
+          // For text-based fields, handle directly (implementation moved to side panel)
           break;
         case "checkbox":
           // Toggle checkbox value
