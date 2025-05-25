@@ -285,29 +285,25 @@ export async function completeDocumentSigning(
   signerEmail?: string;
 }> {
   try {
-    // Performance optimization: Run authentication and database queries in parallel
-    const queryStart = Date.now();
-    
-    const [session, document, documentFields] = await Promise.all([
-      auth(), // Get authentication session
-      prisma.document.findFirst({
-        where: { id: documentId },
-        include: { 
-          signers: true,
-          author: {
-            select: { name: true, email: true }
-          }
+    // Get current user - note we don't require authentication for signing
+    // as the signing URL may be used by unauthenticated users
+    const session = await auth();
+    // We check valid signer access via token instead of requiring login
+
+    // Get the document with fields and signer
+    const document = await prisma.document.findFirst({
+      where: {
+        id: documentId,
+      },
+      include: {
+        fields: {
+          where: {
+            signerId,
+          },
         },
-      }),
-      prisma.documentField.findMany({
-        where: { 
-          documentId,
-          signerId 
-        },
-      }),
-    ]);
-    
-    console.log(`Parallel database queries completed in ${Date.now() - queryStart}ms`);
+        signers: true,
+      },
+    });
 
     if (!document) {
       return {
@@ -324,15 +320,6 @@ export async function completeDocumentSigning(
         message: "Signer not found",
       };
     }
-
-    // Create a typed document object with fields for compatibility
-    const documentWithFields = {
-      ...document,
-      fields: documentFields,
-    };
-
-    // Extract author info for later use
-    const documentAuthor = document.author;
 
     // Check if user is authenticated and is authorized to sign
     if (!session || !session.user) {
@@ -360,39 +347,29 @@ export async function completeDocumentSigning(
       };
     }
 
-    // Send notification to document author - moved to background for better performance
-    setImmediate(async () => {
-      try {
-        // Use pre-fetched document author information (no additional DB query needed)
-        if (documentAuthor && documentAuthor.email) {
-          await sendDocumentSignedNotification(
-            documentAuthor.name || "Document Owner",
-            documentAuthor.email,
-            document.title || "Untitled Document",
-            document.id,
-            session?.user?.name ?? signer.name ?? "Signer",
-            session?.user?.email ?? signer.email ?? "",
-          );
-        }
-      } catch (error) {
-        console.error("Error sending notification to document author:", error);
-        // Non-fatal error, continue with the process
-      }
+    // Update signer status with client info if available and ensure userId is connected
+    await prisma.signer.update({
+      where: {
+        id: signerId,
+      },
+      data: {
+        status: "COMPLETED",
+        completedAt: new Date(),
+        ipAddress: clientInfo?.ipAddress || "127.0.0.1",
+        userAgent: clientInfo?.userAgent || "Unknown",
+        // Ensure the userId is set when completing the signature
+        userId: session.user.id,
+      },
     });
-
     // Import the enhanced field validator
     const { validateAllFields } = await import("@/utils/field-validator");
 
-    console.log("Field values received from client:", fieldValues);
-
     // Prepare fields with their entered values for validation
-    const fieldsToValidate = documentWithFields.fields.map((field: any) => {
+    const fieldsToValidate = document.fields.map((field) => {
       if (field.signerId === signerId) {
-        const finalValue = fieldValues[field.id] !== undefined ? fieldValues[field.id] : field.value || "";
-        console.log(`Field ${field.id} (${field.label}): client value = "${fieldValues[field.id]}", db value = "${field.value}", final value = "${finalValue}"`);
         return {
           ...field,
-          value: finalValue,
+          value: fieldValues[field.id] || field.value || "",
           // Ensure type is a valid DocumentFieldType
           type: field.type as DocumentFieldType,
         };
@@ -423,15 +400,12 @@ export async function completeDocumentSigning(
         error: errorMessages.join(" "), // Convert array to string for the error property
         validationErrors,
       };
-    }
-
-    // Batch update all field values for better performance
-    const fieldUpdates = [];
+    } // Update field values with validation
     const validationErrors: FieldValidationError[] = [];
 
     for (const fieldId in fieldValues) {
       // Make sure the field belongs to the document and signer
-      const field = documentWithFields.fields.find((f: any) => f.id === fieldId);
+      const field = document.fields.find((f) => f.id === fieldId);
       if (field) {
         let value = fieldValues[fieldId];
 
@@ -446,12 +420,11 @@ export async function completeDocumentSigning(
           });
           continue; // Skip this field as it failed validation
         }
-
         // Process conditional logic if present
         if (field.conditionalLogic) {
           try {
             const logic = JSON.parse(field.conditionalLogic);
-            const typedFields = convertToDocumentFields(documentWithFields.fields);
+            const typedFields = convertToDocumentFields(document.fields);
             // Execute conditional logic
             handleConditionalLogic(logic, field.id, value, typedFields);
           } catch (error) {
@@ -478,12 +451,43 @@ export async function completeDocumentSigning(
             // Keep original if parsing fails
           }
         }
+        // Update the field value
+        await prisma.documentField.update({
+          where: {
+            id: fieldId,
+          },
+          data: {
+            value,
+          },
+        }); // After updating a field, evaluate any formula fields that might depend on it
+        const formulaFields = document.fields.filter(
+          (f) => f.type === "formula" && f.validationRule,
+        );
+        for (const formulaField of formulaFields) {
+          if (formulaField.validationRule) {
+            // Create a properly typed array of fields for formula evaluation
+            const updatedFields = document.fields.map((f) => {
+              // If this is the field we just updated, use the new value
+              if (f.id === field.id) {
+                const updatedField = { ...f, value };
+                return convertToDocumentField(updatedField);
+              }
+              // Otherwise use the original field
+              return convertToDocumentField(f);
+            });
 
-        // Add to batch update
-        fieldUpdates.push({
-          where: { id: fieldId },
-          data: { value },
-        });
+            const newValue = evaluateFormula(
+              formulaField.validationRule,
+              updatedFields,
+            );
+
+            // Update the formula field value
+            await prisma.documentField.update({
+              where: { id: formulaField.id },
+              data: { value: newValue },
+            });
+          }
+        }
       }
     }
 
@@ -496,135 +500,115 @@ export async function completeDocumentSigning(
       };
     }
 
-    // Perform batch update of all fields using transaction for better performance
-    if (fieldUpdates.length > 0) {
-      console.log(`Batch updating ${fieldUpdates.length} fields`);
-      const startTime = Date.now();
-      
-      // Use a single transaction to update fields, signer status, and document status
-      // This reduces database round trips and improves consistency
-      await prisma.$transaction([
-        // Update all field values
-        ...fieldUpdates.map(update => 
-          prisma.documentField.update(update)
-        ),
-        // Update signer status
-        prisma.signer.update({
-          where: { id: signerId },
-          data: {
-            status: "COMPLETED",
-            completedAt: new Date(),
-            ipAddress: clientInfo?.ipAddress || "127.0.0.1",
-            userAgent: clientInfo?.userAgent || "Unknown",
-            userId: session.user.id,
-          },
+    // Add document history entry with detailed tracking
+    await prisma.documentHistory.create({
+      data: {
+        documentId,
+        action: "SIGNED",
+        actorEmail: session?.user?.email ?? signer.email ?? undefined,
+        actorName: session?.user?.name ?? signer.name ?? undefined,
+        actorRole: "SIGNER",
+        ipAddress: clientInfo?.ipAddress,
+        userAgent: clientInfo?.userAgent,
+        details: JSON.stringify({
+          timeCompleted: new Date().toISOString(),
+          fieldsCompleted: Object.keys(fieldValues).length,
+          // Add other relevant metadata
         }),
-        // Update document status
-        prisma.document.update({
-          where: { id: documentId },
-          data: {
-            status: "COMPLETED",
-            signedAt: new Date(),
-          },
-        }),
-      ]);
-      
-      console.log(`Combined field, signer, and document updates completed in ${Date.now() - startTime}ms`);
-    } else {
-      // If no field updates, still update signer and document status in a transaction
-      console.log(`Updating signer and document status for ${documentId}`);
-      const statusUpdateStart = Date.now();
-      
-      await prisma.$transaction([
-        prisma.signer.update({
-          where: { id: signerId },
-          data: {
-            status: "COMPLETED",
-            completedAt: new Date(),
-            ipAddress: clientInfo?.ipAddress || "127.0.0.1",
-            userAgent: clientInfo?.userAgent || "Unknown",
-            userId: session.user.id,
-          },
-        }),
-        prisma.document.update({
-          where: { id: documentId },
-          data: {
-            status: "COMPLETED",
-            signedAt: new Date(),
-          },
-        }),
-      ]);
-      
-      console.log(`Signer and document status updates completed in ${Date.now() - statusUpdateStart}ms`);
+      },
+    });
+
+    // Send notification to document author
+    try {
+      // Get document author information
+      const documentAuthor = await prisma.user.findUnique({
+        where: { id: document.authorId },
+        select: { name: true, email: true },
+      });
+
+      // Send email notification to document author
+      if (documentAuthor && documentAuthor.email) {
+        await sendDocumentSignedNotification(
+          documentAuthor.name || "Document Owner",
+          documentAuthor.email,
+          document.title || "Untitled Document",
+          document.id,
+          session?.user?.name ?? signer.name ?? "Signer",
+          session?.user?.email ?? signer.email ?? "",
+        );
+      }
+    } catch (error) {
+      console.error("Error sending notification to document author:", error);
+      // Non-fatal error, continue with the process
     }
 
-    // Add document history entry with detailed tracking
-    // Move to background for better performance
-    setImmediate(async () => {
-      try {
-        await prisma.documentHistory.create({
+    // With single signer model, we always generate the final PDF when the signer completes
+    // since there's only one signer
+    try {
+      // Generate final PDF with all signatures and fields
+      // Generate final PDF with all signatures and fields
+      const result = await generateFinalPDF(documentId);
+
+      if (result.success) {
+        // The generateFinalPDF function already updates the document status to COMPLETED
+        // and handles history recording, so we don't need to duplicate that here
+
+        // Send completion notification to document author
+        try {
+          // Get document author information
+          const documentAuthor = await prisma.user.findUnique({
+            where: { id: document.authorId },
+            select: { name: true, email: true },
+          });
+
+          // Send email notification to document author about completion
+          if (documentAuthor && documentAuthor.email) {
+            await sendDocumentSignedNotification(
+              documentAuthor.name || "Document Owner",
+              documentAuthor.email,
+              document.title || "Untitled Document",
+              document.id,
+              session?.user?.name ?? signer.name ?? "Signer",
+              session?.user?.email ?? signer.email ?? "",
+            );
+          }
+        } catch (error) {
+          console.error(
+            "Error sending completion notification to document author:",
+            error,
+          );
+          // Non-fatal error, continue with the process
+        }
+
+        console.log(`Document ${documentId} fully signed and completed.`);
+      } else {
+        console.error("Error generating final PDF:", result.message);
+
+        // If PDF generation fails, still update document status manually
+        await prisma.document.update({
+          where: {
+            id: documentId,
+          },
           data: {
-            documentId,
-            action: "SIGNED",
-            actorEmail: session?.user?.email ?? signer.email ?? undefined,
-            actorName: session?.user?.name ?? signer.name ?? undefined,
-            actorRole: "SIGNER",
-            ipAddress: clientInfo?.ipAddress,
-            userAgent: clientInfo?.userAgent,
-            details: JSON.stringify({
-              timeCompleted: new Date().toISOString(),
-              fieldsCompleted: Object.keys(fieldValues).length,
-              // Add other relevant metadata
-            }),
+            status: "COMPLETED",
+            signedAt: new Date(),
           },
         });
-      } catch (error) {
-        console.error("Error creating document history entry:", error);
       }
-    });
+    } catch (error) {
+      console.error("Error in final document processing:", error);
 
-    // Send notification to document author - moved to background for better performance
-    setImmediate(async () => {
-      try {
-        // Use pre-fetched document author information (no additional DB query needed)
-        if (documentAuthor && documentAuthor.email) {
-          await sendDocumentSignedNotification(
-            documentAuthor.name || "Document Owner",
-            documentAuthor.email,
-            document.title || "Untitled Document",
-            document.id,
-            session?.user?.name ?? signer.name ?? "Signer",
-            session?.user?.email ?? signer.email ?? "",
-          );
-        }
-      } catch (error) {
-        console.error("Error sending notification to document author:", error);
-        // Non-fatal error, continue with the process
-      }
-    });
-
-    // Process PDF generation asynchronously for better performance
-    setImmediate(async () => {
-      try {
-        console.log(`Starting background PDF generation for document ${documentId}`);
-        const pdfStart = Date.now();
-        
-        // Generate final PDF with all signatures and fields
-        const result = await generateFinalPDF(documentId);
-
-        console.log(`PDF generation completed in ${Date.now() - pdfStart}ms`);
-
-        if (result.success) {
-          console.log(`Document ${documentId} PDF generated successfully: ${result.url}`);
-        } else {
-          console.error(`PDF generation failed for document ${documentId}:`, result.message);
-        }
-
-        console.log(`Background processing completed for document ${documentId}`);
-      } catch (error) {
-        console.error(`Error in background document processing for ${documentId}:`, error);
-      }
-    });
+      // Even if there's an error generating the PDF, still update the document status
+      await prisma.document.update({
+        where: {
+          id: documentId,
+        },
+        data: {
+          status: "COMPLETED",
+          signedAt: new Date(),
+        },
+      });
+    }
     // Revalidate paths
     revalidatePath(`/documents/${documentId}`);
     revalidatePath(`/documents`);

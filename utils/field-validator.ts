@@ -15,11 +15,8 @@ export function validateDocumentField(field: DocumentField): {
 } {
   const errors: FieldValidationError[] = [];
 
-  console.log(`Validating field ${field.id} (${field.label}): value = "${field.value}", type = ${typeof field.value}, required = ${field.required}`);
-
   // Required field validation
-  if (field.required && (!field.value || field.value === null || (typeof field.value === 'string' && field.value.trim() === ""))) {
-    console.log(`Field ${field.id} failed required validation`);
+  if (field.required && (!field.value || (typeof field.value === 'string' && field.value.trim() === ""))) {
     errors.push({
       fieldId: field.id,
       code: "required",
@@ -31,8 +28,7 @@ export function validateDocumentField(field: DocumentField): {
   }
 
   // If field is not required and has no value, it's valid
-  if (!field.value || field.value === null || (typeof field.value === 'string' && field.value.trim() === "")) {
-    console.log(`Field ${field.id} is empty but not required, marking as valid`);
+  if (!field.value || (typeof field.value === 'string' && field.value.trim() === "")) {
     return { valid: true, errors: [] };
   }
 

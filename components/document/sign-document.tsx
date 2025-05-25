@@ -186,6 +186,7 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
           sessionStorage.setItem(`signing-backup-${document.id}`, JSON.stringify(backupData));
           toast.success("Progress saved");
         } catch (error) {
+          console.log("Error while saving progress", error);
           toast.error("Failed to save progress");
         }
       }
@@ -261,14 +262,9 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
   // Handle field value changes with auto-save
   const handleFieldChange = useCallback(
     (fieldId: string, value: string) => {
-      // Ensure value is always a string, never null or undefined
-      const cleanValue = (value && typeof value === 'string') ? value : "";
-      
-      console.log(`Field change: ${fieldId} = "${cleanValue}" (type: ${typeof cleanValue})`);
-      
       setFieldValues((prev) => ({
         ...prev,
-        [fieldId]: cleanValue,
+        [fieldId]: value,
       }));
 
       // Remove validation error for the field if it exists
@@ -285,7 +281,7 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
           const backupData = {
             documentId: document.id,
             signerId: signer.id,
-            fieldValues: { ...fieldValues, [fieldId]: cleanValue },
+            fieldValues: { ...fieldValues, [fieldId]: value },
             timestamp: new Date().toISOString(),
           };
           sessionStorage.setItem(`signing-backup-${document.id}`, JSON.stringify(backupData));
@@ -530,37 +526,6 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
       return;
     }
 
-    // Debug: Log what we're about to send to the server
-    console.log('=== SIGNING DEBUG INFO ===');
-    console.log('Document ID:', document.id);
-    console.log('Signer ID:', signer.id);
-    console.log('Field Values BEFORE cleaning:', fieldValues);
-    
-    // AGGRESSIVE NULL CLEANUP: Ensure absolutely no null values are sent to server
-    const cleanedFieldValues: Record<string, string> = {};
-    fields.forEach(field => {
-      const rawValue = fieldValues[field.id];
-      // Convert any null, undefined, or non-string values to empty strings
-      cleanedFieldValues[field.id] = (rawValue && typeof rawValue === 'string') ? rawValue : "";
-    });
-    
-    console.log('Field Values AFTER cleaning:', cleanedFieldValues);
-    console.log('Field Values JSON:', JSON.stringify(cleanedFieldValues, null, 2));
-    
-    // Double-check that all required fields have values
-    const requiredFieldsCheck = fields.filter(f => f.required);
-    console.log('Required fields check:');
-    requiredFieldsCheck.forEach(field => {
-      const value = cleanedFieldValues[field.id];
-      console.log(`  ${field.label || field.type} (${field.id}):`, {
-        value,
-        type: typeof value,
-        isEmpty: !value || value.trim() === '',
-        isNull: value === null,
-        isUndefined: value === undefined
-      });
-    });
-
     try {
       setIsSigning(true);
 
@@ -571,15 +536,12 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
       const result = await completeDocumentSigning(
         document.id,
         signer.id,
-        cleanedFieldValues, // Use cleaned values instead of raw fieldValues
+        fieldValues,
         { userAgent, ipAddress: "127.0.0.1" } // In a real app, IP would be collected server-side
       );
 
       if (result.success) {
         toast.success(result.message || "Document signed successfully!");
-
-        // Clear validation errors since signing was successful
-        setFieldErrors([]);
 
         // Clear the backup data
         try {
@@ -726,6 +688,7 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
                 sessionStorage.setItem(`signing-backup-${document.id}`, JSON.stringify(backupData));
                 toast.success("Progress saved locally");
               } catch (error) {
+                console.log("Error while saving progress", error);
                 toast.error("Failed to save progress");
               }
             }}
