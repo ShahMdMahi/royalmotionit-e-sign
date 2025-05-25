@@ -89,12 +89,12 @@ export function DocumentSigning({
       const value = fieldValues[field.id];
 
       // Skip validation for optional empty fields
-      if (!field.required && (!value || value.trim() === "")) {
+      if (!field.required && (!value || (typeof value === 'string' && value.trim() === ""))) {
         return;
       }
 
       // Check required fields
-      if (field.required && (!value || value.trim() === "")) {
+      if (field.required && (!value || (typeof value === 'string' && value.trim() === ""))) {
         errors[field.id] = "This field is required";
         isValid = false;
         return;

@@ -172,6 +172,28 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [completionPercentage, isSigning, fieldValues, document.id, signer.id]);
 
+  // Initialize field values as empty strings when fields are loaded
+  useEffect(() => {
+    if (fields.length > 0) {
+      setFieldValues((prev) => {
+        const initializedValues: Record<string, string> = {};
+
+        // Initialize all field values as empty strings if they don't exist or are null
+        fields.forEach((field) => {
+          // Only initialize if the field doesn't have a value or the value is null/undefined
+          if (prev[field.id] === null || prev[field.id] === undefined || prev[field.id] === "") {
+            initializedValues[field.id] = field.value || "";
+          } else {
+            // Keep existing non-null values
+            initializedValues[field.id] = prev[field.id];
+          }
+        });
+
+        return initializedValues;
+      });
+    }
+  }, [fields]);
+
   // Handle field click
   const handleFieldClick = useCallback(
     (fieldId: string) => {
@@ -288,7 +310,8 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
     const requiredFields = fields.filter((field) => field.required);
     requiredFields.forEach((field) => {
       const value = fieldValues[field.id];
-      if (!value || value.trim() === "") {
+      // Handle null, undefined, and empty string values safely
+      if (!value || (typeof value === 'string' && value.trim() === "")) {
         errors.push({
           fieldId: field.id,
           message: `Required field "${field.label || field.type}" must be completed`,
@@ -300,7 +323,8 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
     // Type-specific validations with better error messages
     fields.forEach((field) => {
       const value = fieldValues[field.id];
-      if (!value || value.trim() === "") return; // Skip empty non-required fields
+      // Handle null, undefined, and empty string values safely
+      if (!value || (typeof value === 'string' && value.trim() === "")) return; // Skip empty non-required fields
 
       switch (field.type) {
         case "text":

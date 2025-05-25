@@ -201,10 +201,12 @@ async function handleConditionalLogic(
       conditionMet = sourceValue !== "true" && sourceValue !== "checked";
       break;
     case "isEmpty":
-      conditionMet = !sourceValue || sourceValue.trim() === "";
+      // Handle null, undefined, and empty string values safely
+      conditionMet = !sourceValue || (typeof sourceValue === 'string' && sourceValue.trim() === "");
       break;
     case "isNotEmpty":
-      conditionMet = !!sourceValue && sourceValue.trim() !== "";
+      // Handle null, undefined, and empty string values safely
+      conditionMet = !!sourceValue && (typeof sourceValue === 'string' && sourceValue.trim() !== "");
       break;
     default:
       console.error("Unknown condition type:", logic.condition.type);
