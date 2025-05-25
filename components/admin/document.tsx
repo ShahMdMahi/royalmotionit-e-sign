@@ -315,7 +315,7 @@ export function DocumentComponent({ documents, users }: { documents: (Document &
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  {doc.status === DocumentStatus.PENDING && <DropdownMenuItem onClick={() => router.push(`/admin/documents/${doc.id}/edit`)}>Edit document</DropdownMenuItem>}
+                                  {doc.status !== DocumentStatus.PENDING && <DropdownMenuItem onClick={() => router.push(`/admin/documents/${doc.id}/edit`)}>Edit document</DropdownMenuItem>}
                                   <DropdownMenuItem onClick={() => router.push(`/admin/documents/${doc.id}/preview`)}>Preview document</DropdownMenuItem>
                                   <DropdownMenuSeparator />
                                   <DropdownMenuItem className="text-destructive" onClick={() => openDeleteModal(doc)}>
