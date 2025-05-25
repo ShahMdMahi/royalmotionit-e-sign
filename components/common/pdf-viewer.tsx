@@ -521,7 +521,7 @@ export function PDFViewer({
 
   return (
     <div
-      className="relative h-[calc(100vh-200px)] w-full overflow-hidden"
+      className="relative h-full w-full overflow-hidden"
       ref={viewerContainerRef}
     >
       <Worker workerUrl="/pdf.worker.min.js">
