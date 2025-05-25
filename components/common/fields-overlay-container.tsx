@@ -21,7 +21,9 @@ export function FieldsOverlayContainer({
   debug = false,
   viewerContainerRef,
 }: FieldsOverlayContainerProps) {
-  const [pageElements, setPageElements] = useState<HTMLElement[]>([]); // Use a mutation observer to track changes to the PDF viewer's DOM more efficiently
+  const [pageElements, setPageElements] = useState<HTMLElement[]>([]);
+
+  // Use a mutation observer to track changes to the PDF viewer's DOM more efficiently
   useEffect(() => {
     if (!viewerContainerRef.current) return;
 
@@ -122,7 +124,7 @@ export function FieldsOverlayContainer({
       }
       observer.disconnect();
     };
-  }, [viewerContainerRef, debug, pageElements]); // Added pageElements dependency
+  }, [viewerContainerRef, debug]); // Removed pageElements dependency to prevent infinite loop
   // Removed duplicate fieldsByPage calculation - now using memoizedFieldsByPage// Set up an effect to reposition field overlays when the viewer scrolls, resizes or zooms
   useEffect(() => {
     if (!viewerContainerRef.current) return;
@@ -139,8 +141,12 @@ export function FieldsOverlayContainer({
 
       // Debounce updates to avoid excessive re-renders
       debounceTimer = setTimeout(() => {
-        // Force re-render by setting state
-        setPageElements((prev) => [...prev]);
+        // Re-render will happen naturally due to the getBoundingClientRect calls
+        // which will be recalculated on the next render cycle
+        if (viewerContainerRef.current) {
+          // Force a re-calculation by triggering a layout flush
+          viewerContainerRef.current.scrollTop = viewerContainerRef.current.scrollTop;
+        }
       }, 100); // 100ms debounce time
     };
 
@@ -302,6 +308,7 @@ export function FieldsOverlayContainer({
 
         // Only create overlays for pages that have fields
         if (fieldsForPage.length === 0) return null;
+        
         // Get page position to create a perfectly aligned overlay that's positioned relative to the PDF page
         const pageBounds = pageElement.getBoundingClientRect();
         const viewerBounds =

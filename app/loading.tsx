@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { FileText } from "lucide-react";
 
 export default function Loading() {
@@ -16,25 +16,27 @@ export default function Loading() {
             Loading Content...
           </CardTitle>
           <CardDescription>Please wait while we prepare your content.</CardDescription>
-        </CardHeader>
+        </CardHeader>{" "}
         <CardContent className="p-6">
           <div className="flex flex-col justify-center items-center h-[60vh] space-y-6">
-            <div className="relative w-full max-w-md">
-              <Progress value={60} className="h-2" />
-              <div className="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center">
-                <div className="w-6 h-6 rounded-full bg-primary animate-pulse"></div>
-              </div>
+            {/* Main content skeleton */}
+            <div className="w-full max-w-md space-y-4">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-8 w-3/4 mx-auto" />
+              <Skeleton className="h-6 w-1/2 mx-auto" />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md animate-pulse">
-              <div className="h-12 bg-muted/50 rounded-md"></div>
-              <div className="h-12 bg-muted/50 rounded-md"></div>
-              <div className="h-12 bg-muted/50 rounded-md sm:col-span-2"></div>
-              <div className="h-12 bg-muted/50 rounded-md"></div>
-              <div className="h-12 bg-muted/50 rounded-md"></div>
+            {/* Grid skeleton layout */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full sm:col-span-2" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
             </div>
 
-            <p className="text-muted-foreground">Retrieving your data...</p>
+            {/* Text skeleton */}
+            <Skeleton className="h-4 w-48" />
           </div>
         </CardContent>
       </Card>
