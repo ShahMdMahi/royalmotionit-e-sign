@@ -525,7 +525,7 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
             <Card className="overflow-hidden">
               <CardContent className="p-0">
                 {pdfData && (
-                  <div className="h-[80vh] w-full mx-auto">
+                  <div className="h-[100vh] w-full mx-auto">
                     <PDFViewer
                       pdfData={pdfData}
                       fields={fields}
