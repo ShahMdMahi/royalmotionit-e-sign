@@ -73,9 +73,9 @@ export const emailFieldSchema = baseFieldSchema.extend({
   type: z.literal("email"),
   value: z
     .string()
-    .email({ message: "Invalid email address" })
-    .optional()
-    .or(z.literal("")), // Allow empty string if not required
+    .refine((val) => !val || val === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: "Invalid email address",
+    }),
 });
 
 // Phone field
@@ -83,9 +83,9 @@ export const phoneFieldSchema = baseFieldSchema.extend({
   type: z.literal("phone"),
   value: z
     .string()
-    .regex(/^[0-9+\-() ]{10,}$/, { message: "Invalid phone number format" })
-    .optional()
-    .or(z.literal("")),
+    .refine((val) => !val || val === "" || /^[0-9+\-() ]{10,}$/.test(val), {
+      message: "Invalid phone number format",
+    }),
 });
 
 // Date field
@@ -105,9 +105,7 @@ export const numberFieldSchema = baseFieldSchema.extend({
   type: z.literal("number"),
   value: z
     .string()
-    .optional()
-    .or(z.literal(""))
-    .refine((val) => !val || !isNaN(Number(val)), {
+    .refine((val) => !val || val === "" || !isNaN(Number(val)), {
       message: "Value must be a number",
     }),
 });

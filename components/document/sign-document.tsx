@@ -110,7 +110,28 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
     fetchPdf();
   }, [document.key]);
 
-  // Load backup data on component mount
+  // Initialize field values as empty strings when fields are loaded
+  useEffect(() => {
+    if (fields.length > 0) {
+      setFieldValues((prev) => {
+        const initializedValues: Record<string, string> = { ...prev };
+
+        // Initialize all field values as empty strings if they don't exist or are null
+        fields.forEach((field) => {
+          // Ensure all field values are strings, never null
+          if (initializedValues[field.id] === null || initializedValues[field.id] === undefined) {
+            // Convert field.value to string, defaulting to empty string if null/undefined
+            initializedValues[field.id] = (field.value && typeof field.value === 'string') ? field.value : "";
+          }
+        });
+
+        console.log('Field values initialized:', initializedValues);
+        return initializedValues;
+      });
+    }
+  }, [fields]);
+
+  // Load backup data on component mount (after field initialization)
   useEffect(() => {
     // Try to restore from backup on component mount
     try {
@@ -119,14 +140,26 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
       if (backupData) {
         const parsed = JSON.parse(backupData);
         if (parsed.signerId === signer.id && parsed.fieldValues) {
-          setFieldValues(parsed.fieldValues);
+          // Ensure backup values are strings, not null
+          const cleanedFieldValues: Record<string, string> = {};
+          Object.entries(parsed.fieldValues).forEach(([fieldId, value]) => {
+            // Convert any null/undefined values to empty strings
+            cleanedFieldValues[fieldId] = (value && typeof value === 'string') ? value : "";
+          });
+          
+          setFieldValues((prev) => ({
+            ...prev,
+            ...cleanedFieldValues
+          }));
+          
+          console.log('Restored backup data:', cleanedFieldValues);
           toast.info("Restored your previous progress");
         }
       }
     } catch (error) {
       console.warn("Failed to restore backup:", error);
     }
-  }, [document.id, signer.id]);
+  }, [document.id, signer.id, fields]); // Added fields dependency
 
   // Cleanup on unmount
   useEffect(() => {
@@ -171,28 +204,6 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [completionPercentage, isSigning, fieldValues, document.id, signer.id]);
-
-  // Initialize field values as empty strings when fields are loaded
-  useEffect(() => {
-    if (fields.length > 0) {
-      setFieldValues((prev) => {
-        const initializedValues: Record<string, string> = {};
-
-        // Initialize all field values as empty strings if they don't exist or are null
-        fields.forEach((field) => {
-          // Only initialize if the field doesn't have a value or the value is null/undefined
-          if (prev[field.id] === null || prev[field.id] === undefined || prev[field.id] === "") {
-            initializedValues[field.id] = field.value || "";
-          } else {
-            // Keep existing non-null values
-            initializedValues[field.id] = prev[field.id];
-          }
-        });
-
-        return initializedValues;
-      });
-    }
-  }, [fields]);
 
   // Handle field click
   const handleFieldClick = useCallback(
@@ -250,9 +261,14 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
   // Handle field value changes with auto-save
   const handleFieldChange = useCallback(
     (fieldId: string, value: string) => {
+      // Ensure value is always a string, never null or undefined
+      const cleanValue = (value && typeof value === 'string') ? value : "";
+      
+      console.log(`Field change: ${fieldId} = "${cleanValue}" (type: ${typeof cleanValue})`);
+      
       setFieldValues((prev) => ({
         ...prev,
-        [fieldId]: value,
+        [fieldId]: cleanValue,
       }));
 
       // Remove validation error for the field if it exists
@@ -269,7 +285,7 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
           const backupData = {
             documentId: document.id,
             signerId: signer.id,
-            fieldValues: { ...fieldValues, [fieldId]: value },
+            fieldValues: { ...fieldValues, [fieldId]: cleanValue },
             timestamp: new Date().toISOString(),
           };
           sessionStorage.setItem(`signing-backup-${document.id}`, JSON.stringify(backupData));
@@ -306,17 +322,22 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
   const validateFields = () => {
     const errors: FieldValidationError[] = [];
 
+    console.log('Validating fields. Current fieldValues:', fieldValues);
+
     // Check for missing required fields
     const requiredFields = fields.filter((field) => field.required);
     requiredFields.forEach((field) => {
       const value = fieldValues[field.id];
+      console.log(`Validating field ${field.id} (${field.label}):`, { value, type: typeof value });
+      
       // Handle null, undefined, and empty string values safely
-      if (!value || (typeof value === 'string' && value.trim() === "")) {
+      if (value === null || value === undefined || (typeof value === "string" && value.trim() === "")) {
         errors.push({
           fieldId: field.id,
           message: `Required field "${field.label || field.type}" must be completed`,
           severity: "error",
         });
+        console.log(`Field ${field.id} failed validation: value is null/undefined/empty`);
       }
     });
 
@@ -324,7 +345,7 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
     fields.forEach((field) => {
       const value = fieldValues[field.id];
       // Handle null, undefined, and empty string values safely
-      if (!value || (typeof value === 'string' && value.trim() === "")) return; // Skip empty non-required fields
+      if (!value || (typeof value === "string" && value.trim() === "")) return; // Skip empty non-required fields
 
       switch (field.type) {
         case "text":
@@ -509,6 +530,37 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
       return;
     }
 
+    // Debug: Log what we're about to send to the server
+    console.log('=== SIGNING DEBUG INFO ===');
+    console.log('Document ID:', document.id);
+    console.log('Signer ID:', signer.id);
+    console.log('Field Values BEFORE cleaning:', fieldValues);
+    
+    // AGGRESSIVE NULL CLEANUP: Ensure absolutely no null values are sent to server
+    const cleanedFieldValues: Record<string, string> = {};
+    fields.forEach(field => {
+      const rawValue = fieldValues[field.id];
+      // Convert any null, undefined, or non-string values to empty strings
+      cleanedFieldValues[field.id] = (rawValue && typeof rawValue === 'string') ? rawValue : "";
+    });
+    
+    console.log('Field Values AFTER cleaning:', cleanedFieldValues);
+    console.log('Field Values JSON:', JSON.stringify(cleanedFieldValues, null, 2));
+    
+    // Double-check that all required fields have values
+    const requiredFieldsCheck = fields.filter(f => f.required);
+    console.log('Required fields check:');
+    requiredFieldsCheck.forEach(field => {
+      const value = cleanedFieldValues[field.id];
+      console.log(`  ${field.label || field.type} (${field.id}):`, {
+        value,
+        type: typeof value,
+        isEmpty: !value || value.trim() === '',
+        isNull: value === null,
+        isUndefined: value === undefined
+      });
+    });
+
     try {
       setIsSigning(true);
 
@@ -519,12 +571,15 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
       const result = await completeDocumentSigning(
         document.id,
         signer.id,
-        fieldValues,
+        cleanedFieldValues, // Use cleaned values instead of raw fieldValues
         { userAgent, ipAddress: "127.0.0.1" } // In a real app, IP would be collected server-side
       );
 
       if (result.success) {
         toast.success(result.message || "Document signed successfully!");
+
+        // Clear validation errors since signing was successful
+        setFieldErrors([]);
 
         // Clear the backup data
         try {
@@ -678,6 +733,31 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
           >
             <Save className="h-4 w-4 mr-2" />
             Save Progress
+          </Button>
+
+          {/* Debug button - temporary for troubleshooting */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              console.log('=== FIELD DEBUG INFO ===');
+              console.log('Current fieldValues:', fieldValues);
+              console.log('Fields:', fields);
+              
+              // Clean up any null values manually
+              const cleanedValues: Record<string, string> = {};
+              fields.forEach((field) => {
+                const currentValue = fieldValues[field.id];
+                cleanedValues[field.id] = (currentValue && typeof currentValue === 'string') ? currentValue : "";
+              });
+              
+              console.log('Cleaned values:', cleanedValues);
+              setFieldValues(cleanedValues);
+              toast.info("Field values cleaned up");
+            }}
+            className="text-xs"
+          >
+            🐛 Debug
           </Button>
 
           <Button
