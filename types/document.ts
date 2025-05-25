@@ -32,6 +32,7 @@ export type DocumentFieldType =
   | "signature"
   | "initial"
   | "text"
+  | "textarea"
   | "date"
   | "checkbox"
   | "dropdown"

@@ -1,18 +1,24 @@
 "use client";
 
 import { Document as PrismaDocument, Signer } from "@prisma/client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { PDFViewer } from "@/components/common/pdf-viewer";
 import { getFromR2 } from "@/actions/r2";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { ArrowLeft, CheckCircle, Save, Send, AlertTriangle, AlertCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, Save, Send, AlertTriangle, AlertCircle, Menu, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useRouter } from "next/navigation";
 import { PageNavigation } from "@/components/document/page-navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import SignatureCanvasWrapper, { SignatureCanvasRef } from "./signature-canvas-wrapper";
 import { format } from "date-fns";
 import { completeDocumentSigning } from "@/actions/sign-document";
@@ -46,11 +52,27 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
-  const [completionPercentage, setCompletionPercentage] = useState(0);
   const [signingCompleted, setSigningCompleted] = useState(false);
   const [isLastSigner, setIsLastSigner] = useState(false);
+  const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const signatureRef = useRef<SignatureCanvasRef | null>(null);
   const [date] = useState<Date | undefined>(new Date());
+
+  // Memoized calculations for performance
+  const requiredFields = useMemo(() => fields.filter((field) => field.required), [fields]);
+
+  const completionPercentage = useMemo(() => {
+    if (fields.length === 0) return 100;
+    if (requiredFields.length === 0) return 100;
+
+    const completedFields = requiredFields.filter((field) => {
+      const value = fieldValues[field.id];
+      return value !== undefined && value !== "";
+    });
+
+    return Math.round((completedFields.length / requiredFields.length) * 100);
+  }, [fields.length, requiredFields, fieldValues]);
 
   // Fetch PDF data from R2
   useEffect(() => {
@@ -88,99 +110,166 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
     fetchPdf();
   }, [document.key]);
 
-  // Calculate completion percentage
+  // Load backup data on component mount
   useEffect(() => {
-    if (fields.length === 0) {
-      setCompletionPercentage(100);
-      return;
-    }
-
-    const requiredFields = fields.filter((field) => field.required);
-    if (requiredFields.length === 0) {
-      setCompletionPercentage(100);
-      return;
-    }
-
-    const completedFields = requiredFields.filter((field) => {
-      const value = fieldValues[field.id];
-      return value !== undefined && value !== "";
-    });
-
-    const percentage = Math.round((completedFields.length / requiredFields.length) * 100);
-    setCompletionPercentage(percentage);
-  }, [fields, fieldValues]);
-
-  // Handle field click
-  const handleFieldClick = (fieldId: string) => {
-    const field = fields.find((f) => f.id === fieldId);
-    if (!field) return;
-
+    // Try to restore from backup on component mount
     try {
-      switch (field.type) {
-        case "signature":
-        case "initial":
-          setActiveFieldId(fieldId);
-          setIsSignatureModalOpen(true);
-          break;
-        case "date":
-          handleFieldChange(fieldId, format(date || new Date(), "yyyy-MM-dd"));
-          break;
-        case "text":
-        case "email":
-        case "phone":
-        case "number":
-          setActiveFieldId(fieldId);
-          // For text-based fields, handle directly (implementation moved to side panel)
-          break;
-        case "checkbox":
-          // Toggle checkbox value
-          const currentValue = fieldValues[fieldId];
-          handleFieldChange(fieldId, currentValue === "true" ? "" : "true");
-          break;
-        case "dropdown":
-        case "radio":
-          // For dropdown and radio, focus on the side panel tab where users can select options
-          try {
-            if (window.innerWidth < 768) {
-              // On mobile, toggle the mobile field menu
-              const menuTrigger = window.document.getElementById("mobile-field-menu-trigger");
-              if (menuTrigger) {
-                menuTrigger.click();
-              } else {
-                console.warn("Mobile field menu trigger element not found");
-              }
-            }
-          } catch (error) {
-            console.error("Error interacting with field selector:", error);
-          }
-          break;
+      const backupKey = `signing-backup-${document.id}`;
+      const backupData = sessionStorage.getItem(backupKey);
+      if (backupData) {
+        const parsed = JSON.parse(backupData);
+        if (parsed.signerId === signer.id && parsed.fieldValues) {
+          setFieldValues(parsed.fieldValues);
+          toast.info("Restored your previous progress");
+        }
       }
     } catch (error) {
-      console.error(`Error handling field click for field ${fieldId}:`, error);
-      toast?.error?.("Failed to interact with the field. Please try again.");
+      console.warn("Failed to restore backup:", error);
     }
-  };
+  }, [document.id, signer.id]);
 
-  // Handle field value changes
-  const handleFieldChange = (fieldId: string, value: string) => {
-    setFieldValues((prev) => ({
-      ...prev,
-      [fieldId]: value,
-    }));
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimer) {
+        clearTimeout(autoSaveTimer);
+      }
+    };
+  }, [autoSaveTimer]);
 
-    // Remove validation error for the field if it exists
-    setFieldErrors((prev) => prev.filter((error) => error.fieldId !== fieldId));
-  };
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ctrl/Cmd + S to save progress
+      if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+        event.preventDefault();
+        try {
+          const backupData = {
+            documentId: document.id,
+            signerId: signer.id,
+            fieldValues,
+            timestamp: new Date().toISOString(),
+          };
+          sessionStorage.setItem(`signing-backup-${document.id}`, JSON.stringify(backupData));
+          toast.success("Progress saved");
+        } catch (error) {
+          toast.error("Failed to save progress");
+        }
+      }
+
+      // Ctrl/Cmd + Enter to sign (if all fields are completed)
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        event.preventDefault();
+        if (completionPercentage === 100 && !isSigning) {
+          setIsConfirmationModalOpen(true);
+        } else {
+          toast.info("Please complete all required fields first");
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [completionPercentage, isSigning, fieldValues, document.id, signer.id]);
+
+  // Handle field click
+  const handleFieldClick = useCallback(
+    (fieldId: string) => {
+      const field = fields.find((f) => f.id === fieldId);
+      if (!field) return;
+
+      try {
+        switch (field.type) {
+          case "signature":
+          case "initial":
+            setActiveFieldId(fieldId);
+            setIsSignatureModalOpen(true);
+            break;
+          case "date":
+            handleFieldChange(fieldId, format(date || new Date(), "yyyy-MM-dd"));
+            break;
+          case "text":
+          case "email":
+          case "phone":
+          case "number":
+          case "textarea":
+            setActiveFieldId(fieldId);
+            // For text-based fields, handle directly (implementation moved to side panel)
+            break;
+          case "checkbox":
+            // Toggle checkbox value
+            const currentValue = fieldValues[fieldId];
+            handleFieldChange(fieldId, currentValue === "true" ? "false" : "true");
+            break;
+          case "dropdown":
+          case "radio":
+          case "image":
+          case "formula":
+          case "payment":
+            setActiveFieldId(fieldId);
+            // For dropdown, radio, image, formula, and payment fields, handle in the side panel
+            // Show a toast to guide the user
+            toast.info(`Please use the field panel on the left to complete "${field.label || field.type}"`);
+            break;
+          default:
+            // Handle any other field types
+            setActiveFieldId(fieldId);
+            console.warn(`Unhandled field type: ${field.type}`);
+            break;
+        }
+      } catch (error) {
+        console.error(`Error handling field click for field ${fieldId}:`, error);
+        toast?.error?.("Failed to interact with the field. Please try again.");
+      }
+    },
+    [fields, fieldValues, date]
+  );
+
+  // Handle field value changes with auto-save
+  const handleFieldChange = useCallback(
+    (fieldId: string, value: string) => {
+      setFieldValues((prev) => ({
+        ...prev,
+        [fieldId]: value,
+      }));
+
+      // Remove validation error for the field if it exists
+      setFieldErrors((prev) => prev.filter((error) => error.fieldId !== fieldId));
+
+      // Auto-save after a delay
+      if (autoSaveTimer) {
+        clearTimeout(autoSaveTimer);
+      }
+
+      const timer = setTimeout(() => {
+        // Save field value to session storage as backup
+        try {
+          const backupData = {
+            documentId: document.id,
+            signerId: signer.id,
+            fieldValues: { ...fieldValues, [fieldId]: value },
+            timestamp: new Date().toISOString(),
+          };
+          sessionStorage.setItem(`signing-backup-${document.id}`, JSON.stringify(backupData));
+        } catch (error) {
+          console.warn("Failed to save backup:", error);
+        }
+      }, 2000);
+
+      setAutoSaveTimer(timer);
+    },
+    [autoSaveTimer, fieldValues, document.id, signer.id]
+  );
 
   // Clear signature canvas
-  const clearSignature = () => {
+  const clearSignature = useCallback(() => {
     if (signatureRef.current) {
       signatureRef.current.clear();
     }
-  };
+  }, []);
 
   // Save signature
-  const saveSignature = () => {
+  const saveSignature = useCallback(() => {
     if (!signatureRef.current || signatureRef.current.isEmpty()) {
       toast.error("Please provide a signature");
       return;
@@ -189,9 +278,9 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
     const signature = signatureRef.current.toDataURL();
     handleFieldChange(activeFieldId!, signature);
     setIsSignatureModalOpen(false);
-  };
+  }, [activeFieldId, handleFieldChange]);
 
-  // Validate fields
+  // Validate fields with enhanced error reporting
   const validateFields = () => {
     const errors: FieldValidationError[] = [];
 
@@ -203,21 +292,46 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
         errors.push({
           fieldId: field.id,
           message: `Required field "${field.label || field.type}" must be completed`,
+          severity: "error",
         });
       }
     });
 
-    // Type-specific validations
+    // Type-specific validations with better error messages
     fields.forEach((field) => {
       const value = fieldValues[field.id];
       if (!value || value.trim() === "") return; // Skip empty non-required fields
 
       switch (field.type) {
+        case "text":
+          // Check field-specific validation rules for text fields
+          if (field.validationRule?.includes("minLength:")) {
+            const minLength = parseInt(field.validationRule.substring(field.validationRule.indexOf("minLength:") + 10));
+            if (!isNaN(minLength) && value.length < minLength) {
+              errors.push({
+                fieldId: field.id,
+                message: `"${field.label || "Text"}" must be at least ${minLength} characters`,
+                severity: "error",
+              });
+            }
+          }
+          if (field.validationRule?.includes("maxLength:")) {
+            const maxLength = parseInt(field.validationRule.substring(field.validationRule.indexOf("maxLength:") + 10));
+            if (!isNaN(maxLength) && value.length > maxLength) {
+              errors.push({
+                fieldId: field.id,
+                message: `"${field.label || "Text"}" must be no more than ${maxLength} characters`,
+                severity: "error",
+              });
+            }
+          }
+          break;
         case "email":
           if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
             errors.push({
               fieldId: field.id,
-              message: `Please enter a valid email address`,
+              message: `Please enter a valid email address for "${field.label || "Email"}"`,
+              severity: "error",
             });
           }
           break;
@@ -225,7 +339,8 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
           if (!/^[0-9+\-() ]{10,}$/.test(value)) {
             errors.push({
               fieldId: field.id,
-              message: `Please enter a valid phone number`,
+              message: `Please enter a valid phone number for "${field.label || "Phone"}"`,
+              severity: "error",
             });
           }
           break;
@@ -233,7 +348,8 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
           if (isNaN(new Date(value).getTime())) {
             errors.push({
               fieldId: field.id,
-              message: `Please enter a valid date`,
+              message: `Please enter a valid date for "${field.label || "Date"}"`,
+              severity: "error",
             });
           }
           break;
@@ -241,7 +357,72 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
           if (isNaN(Number(value))) {
             errors.push({
               fieldId: field.id,
-              message: `Please enter a valid number`,
+              message: `Please enter a valid number for "${field.label || "Number"}"`,
+              severity: "error",
+            });
+          }
+          break;
+        case "textarea":
+          // Textarea follows the same validation as text fields
+          if (field.validationRule?.includes("minLength:")) {
+            const minLength = parseInt(field.validationRule.substring(field.validationRule.indexOf("minLength:") + 10));
+            if (!isNaN(minLength) && value.length < minLength) {
+              errors.push({
+                fieldId: field.id,
+                message: `"${field.label || "Text"}" must be at least ${minLength} characters`,
+                severity: "error",
+              });
+            }
+          }
+          if (field.validationRule?.includes("maxLength:")) {
+            const maxLength = parseInt(field.validationRule.substring(field.validationRule.indexOf("maxLength:") + 10));
+            if (!isNaN(maxLength) && value.length > maxLength) {
+              errors.push({
+                fieldId: field.id,
+                message: `"${field.label || "Text"}" must be no more than ${maxLength} characters`,
+                severity: "error",
+              });
+            }
+          }
+          break;
+        case "image":
+          // Check if image is uploaded
+          if (!value.includes("data:image") && !value.startsWith("http")) {
+            errors.push({
+              fieldId: field.id,
+              message: `Please upload an image for "${field.label || "Image"}"`,
+              severity: "error",
+            });
+          }
+          break;
+        case "payment":
+          // Check if payment is completed
+          if (!value || value !== "completed") {
+            errors.push({
+              fieldId: field.id,
+              message: `Payment for "${field.label || "Payment"}" must be completed`,
+              severity: "error",
+            });
+          }
+          break;
+        case "formula":
+          // Formula fields are typically calculated, but check if result is valid
+          if (!value || value === "error") {
+            errors.push({
+              fieldId: field.id,
+              message: `Formula calculation error for "${field.label || "Formula"}"`,
+              severity: "warning",
+            });
+          }
+          break;
+        case "signature":
+        case "initial":
+          // Check if signature is just a data URL placeholder or actually has content
+          if (!value.includes("data:image") || value === "data:image/png;base64,") {
+            errors.push({
+              fieldId: field.id,
+              message: `Please provide a ${field.type} for "${field.label || field.type}"`,
+              severity: "error",
             });
           }
           break;
@@ -258,7 +439,32 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
             if (!regex.test(value)) {
               errors.push({
                 fieldId: field.id,
-                message: `Field "${field.label || field.type}" has invalid format`,
+                message: `Field "${field.label || field.type}" format is invalid`,
+                severity: "error",
+              });
+            }
+          }
+
+          // Minimum length validation
+          if (field.validationRule.startsWith("minLength:")) {
+            const minLength = parseInt(field.validationRule.substring(10));
+            if (value.length < minLength) {
+              errors.push({
+                fieldId: field.id,
+                message: `"${field.label || field.type}" must be at least ${minLength} characters`,
+                severity: "error",
+              });
+            }
+          }
+
+          // Maximum length validation
+          if (field.validationRule.startsWith("maxLength:")) {
+            const maxLength = parseInt(field.validationRule.substring(10));
+            if (value.length > maxLength) {
+              errors.push({
+                fieldId: field.id,
+                message: `"${field.label || field.type}" must not exceed ${maxLength} characters`,
+                severity: "error",
               });
             }
           }
@@ -295,6 +501,13 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
 
       if (result.success) {
         toast.success(result.message || "Document signed successfully!");
+
+        // Clear the backup data
+        try {
+          sessionStorage.removeItem(`signing-backup-${document.id}`);
+        } catch (error) {
+          console.warn("Failed to clear backup:", error);
+        }
 
         // Check if this was the last signer
         const remainingSigners = document.signers.filter((s) => s.id !== signer.id && s.status !== "COMPLETED");
@@ -396,13 +609,19 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
   return (
     <div className="flex flex-col w-full">
       <div className="p-4 border-b flex items-center justify-between bg-background shadow-sm">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" onClick={() => router.push(`/documents/${document.id}`)}>
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <Button variant="ghost" size="sm" onClick={() => router.push(`/documents/${document.id}`)}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Document
+            <span className="hidden sm:inline">Back to Document</span>
+            <span className="sm:hidden">Back</span>
           </Button>
 
-          <h1 className="text-lg font-medium hidden md:block">{document.title || "Untitled Document"}</h1>
+          <Button variant="outline" size="sm" onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)} className="md:hidden">
+            {isMobileSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            <span className="ml-2">Fields</span>
+          </Button>
+
+          <h1 className="text-sm sm:text-lg font-medium hidden sm:block">{document.title || "Untitled Document"}</h1>
         </div>
 
         <div className="flex items-center space-x-3">
@@ -412,6 +631,31 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
               <span className="text-sm text-muted-foreground">{completionPercentage}%</span>
             </div>
           </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              // Manual save to session storage
+              try {
+                const backupData = {
+                  documentId: document.id,
+                  signerId: signer.id,
+                  fieldValues,
+                  timestamp: new Date().toISOString(),
+                };
+                sessionStorage.setItem(`signing-backup-${document.id}`, JSON.stringify(backupData));
+                toast.success("Progress saved locally");
+              } catch (error) {
+                toast.error("Failed to save progress");
+              }
+            }}
+            className="hidden sm:flex"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            Save Progress
+          </Button>
+
           <Button
             onClick={() => {
               if (!validateFields()) {
@@ -444,13 +688,41 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
         {/* Show validation errors summary if there are any */}
         {fieldErrors.length > 0 && (
           <div className="mb-4 sm:mb-6">
-            <ValidationErrorsSummary errors={fieldErrors} onFieldClickAction={handleFieldClick} fieldLabels={Object.fromEntries(fields.map((f) => [f.id, f.label || f.type]))} />
+            <ValidationErrorsSummary
+              errors={fieldErrors}
+              onFieldClickAction={(fieldId) => {
+                // Find the field and navigate to its page
+                const field = fields.find((f) => f.id === fieldId);
+                if (field) {
+                  setCurrentPage(field.pageNumber);
+                  // Scroll the field into view after a short delay
+                  setTimeout(() => {
+                    const fieldElement = window.document.querySelector(`[data-field-id="${fieldId}"]`);
+                    if (fieldElement) {
+                      fieldElement.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                  }, 100);
+                }
+                handleFieldClick(fieldId);
+              }}
+              fieldLabels={Object.fromEntries(fields.map((f) => [f.id, f.label || f.type]))}
+            />
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-6 relative">
           {/* Instruction sidebar - collapses to expandable section on mobile */}
-          <div className="space-y-4 sm:space-y-6">
+          <div
+            className={`space-y-4 sm:space-y-6 ${isMobileSidebarOpen ? "block" : "hidden"} md:block${isMobileSidebarOpen ? " fixed inset-0 bg-background/95 backdrop-blur-sm z-50 overflow-auto p-4" : ""}`}
+          >
+            {isMobileSidebarOpen && (
+              <div className="flex justify-between items-center mb-4 md:hidden">
+                <h2 className="text-lg font-semibold">Document Fields</h2>
+                <Button variant="ghost" size="sm" onClick={() => setIsMobileSidebarOpen(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
             <Card>
               <CardHeader className="py-3 sm:py-6">
                 <CardTitle className="text-base sm:text-lg">Signing Instructions</CardTitle>
@@ -464,13 +736,31 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
                 </div>
 
                 <div className="pt-2">
-                  <h3 className="text-sm font-medium mb-2">Tips:</h3>
+                  <h3 className="text-sm font-medium mb-2">How to sign:</h3>
                   <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>• Click on highlighted fields to complete them</li>
-                    <li>• Required fields are marked with an asterisk (*)</li>
-                    <li>• All required fields must be completed to sign</li>
+                    <li>• Fill out all required fields (*) in the panel below</li>
+                    <li>• Click on PDF fields to jump to that section</li>
+                    <li>• Use Ctrl+S to save your progress</li>
+                    <li>• Use Ctrl+Enter to sign when ready</li>
+                    <li>• Your progress is automatically saved</li>
                   </ul>
                 </div>
+
+                {fieldErrors.length > 0 && (
+                  <div className="pt-2">
+                    <div className="bg-destructive/10 border border-destructive/20 rounded-md p-2">
+                      <p className="text-xs font-medium text-destructive mb-1">
+                        {fieldErrors.length} error{fieldErrors.length > 1 ? "s" : ""} found:
+                      </p>
+                      <ul className="text-xs text-destructive space-y-1">
+                        {fieldErrors.slice(0, 3).map((error, index) => (
+                          <li key={index}>• {error.message}</li>
+                        ))}
+                        {fieldErrors.length > 3 && <li>• And {fieldErrors.length - 3} more...</li>}
+                      </ul>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -478,6 +768,7 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Field Summary</CardTitle>
+                <CardDescription>Complete all required fields to sign</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {fields.length === 0 ? (
@@ -492,25 +783,112 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
                         }
                       : {};
                     const fieldError = fieldErrors.find((err) => err.fieldId === field.id);
+
                     return (
                       <FieldErrorTooltip key={field.id} fieldId={field.id} fieldErrors={fieldErrors}>
                         <div
-                          className={`flex items-center justify-between p-1.5 sm:p-2 rounded border ${
-                            fieldError ? "border-destructive bg-destructive/5" : isCompleted ? "border-primary/40 bg-primary/5" : "border-border"
-                          } hover:bg-muted/50 active:bg-muted/70 cursor-pointer transition-colors`}
+                          className={`p-2 rounded border ${fieldError ? "border-destructive bg-destructive/5" : isCompleted ? "border-primary/40 bg-primary/5" : "border-border"} transition-colors`}
                           style={fieldError || isCompleted ? {} : fieldStyle}
-                          onClick={() => handleFieldClick(field.id)}
                         >
-                          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                            {fieldError ? <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-destructive" /> : null}
-                            <span className={`text-xs font-medium truncate ${field.required ? "text-primary" : ""}`}>
-                              {field.label || field.type}
-                              {field.required && <span className="text-primary">*</span>}
-                            </span>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              {fieldError ? <AlertCircle className="h-4 w-4 flex-shrink-0 text-destructive" /> : null}
+                              <span className={`text-sm font-medium truncate ${field.required ? "text-primary" : ""}`}>
+                                {field.label || field.type}
+                                {field.required && <span className="text-primary">*</span>}
+                              </span>
+                            </div>
+                            <Badge variant={fieldError ? "destructive" : isCompleted ? "default" : "outline"} className="text-xs whitespace-nowrap">
+                              {fieldError ? "Error" : isCompleted ? "Completed" : "Pending"}
+                            </Badge>
                           </div>
-                          <Badge variant={fieldError ? "destructive" : isCompleted ? "default" : "outline"} className="text-[9px] sm:text-[10px] whitespace-nowrap ml-1">
-                            {fieldError ? "Error" : isCompleted ? "Completed" : "Pending"}
-                          </Badge>
+
+                          {/* Inline field editing */}
+                          <div className="space-y-2">
+                            {field.type === "text" || field.type === "email" || field.type === "phone" || field.type === "number" ? (
+                              <Input
+                                type={field.type === "email" ? "email" : field.type === "phone" ? "tel" : field.type === "number" ? "number" : "text"}
+                                placeholder={field.placeholder || `Enter ${field.label || field.type}`}
+                                value={fieldValues[field.id] || ""}
+                                onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                                className="h-8 text-xs"
+                              />
+                            ) : field.type === "date" ? (
+                              <Input type="date" value={fieldValues[field.id] || ""} onChange={(e) => handleFieldChange(field.id, e.target.value)} className="h-8 text-xs" />
+                            ) : field.type === "textarea" ? (
+                              <Textarea
+                                placeholder={field.placeholder || `Enter ${field.label || field.type}`}
+                                value={fieldValues[field.id] || ""}
+                                onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                                className="min-h-16 text-xs resize-none"
+                                rows={2}
+                              />
+                            ) : field.type === "checkbox" ? (
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id={field.id} checked={fieldValues[field.id] === "true"} onCheckedChange={(checked) => handleFieldChange(field.id, checked ? "true" : "false")} />
+                                <Label htmlFor={field.id} className="text-xs">
+                                  {field.placeholder || "Check this box"}
+                                </Label>
+                              </div>
+                            ) : field.type === "radio" ? (
+                              <RadioGroup value={fieldValues[field.id] || ""} onValueChange={(value) => handleFieldChange(field.id, value)} className="space-y-1">
+                                {field.options ? (
+                                  field.options.split(",").map((option, index) => (
+                                    <div key={index} className="flex items-center space-x-2">
+                                      <RadioGroupItem value={option.trim()} id={`${field.id}-${index}`} />
+                                      <Label htmlFor={`${field.id}-${index}`} className="text-xs">
+                                        {option.trim()}
+                                      </Label>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="option1" id={`${field.id}-1`} />
+                                    <Label htmlFor={`${field.id}-1`} className="text-xs">
+                                      Option 1
+                                    </Label>
+                                  </div>
+                                )}
+                              </RadioGroup>
+                            ) : field.type === "dropdown" ? (
+                              <Select value={fieldValues[field.id] || ""} onValueChange={(value) => handleFieldChange(field.id, value)}>
+                                <SelectTrigger className="h-8 text-xs">
+                                  <SelectValue placeholder={field.placeholder || "Select an option"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {field.options ? (
+                                    field.options.split(",").map((option, index) => (
+                                      <SelectItem key={index} value={option.trim()}>
+                                        {option.trim()}
+                                      </SelectItem>
+                                    ))
+                                  ) : (
+                                    <SelectItem value="option1">Option 1</SelectItem>
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            ) : field.type === "signature" || field.type === "initial" ? (
+                              <Button variant="outline" size="sm" onClick={() => handleFieldClick(field.id)} className="w-full h-8 text-xs">
+                                {isCompleted ? "Update Signature" : "Add Signature"}
+                              </Button>
+                            ) : field.type === "image" ? (
+                              <Button variant="outline" size="sm" onClick={() => handleFieldClick(field.id)} className="w-full h-8 text-xs">
+                                {isCompleted ? "Update Image" : "Upload Image"}
+                              </Button>
+                            ) : field.type === "formula" ? (
+                              <div className="p-2 bg-muted rounded text-xs">
+                                <span className="text-muted-foreground">Formula Result: {fieldValues[field.id] || "Calculating..."}</span>
+                              </div>
+                            ) : field.type === "payment" ? (
+                              <Button variant="outline" size="sm" onClick={() => handleFieldClick(field.id)} className="w-full h-8 text-xs">
+                                {isCompleted ? "Payment Completed" : "Complete Payment"}
+                              </Button>
+                            ) : (
+                              <Button variant="outline" size="sm" onClick={() => handleFieldClick(field.id)} className="w-full h-8 text-xs">
+                                Click to edit
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </FieldErrorTooltip>
                     );
