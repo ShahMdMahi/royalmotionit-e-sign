@@ -17,7 +17,6 @@ export default function Loading() {
           <Skeleton className="h-8 w-48 mx-auto" />
           <Skeleton className="h-4 w-64 mx-auto" />
         </div>
-
         {/* Main Content Loading */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Sidebar Loading */}
@@ -68,7 +67,6 @@ export default function Loading() {
             </Card>
           </div>
         </div>
-
         {/* Footer Actions Loading */}
         <div className="flex items-center justify-between p-4 border rounded-lg bg-card">
           <div className="flex items-center space-x-3">
@@ -80,12 +78,11 @@ export default function Loading() {
             <Skeleton className="h-9 w-24" />
           </div>
         </div>
-
         {/* Loading Status */}
         <div className="text-center">
           <div className="inline-flex items-center space-x-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Loading your documents...</span>
+            <span>Loading...</span>
           </div>
         </div>
       </div>
