@@ -121,11 +121,11 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
           // Ensure all field values are strings, never null
           if (initializedValues[field.id] === null || initializedValues[field.id] === undefined) {
             // Convert field.value to string, defaulting to empty string if null/undefined
-            initializedValues[field.id] = (field.value && typeof field.value === 'string') ? field.value : "";
+            initializedValues[field.id] = field.value && typeof field.value === "string" ? field.value : "";
           }
         });
 
-        console.log('Field values initialized:', initializedValues);
+        console.log("Field values initialized:", initializedValues);
         return initializedValues;
       });
     }
@@ -144,15 +144,15 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
           const cleanedFieldValues: Record<string, string> = {};
           Object.entries(parsed.fieldValues).forEach(([fieldId, value]) => {
             // Convert any null/undefined values to empty strings
-            cleanedFieldValues[fieldId] = (value && typeof value === 'string') ? value : "";
+            cleanedFieldValues[fieldId] = value && typeof value === "string" ? value : "";
           });
-          
+
           setFieldValues((prev) => ({
             ...prev,
-            ...cleanedFieldValues
+            ...cleanedFieldValues,
           }));
-          
-          console.log('Restored backup data:', cleanedFieldValues);
+
+          console.log("Restored backup data:", cleanedFieldValues);
           toast.info("Restored your previous progress");
         }
       }
@@ -318,14 +318,14 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
   const validateFields = () => {
     const errors: FieldValidationError[] = [];
 
-    console.log('Validating fields. Current fieldValues:', fieldValues);
+    console.log("Validating fields. Current fieldValues:", fieldValues);
 
     // Check for missing required fields
     const requiredFields = fields.filter((field) => field.required);
     requiredFields.forEach((field) => {
       const value = fieldValues[field.id];
       console.log(`Validating field ${field.id} (${field.label}):`, { value, type: typeof value });
-      
+
       // Handle null, undefined, and empty string values safely
       if (value === null || value === undefined || (typeof value === "string" && value.trim() === "")) {
         errors.push({
@@ -703,18 +703,18 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
             variant="ghost"
             size="sm"
             onClick={() => {
-              console.log('=== FIELD DEBUG INFO ===');
-              console.log('Current fieldValues:', fieldValues);
-              console.log('Fields:', fields);
-              
+              console.log("=== FIELD DEBUG INFO ===");
+              console.log("Current fieldValues:", fieldValues);
+              console.log("Fields:", fields);
+
               // Clean up any null values manually
               const cleanedValues: Record<string, string> = {};
               fields.forEach((field) => {
                 const currentValue = fieldValues[field.id];
-                cleanedValues[field.id] = (currentValue && typeof currentValue === 'string') ? currentValue : "";
+                cleanedValues[field.id] = currentValue && typeof currentValue === "string" ? currentValue : "";
               });
-              
-              console.log('Cleaned values:', cleanedValues);
+
+              console.log("Cleaned values:", cleanedValues);
               setFieldValues(cleanedValues);
               toast.info("Field values cleaned up");
             }}
@@ -985,7 +985,7 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
                         return pages;
                       }}
                       onFieldClickAction={handleFieldClick}
-                      debug={true} // Enable debug mode to help diagnose positioning issues
+                      debug={process.env.NODE_ENV === "development"} // Enable debug mode to help diagnose positioning issues
                     />
                   </div>
                 )}
