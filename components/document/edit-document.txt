@@ -401,13 +401,15 @@ export function EditDocument({
         >
           <SheetContent side="right" className="w-[400px] sm:w-[540px]">
             <SheetHeader>
-              <SheetTitle>Field Properties</SheetTitle>
-              <SheetDescription>Configure the selected field</SheetDescription>
+              <SheetTitle>Field Properties: {selectedField?.label}</SheetTitle>
+              <SheetDescription>Configure the selected field's properties and behavior</SheetDescription>
             </SheetHeader>
 
             {selectedField && (
               <FieldProperties
                 field={selectedField}
+                signers={document.signers || []}
+                availableFieldIds={fields.map(f => f.id)}
                 onUpdateAction={(field) => {
                   handleUpdateField(field as DocumentField);
                   return Promise.resolve(field);

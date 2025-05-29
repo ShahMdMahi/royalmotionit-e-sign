@@ -1,19 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DocumentField, Signer } from "@/types/document";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -21,15 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { HexColorPicker } from "react-colorful";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Info } from "lucide-react";
+import { HexColorPicker } from "react-colorful";
+import { DocumentField, Signer } from "@/types/document";
 import {
   handleFieldPropertiesUpdate,
   handleFieldPropertiesClose,
@@ -92,15 +85,16 @@ export function FieldProperties({
     }
   };
 
-  // Handle signer selection and update the color accordingly
-  const handleSignerChange = (signerId: string) => {
-    const selectedSigner = signers.find((s) => s.id === signerId);
-
-    setLocalField((prev) => ({
-      ...prev,
-      signerId,
-      color: selectedSigner?.color || prev.color,
-    }));
+  // For single signer setup, we automatically set the signer ID from the available signer
+  const autoAssignSigner = () => {
+    if (signers.length > 0 && signers[0]) {
+      // Automatically use the first signer by default
+      setLocalField((prev) => ({
+        ...prev,
+        signerId: signers[0].id,
+        color: signers[0].color || prev.color,
+      }));
+    }
   };
 
   // Update JSON for conditional logic
@@ -129,13 +123,16 @@ export function FieldProperties({
     }
   };
 
-  const handleSubmit = async () => {
-    // Validate field before submitting
-    if (localField.required && !localField.signerId) {
-      setValidationError("Required fields must be assigned to a signer");
-      return;
+  // Auto-assign signer when component mounts or when field type changes to signature/initial
+  useEffect(() => {
+    if (["signature", "initial"].includes(localField.type)) {
+      autoAssignSigner();
     }
+  }, [localField.type]);
 
+  const handleSubmit = async () => {
+    // For single-signer setup, we don't need to validate signer assignment
+    // as it's handled automatically
     await onUpdateAction(localField);
     await onCloseAction();
   };
@@ -304,21 +301,134 @@ export function FieldProperties({
           </div>
         );
 
+      case "checkbox":
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Default Value</Label>
+                <Select
+                  value={localField.value === "true" ? "checked" : "unchecked"}
+                  onValueChange={(value) =>
+                    handleChange("value", value === "checked" ? "true" : "false")
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select default state" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="checked">Checked</SelectItem>
+                    <SelectItem value="unchecked">Unchecked</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "formula":
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="formula">Formula Expression</Label>
+              <Input
+                id="formula"
+                value={localField.value || ""}
+                onChange={(e) => handleChange("value", e.target.value)}
+                placeholder="e.g., {field_1} + {field_2}"
+              />
+              <p className="text-xs text-muted-foreground">
+                Use {"{field_id}"} to reference other fields
+              </p>
+            </div>
+          </div>
+        );
+
+      case "radio":
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="options">Radio Button Options</Label>
+              <div className="space-y-2">
+                <Input
+                  placeholder="Enter options separated by commas"
+                  value={localField.options || ""}
+                  onChange={(e) => {
+                    const optionsString = e.target.value;
+                    handleChange("options", optionsString);
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Enter comma-separated values, e.g., &quot;Option 1, Option 2&quot;
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "payment":
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="amount">Amount</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  value={localField.value || ""}
+                  onChange={(e) => handleChange("value", e.target.value)}
+                  placeholder="Enter amount"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="currency">Currency</Label>
+                <Select
+                  value={localField.placeholder || "USD"}
+                  onValueChange={(value) => handleChange("placeholder", value)}
+                >
+                  <SelectTrigger id="currency">
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USD">USD ($)</SelectItem>
+                    <SelectItem value="EUR">EUR (€)</SelectItem>
+                    <SelectItem value="GBP">GBP (£)</SelectItem>
+                    <SelectItem value="CAD">CAD ($)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "image":
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Image Properties</Label>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="proportionalResize"
+                  checked={localField.value === "true"}
+                  onCheckedChange={(checked) =>
+                    handleChange("value", checked ? "true" : "false")
+                  }
+                />
+                <Label htmlFor="proportionalResize">
+                  Maintain aspect ratio
+                </Label>
+              </div>
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
   };
 
   return (
-    <Sheet open={!!field} onOpenChange={(open) => !open && onCloseAction()}>
-      <SheetContent className="w-full sm:max-w-lg">
-        <SheetHeader>
-          <SheetTitle>Field Properties: {localField.label}</SheetTitle>
-          <SheetDescription>
-            Configure the selected field&apos;s properties and behavior
-          </SheetDescription>
-        </SheetHeader>
-
+    <div>
         {validationError && (
           <Alert className="mt-4 text-red-500">
             <AlertCircle className="h-4 w-4" />
@@ -332,54 +442,57 @@ export function FieldProperties({
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="w-full grid grid-cols-3">
-              <TabsTrigger value="general">General</TabsTrigger>
-              <TabsTrigger value="appearance">Appearance</TabsTrigger>
-              <TabsTrigger value="conditional">Conditional Logic</TabsTrigger>
+            <TabsList className="w-full grid grid-cols-3 mb-4">
+              <TabsTrigger value="general" className="transition-all">General</TabsTrigger>
+              <TabsTrigger value="appearance" className="transition-all">Appearance</TabsTrigger>
+              <TabsTrigger value="conditional" className="transition-all">Conditional Logic</TabsTrigger>
             </TabsList>
 
             <TabsContent value="general" className="mt-4 space-y-4">
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="label">Field Label</Label>
+                  <Label htmlFor="label" className="text-sm font-medium">Field Label</Label>
                   <Input
                     id="label"
                     value={localField.label}
                     onChange={(e) => handleChange("label", e.target.value)}
                     placeholder="Enter field label"
+                    className="transition-all focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 p-2 rounded-md bg-slate-50 hover:bg-slate-100 transition-colors">
                   <Checkbox
                     id="required"
                     checked={localField.required}
                     onCheckedChange={(checked) =>
                       handleChange("required", !!checked)
                     }
+                    className="data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
                   />
-                  <Label htmlFor="required">Required Field</Label>
+                  <Label htmlFor="required" className="font-medium cursor-pointer">
+                    <span className="flex items-center">
+                      Required Field
+                      {localField.required && (
+                        <span className="ml-2 text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full">Required</span>
+                      )}
+                    </span>
+                  </Label>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="signer">Assign to Signer</Label>
-                  <Select
-                    value={localField.signerId || ""}
-                    onValueChange={handleSignerChange}
-                  >
-                    <SelectTrigger id="signer">
-                      <SelectValue placeholder="Select a signer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Unassigned</SelectItem>
-                      {signers.map((signer) => (
-                        <SelectItem key={signer.id} value={signer.id}>
-                          {signer.name || signer.email}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Single signer mode - auto-assigned */}
+                {["signature", "initial"].includes(localField.type) && (
+                  <div className="my-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
+                    <div className="flex items-center">
+                      <div className="mr-2 p-1 bg-blue-100 rounded-full">
+                        <Info className="h-4 w-4 text-blue-500" />
+                      </div>
+                      <p className="text-sm text-blue-700">
+                        This field will be assigned to the document signer automatically.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {renderFieldTypeSpecificProperties()}
               </div>
@@ -428,6 +541,43 @@ export function FieldProperties({
                 </div>
 
                 <div className="space-y-2">
+                  <Label>Text Color</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        <div
+                          className="h-4 w-4 rounded border mr-2"
+                          style={{
+                            backgroundColor:
+                              localField.textColor || "#000000",
+                          }}
+                        />
+                        {localField.textColor || "Select text color"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64">
+                      <div className="space-y-2">
+                        <HexColorPicker
+                          color={localField.textColor || "#000000"}
+                          onChange={(color) =>
+                            handleChange("textColor", color)
+                          }
+                        />
+                        <Input
+                          value={localField.textColor || "#000000"}
+                          onChange={(e) =>
+                            handleChange("textColor", e.target.value)
+                          }
+                        />
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="space-y-2">
                   <Label>Background Color</Label>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -463,6 +613,43 @@ export function FieldProperties({
                     </PopoverContent>
                   </Popover>
                 </div>
+                
+                <div className="space-y-2">
+                  <Label>Border Color</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        <div
+                          className="h-4 w-4 rounded border mr-2"
+                          style={{
+                            backgroundColor:
+                              localField.borderColor || "#cccccc",
+                          }}
+                        />
+                        {localField.borderColor || "Select border color"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64">
+                      <div className="space-y-2">
+                        <HexColorPicker
+                          color={localField.borderColor || "#cccccc"}
+                          onChange={(color) =>
+                            handleChange("borderColor", color)
+                          }
+                        />
+                        <Input
+                          value={localField.borderColor || "#cccccc"}
+                          onChange={(e) =>
+                            handleChange("borderColor", e.target.value)
+                          }
+                        />
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
             </TabsContent>
 
@@ -473,16 +660,16 @@ export function FieldProperties({
                     Show this field based on:
                   </Label>
                   <Select
-                    value={conditionalLogic.fieldId || ""}
+                    value={conditionalLogic.fieldId || "no_condition"}
                     onValueChange={(value) =>
-                      updateConditionalLogic("fieldId", value)
+                      updateConditionalLogic("fieldId", value === "no_condition" ? "" : value)
                     }
                   >
                     <SelectTrigger id="conditional-field">
                       <SelectValue placeholder="Select a field" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">
+                      <SelectItem value="no_condition">
                         No condition (always show)
                       </SelectItem>
                       {availableFieldIds
@@ -594,13 +781,21 @@ export function FieldProperties({
           </Tabs>
         </div>
 
-        <div className="mt-6 flex justify-end gap-2">
-          <Button variant="outline" onClick={() => onCloseAction()}>
+        <div className="mt-8 flex justify-end gap-3">
+          <Button 
+            variant="outline" 
+            onClick={() => onCloseAction()}
+            className="px-4 hover:bg-slate-100 transition-colors"
+          >
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>Save Changes</Button>
+          <Button 
+            onClick={handleSubmit}
+            className="px-6 bg-amber-500 hover:bg-amber-600 transition-colors"
+          >
+            Save Changes
+          </Button>
         </div>
-      </SheetContent>
-    </Sheet>
+    </div>
   );
 }

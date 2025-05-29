@@ -15,14 +15,15 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { saveDocumentFields } from "@/actions/document";
 import { useRouter } from "next/navigation";
+import { FieldProperties } from "@/components/document/field-properties";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { FileSignature, Type, PenTool, Check, CalendarDays, ListFilter } from "lucide-react";
 
 interface EditDocumentComponentProps {
   document: PrismaDocument;
 }
 
-export function EditDocumentComponent({
-  document,
-}: EditDocumentComponentProps) {
+export function EditDocumentComponent({ document }: EditDocumentComponentProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [pdfData, setPdfData] = useState<Uint8Array | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,15 +31,9 @@ export function EditDocumentComponent({
   const [activeTab, setActiveTab] = useState("fields");
   const [isSaving, setIsSaving] = useState(false);
   const [hasValidatedSigner, setHasValidatedSigner] = useState(false);
+  const [showFieldProperties, setShowFieldProperties] = useState(false);
 
-  const {
-    fields,
-    addField,
-    updateField,
-    deleteField,
-    selectedField,
-    selectField,
-  } = useDocumentFields(document.id);
+  const { fields, addField, updateField, deleteField, selectedField, selectField } = useDocumentFields(document.id);
 
   const router = useRouter();
 
@@ -76,9 +71,7 @@ export function EditDocumentComponent({
   // Check if document has a valid signer when required
   const hasValidSigner = () => {
     // Find fields that require a signer (signature, initial)
-    const signerRequiredFields = fields.filter((field) =>
-      ["signature", "initial"].includes(field.type),
-    );
+    const signerRequiredFields = fields.filter((field) => ["signature", "initial"].includes(field.type));
 
     // If there are no signature/initial fields, we don't need a signer
     if (signerRequiredFields.length === 0) {
@@ -87,9 +80,7 @@ export function EditDocumentComponent({
     }
 
     // Check if at least one field has a signerId
-    const fieldsWithSigner = signerRequiredFields.filter(
-      (f) => f.signerId && f.signerId.trim() !== "",
-    );
+    const fieldsWithSigner = signerRequiredFields.filter((f) => f.signerId && f.signerId.trim() !== "");
 
     const hasAssignedSigner = fieldsWithSigner.length > 0;
 
@@ -97,9 +88,7 @@ export function EditDocumentComponent({
     console.log("- Total signature fields found:", signerRequiredFields.length);
     console.log("- Fields with signer assignments:", fieldsWithSigner.length);
     signerRequiredFields.forEach((field) => {
-      console.log(
-        `  Field ID: ${field.id}, Type: ${field.type}, SignerId: ${field.signerId || "MISSING"}`,
-      );
+      console.log(`  Field ID: ${field.id}, Type: ${field.type}, SignerId: ${field.signerId || "MISSING"}`);
     });
 
     return hasAssignedSigner;
@@ -111,16 +100,13 @@ export function EditDocumentComponent({
       // Check if there are any fields to save
       if (fields.length === 0) {
         setActiveTab("fields");
-        toast.error(
-          "Please add at least one field before saving the document",
-          {
-            description: "Your document needs at least one field to be useful",
-            action: {
-              label: "Add Fields",
-              onClick: () => setActiveTab("fields"),
-            },
+        toast.error("Please add at least one field before saving the document", {
+          description: "Your document needs at least one field to be useful",
+          action: {
+            label: "Add Fields",
+            onClick: () => setActiveTab("fields"),
           },
-        );
+        });
         return;
       }
 
@@ -128,8 +114,7 @@ export function EditDocumentComponent({
       if (!hasValidSigner()) {
         setActiveTab("signers");
         toast.error("Please add a signer before saving the document", {
-          description:
-            "Document includes signature fields which require a signer",
+          description: "Document includes signature fields which require a signer",
           action: {
             label: "Add Signer",
             onClick: () => setActiveTab("signers"),
@@ -197,23 +182,15 @@ export function EditDocumentComponent({
             <TabsContent value="fields" className="w-full">
               <FieldPalette
                 currentPage={currentPage}
-                onAddFieldAction={async (
-                  fieldType: DocumentFieldType,
-                  pageNumber?: number,
-                ) => {
+                onAddFieldAction={async (fieldType: DocumentFieldType, pageNumber?: number) => {
                   // Add the field first
                   addField(fieldType, pageNumber ?? currentPage);
 
                   // If adding a signature or initial field, check if we have a signer
-                  if (
-                    ["signature", "initial"].includes(fieldType) &&
-                    !hasValidSigner() &&
-                    !hasValidatedSigner
-                  ) {
+                  if (["signature", "initial"].includes(fieldType) && !hasValidSigner() && !hasValidatedSigner) {
                     // Prompt the user to add a signer
                     toast.info("Signature field added", {
-                      description:
-                        "Remember to add a signer for signature fields",
+                      description: "Remember to add a signer for signature fields",
                       action: {
                         label: "Add Signer",
                         onClick: () => setActiveTab("signers"),
@@ -241,9 +218,7 @@ export function EditDocumentComponent({
                     }
                   });
 
-                  console.log(
-                    `Updated ${fields.filter((f) => ["signature", "initial"].includes(f.type)).length} signature fields with signer ID: ${signerId}`,
-                  );
+                  console.log(`Updated ${fields.filter((f) => ["signature", "initial"].includes(f.type)).length} signature fields with signer ID: ${signerId}`);
                   return { signerId, color };
                 }}
               />
@@ -276,6 +251,7 @@ export function EditDocumentComponent({
             selectedFieldId={selectedField?.id}
             onFieldSelectAction={async (field) => {
               selectField(field);
+              setShowFieldProperties(true);
               return field;
             }}
             onFieldDragEnd={async (id, x, y) => {
@@ -311,6 +287,40 @@ export function EditDocumentComponent({
           />
         </div>
       </div>
+
+      {/* Field Properties Panel */}
+      <Sheet open={showFieldProperties && !!selectedField} onOpenChange={setShowFieldProperties}>
+        <SheetContent side="right" className="w-[400px] sm:w-[540px] overflow-y-auto p-4">
+          <SheetHeader className="pb-4 border-b">
+            <SheetTitle className="text-xl flex items-center">
+              {selectedField?.type === "signature" && <FileSignature className="h-5 w-5 mr-2 text-blue-500" />}
+              {selectedField?.type === "text" && <Type className="h-5 w-5 mr-2 text-blue-500" />}
+              {selectedField?.type === "initial" && <PenTool className="h-5 w-5 mr-2 text-blue-500" />}
+              {selectedField?.type === "checkbox" && <Check className="h-5 w-5 mr-2 text-blue-500" />}
+              {selectedField?.type === "date" && <CalendarDays className="h-5 w-5 mr-2 text-blue-500" />}
+              {selectedField?.type === "dropdown" && <ListFilter className="h-5 w-5 mr-2 text-blue-500" />}
+              Field Properties
+            </SheetTitle>
+            <SheetDescription className="text-sm">
+              Configure the selected <span className="font-medium">{selectedField?.type}</span> field
+            </SheetDescription>
+          </SheetHeader>
+
+          {selectedField && (
+            <FieldProperties
+              field={selectedField}
+              onUpdateAction={async (field) => {
+                updateField(field);
+                return field;
+              }}
+              onCloseAction={() => {
+                setShowFieldProperties(false);
+                return Promise.resolve(true);
+              }}
+            />
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
