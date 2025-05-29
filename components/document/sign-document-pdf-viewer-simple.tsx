@@ -6,12 +6,12 @@ import { DocumentField } from "@/types/document";
 import { FieldValidationError } from "@/types/validation";
 import { usePdfWorker } from "@/hooks/use-pdf-worker";
 import { cn } from "@/lib/utils";
-import {  pdfToScreenCoordinates } from "@/utils/pdf-utils";
+import { pdfToScreenCoordinates } from "@/utils/pdf-utils";
 import { PageNavigation } from "@/components/document/page-navigation";
 import { FieldErrorTooltip } from "@/components/document/field-error-tooltip";
 import { PdfFormField } from "@/components/document/pdf-form-fields";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut,  RefreshCw } from "lucide-react";
+import { ZoomIn, ZoomOut, RefreshCw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Import react-pdf styles
@@ -19,9 +19,6 @@ import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import "@/app/pdf-viewer.css";
 import "@/app/pdf-form-fields.css";
-
-// Import SVG icons for field types
-import { Check, Edit, FileSignature, Type, Calendar, FileText } from "lucide-react";
 
 interface SignDocumentPdfViewerSimpleProps {
   pdfData: Uint8Array | null;
@@ -118,40 +115,41 @@ export function SignDocumentPdfViewerSimple({
   // Get fields for current page
   const currentPageFields = useMemo(() => {
     const filteredFields = fields.filter((field) => field.pageNumber === currentPage && field.signerId === currentSignerId);
-    
+
     // Debug logging to help identify field rendering issues
-    console.log(`Found ${filteredFields.length} fields for page ${currentPage}:`, 
-      filteredFields.map(f => ({ id: f.id, type: f.type, x: f.x, y: f.y, width: f.width, height: f.height }))
+    console.log(
+      `Found ${filteredFields.length} fields for page ${currentPage}:`,
+      filteredFields.map((f) => ({ id: f.id, type: f.type, x: f.x, y: f.y, width: f.width, height: f.height }))
     );
-    
+
     // Check specifically for signature fields
-    const signatureFields = filteredFields.filter(f => f.type === "signature" || f.type === "initial");
+    const signatureFields = filteredFields.filter((f) => f.type === "signature" || f.type === "initial");
     if (signatureFields.length > 0) {
       console.log(`Found ${signatureFields.length} signature/initial fields on page ${currentPage}`);
     }
-    
+
     return filteredFields;
   }, [fields, currentPage, currentSignerId]);
 
   // Create field icon component based on field type
-//   const getFieldIcon = useCallback((type: string) => {
-//     switch (type) {
-//       case "signature":
-//         return <FileSignature className="h-3.5 w-3.5" />;
-//       case "initial":
-//         return <Edit className="h-3.5 w-3.5" />;
-//       case "text":
-//         return <Type className="h-3.5 w-3.5" />;
-//       case "checkbox":
-//         return <Check className="h-3.5 w-3.5" />;
-//       case "date":
-//         return <Calendar className="h-3.5 w-3.5" />;
-//       case "textarea":
-//         return <FileText className="h-3.5 w-3.5" />;
-//       default:
-//         return <Type className="h-3.5 w-3.5" />;
-//     }
-//   }, []);
+  //   const getFieldIcon = useCallback((type: string) => {
+  //     switch (type) {
+  //       case "signature":
+  //         return <FileSignature className="h-3.5 w-3.5" />;
+  //       case "initial":
+  //         return <Edit className="h-3.5 w-3.5" />;
+  //       case "text":
+  //         return <Type className="h-3.5 w-3.5" />;
+  //       case "checkbox":
+  //         return <Check className="h-3.5 w-3.5" />;
+  //       case "date":
+  //         return <Calendar className="h-3.5 w-3.5" />;
+  //       case "textarea":
+  //         return <FileText className="h-3.5 w-3.5" />;
+  //       default:
+  //         return <Type className="h-3.5 w-3.5" />;
+  //     }
+  //   }, []);
 
   // Get field status classes for styling
   const getFieldStatusClasses = useCallback(
@@ -198,7 +196,7 @@ export function SignDocumentPdfViewerSimple({
       onFieldClickAction(fieldId);
     },
     [onFieldClickAction]
-  );  // Create a stable reference to the PDF data
+  ); // Create a stable reference to the PDF data
   // Using proper memoization to prevent unnecessary reloads
   const memoizedFile = useMemo(() => {
     if (!pdfData) return null;
@@ -215,7 +213,7 @@ export function SignDocumentPdfViewerSimple({
     }
 
     return null;
-  }, [pdfData instanceof Uint8Array ? pdfData.buffer : null]);// Handle page navigation
+  }, [pdfData instanceof Uint8Array ? pdfData.buffer : null]); // Handle page navigation
   const handlePageNavigation = useCallback(
     async (newPage: number) => {
       // Check if the new page is within range
@@ -234,16 +232,11 @@ export function SignDocumentPdfViewerSimple({
     if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains("page-container")) {
       setActiveField(null);
     }
-    
+
     // Don't clear active field when clicking inside form inputs
     const target = e.target as HTMLElement;
-    const isFormElement = 
-      target.tagName === "INPUT" || 
-      target.tagName === "TEXTAREA" || 
-      target.tagName === "SELECT" ||
-      target.tagName === "BUTTON" ||
-      target.closest('[role="dialog"]') !== null;
-    
+    const isFormElement = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.tagName === "BUTTON" || target.closest('[role="dialog"]') !== null;
+
     if (isFormElement) {
       e.stopPropagation();
       return;
@@ -399,25 +392,22 @@ export function SignDocumentPdfViewerSimple({
                 )}
 
                 {/* Interactive field overlay */}
-                <div className="absolute top-0 left-0 w-full h-full pointer-events-none">                  {currentPageFields.map((field) => {                    // Make sure field has all required positioning properties
-                    if (field.x === undefined || field.y === undefined || 
-                        field.width === undefined || field.height === undefined) {
+                <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+                  {currentPageFields.map((field) => {
+                    // Make sure field has all required positioning properties
+                    if (field.x === undefined || field.y === undefined || field.width === undefined || field.height === undefined) {
                       console.error("Field is missing position/size data:", field);
                       return null; // Skip rendering this field
                     }
-                    
+
                     // Calculate scaled position and size
-                    const fieldCoords = pdfToScreenCoordinates(
-                      Number(field.x), 
-                      Number(field.y), 
-                      effectiveScale
-                    );
+                    const fieldCoords = pdfToScreenCoordinates(Number(field.x), Number(field.y), effectiveScale);
                     const width = Number(field.width) * effectiveScale;
                     const height = Number(field.height) * effectiveScale;
                     const isActive = field.id === activeField;
                     const hasError = fieldErrors.some((error) => error.fieldId === field.id);
                     const value = fieldValues[field.id] || "";
-                    
+
                     return (
                       <FieldErrorTooltip key={field.id} fieldId={field.id} fieldErrors={fieldErrors}>
                         <div
@@ -425,7 +415,8 @@ export function SignDocumentPdfViewerSimple({
                             "absolute border-2 rounded-md pointer-events-auto transition-all overflow-hidden",
                             getFieldStatusClasses(field.id),
                             isActive && "ring-2 ring-primary ring-offset-2 shadow-lg scale-[1.02]"
-                          )}                          style={{
+                          )}
+                          style={{
                             left: `${fieldCoords.x}px`,
                             top: `${fieldCoords.y}px`,
                             width: `${width}px`,
@@ -441,7 +432,9 @@ export function SignDocumentPdfViewerSimple({
                           data-field-id={field.id}
                           data-field-type={field.type}
                           data-field-required={field.required}
-                        >                          <PdfFormField 
+                        >
+                          {" "}
+                          <PdfFormField
                             field={field}
                             value={value}
                             onChangeAction={(fieldId, newValue) => {
@@ -449,7 +442,7 @@ export function SignDocumentPdfViewerSimple({
                                 onFieldChangeAction(fieldId, newValue);
                               } else {
                                 // If no change action provided, fallback to click action
-                                handleFieldClick(new MouseEvent('click') as any, fieldId);
+                                handleFieldClick(new MouseEvent("click") as any, fieldId);
                               }
                             }}
                             onFocusAction={(fieldId) => {
@@ -465,10 +458,10 @@ export function SignDocumentPdfViewerSimple({
                             }}
                             error={hasError}
                             style={{
-                              width: '100%',
-                              height: '100%',
+                              width: "100%",
+                              height: "100%",
                             }}
-                            className={isActive ? 'focus-within:ring-0' : ''}
+                            className={isActive ? "focus-within:ring-0" : ""}
                           />
                         </div>
                       </FieldErrorTooltip>
