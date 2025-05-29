@@ -538,6 +538,11 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
       toast.error("Please correct the errors before signing the document");
       return;
     }
+    // // Print field values in a big red style in the browser console
+    // console.log(
+    //   "%cField values before signing:",
+    //   "color: white; background: red; font-size: 2rem; font-weight: bold; padding: 8px 16px; border-radius: 4px;", fieldValues
+    // );
 
     try {
       setIsSigning(true);
@@ -545,12 +550,26 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
       // Get client user agent for tracking
       const userAgent = getUserAgent();
 
+      // // Print user agent in a big red style in the browser console
+      // console.log(
+      //   "%cUser Agent before signing:",
+      //   "color: white; background: red; font-size: 2rem; font-weight: bold; padding: 8px 16px; border-radius: 4px;",
+      //   userAgent
+      // );
+
       // Call the server action to complete the document signing process
       const result = await completeDocumentSigning(
         document.id,
         signer.id,
         fieldValues,
         { userAgent, ipAddress: "127.0.0.1" } // In a real app, IP would be collected server-side
+      );
+
+      // Print result in a big red style in the browser console
+      console.log(
+        "%cSign Document Result:",
+        "color: white; background: red; font-size: 2rem; font-weight: bold; padding: 8px 16px; border-radius: 4px;",
+        result
       );
 
       if (result.success) {
@@ -1049,11 +1068,9 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
       </Dialog>
       {/* Date Picker Dialog for date fields would be added here */}
       {/* Show completion dialog when signing is completed */}
-      <Dialog open={signingCompleted} onOpenChange={setSigningCompleted}>
-        <DialogContent className="sm:max-w-md">
-          <SigningCompletedDialog documentId={document.id} documentTitle={document.title || "Document"} isLastSigner={isLastSigner} />
-        </DialogContent>
-      </Dialog>
+      {signingCompleted && (
+        <SigningCompletedDialog documentId={document.id} documentTitle={document.title || "Document"} isLastSigner={isLastSigner} />
+      )}
       {/* Signing confirmation dialog */}
       <SignConfirmationDialog
         open={isConfirmationModalOpen}

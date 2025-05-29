@@ -13,17 +13,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DownloadButton } from "@/components/document/download-button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface SigningCompletedProps {
   documentId: string;
   documentTitle?: string;
   isLastSigner: boolean;
+  dialogMode?: boolean;
 }
 
 export function SigningCompletedDialog({
   documentId,
   documentTitle = "Document",
   isLastSigner,
+  dialogMode = false,
 }: SigningCompletedProps) {
   const router = useRouter();
   const [countdown, setCountdown] = useState(5);
@@ -43,7 +46,7 @@ export function SigningCompletedDialog({
     return () => clearInterval(timer);
   }, [documentId, router]);
 
-  return (
+  const content = (
     <Card className="max-w-md w-full mx-auto border-primary/20 shadow-lg animate-in fade-in-0 zoom-in-95 duration-300">
       <CardHeader className="bg-primary/5 border-b border-primary/10">
         <div className="flex items-center gap-3">
@@ -109,4 +112,19 @@ export function SigningCompletedDialog({
       </CardFooter>
     </Card>
   );
+
+  if (dialogMode) {
+    return (
+      <Dialog open={true}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="sr-only">Document Signed</DialogTitle>
+          </DialogHeader>
+          {content}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return content;
 }
