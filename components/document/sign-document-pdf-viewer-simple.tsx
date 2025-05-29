@@ -86,11 +86,17 @@ export function SignDocumentPdfViewerSimple({
     },
     [onTotalPagesChangeAction]
   );
-
   // Handle page render success
+  interface PageLoadSuccessData {
+    originalWidth?: number;
+    originalHeight?: number;
+  }
+
   const handlePageLoadSuccess = useCallback(
-    (page: any) => {
-      const { width, height } = page.originalWidth ? { width: page.originalWidth, height: page.originalHeight } : pageSize;
+    (page: PageLoadSuccessData) => {
+      // Ensure we have valid width and height values by using nullish coalescing
+      const width = page.originalWidth ?? pageSize.width;
+      const height = page.originalHeight ?? pageSize.height;
 
       setPageSize({ width, height });
 
@@ -183,9 +189,18 @@ export function SignDocumentPdfViewerSimple({
   const resetZoom = useCallback(() => {
     setZoomLevel(1);
   }, []);
-
   // Calculate the effective scale (base scale * zoom level)
   const effectiveScale = viewerScale * zoomLevel;
+
+  // PDF rendering options
+  const pdfOptions = useMemo(
+    () => ({
+      cMapUrl: "https://unpkg.com/pdfjs-dist@3.4.120/cmaps/",
+      cMapPacked: true,
+      standardFontDataUrl: "https://unpkg.com/pdfjs-dist@3.4.120/standard_fonts/",
+    }),
+    []
+  );
 
   // Handle field click with active state
   const handleFieldClick = useCallback(
@@ -211,9 +226,8 @@ export function SignDocumentPdfViewerSimple({
     } catch (error) {
       console.error("Error creating PDF file reference:", error);
     }
-
     return null;
-  }, [pdfData instanceof Uint8Array ? pdfData.buffer : null]); // Handle page navigation
+  }, [pdfData]); // Handle page navigation
   const handlePageNavigation = useCallback(
     async (newPage: number) => {
       // Check if the new page is within range
@@ -366,14 +380,7 @@ export function SignDocumentPdfViewerSimple({
                   </div>
                 }
                 className="pdf-document"
-                options={useMemo(
-                  () => ({
-                    cMapUrl: "https://unpkg.com/pdfjs-dist@3.4.120/cmaps/",
-                    cMapPacked: true,
-                    standardFontDataUrl: "https://unpkg.com/pdfjs-dist@3.4.120/standard_fonts/",
-                  }),
-                  []
-                )}
+                options={pdfOptions}
               >
                 {workerLoaded ? (
                   <Page
@@ -442,7 +449,9 @@ export function SignDocumentPdfViewerSimple({
                                 onFieldChangeAction(fieldId, newValue);
                               } else {
                                 // If no change action provided, fallback to click action
-                                handleFieldClick(new MouseEvent("click") as any, fieldId);
+                                // Call the field click action directly rather than trying to synthesize an event
+                                setActiveField(fieldId);
+                                onFieldClickAction(fieldId);
                               }
                             }}
                             onFocusAction={(fieldId) => {
