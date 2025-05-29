@@ -61,7 +61,7 @@ export const sendEmail = async (payload: Payload) => {
   const transporter = nodemailer.createTransport(smtpSettings);
 
   try {
-    const mailOptions: any = {
+    const mailOptions: nodemailer.SendMailOptions = {
       from: `"Royal Sign" <${process.env.GMAIL_SMTP_USER}>`,
       to: recipient,
       subject,
@@ -70,7 +70,12 @@ export const sendEmail = async (payload: Payload) => {
     
     // Add attachments if provided
     if (attachments && attachments.length > 0) {
-      mailOptions.attachments = attachments;
+      mailOptions.attachments = attachments.map(att => ({
+        ...att,
+        content: att.content instanceof Uint8Array && !(att.content instanceof Buffer)
+          ? Buffer.from(att.content)
+          : att.content,
+      }));
     }
     
     const info = await transporter.sendMail(mailOptions);
