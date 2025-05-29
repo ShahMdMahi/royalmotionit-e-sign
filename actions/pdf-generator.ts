@@ -136,6 +136,37 @@ async function addWatermark(pdfDoc: PDFDocument, text: string, opacity: number =
 }
 
 /**
+ * Add document ID header to the top left corner of each page
+ * @param pdfDoc PDF document object
+ * @param documentId The document ID to display
+ */
+async function addDocumentIdHeader(pdfDoc: PDFDocument, documentId: string) {
+  const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const headerText = `Royal Sign Document Id: ${documentId}`;
+  const fontSize = 10; // Small but readable size for header
+
+  // Add header to each page
+  for (let i = 0; i < pdfDoc.getPageCount(); i++) {
+    const page = pdfDoc.getPage(i);
+    const { height } = page.getSize();
+    
+    // Position in top left corner with small margin
+    const x = 15;
+    const y = height - 20; // From top edge
+    
+    // Draw header text
+    page.drawText(headerText, {
+      x,
+      y,
+      size: fontSize,
+      font: font,
+      color: rgb(0, 0, 0), // Black color for better visibility
+      opacity: 1.0, // Fully opaque for readability
+    });
+  }
+}
+
+/**
  * Add document metadata to the PDF
  * @param pdfDoc PDF document object
  * @param document Document object with metadata
@@ -816,6 +847,9 @@ export async function generateFinalPDF(documentId: string) {
         });
       }
     }
+
+    // Add document ID in the top left corner of every page
+    await addDocumentIdHeader(pdfDoc, document.id);
 
     // Add document metadata
     pdfDoc.setTitle(document.title || "Signed Document");
