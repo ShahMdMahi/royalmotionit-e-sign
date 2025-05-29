@@ -199,17 +199,20 @@ export function PdfSignatureField({ field, value, onChangeAction, onFocusAction,
   // Add debug log when signature field is clicked
   const handleSignatureClick = () => {
     console.log(`Signature field clicked: ${field.id}, label: ${field.label || field.type}`);
+    // Update the form value when the signature field is clicked
+    // This will be handled by the parent component that provides the signature value
+    onChangeAction(field.id, value);
     if (onFocusAction) {
       console.log(`Calling onFocusAction for signature field: ${field.id}`);
       onFocusAction(field.id);
     }
   };
-
   return (
     <Button
       variant="outline"
       id={field.id}
       onClick={handleSignatureClick}
+      onBlur={onBlurAction}
       className={cn(
         "h-full w-full p-1 relative bg-background/90 hover:bg-primary/5 transition-colors text-sm pdf-form-field pdf-signature-field",
         error && "border-destructive pdf-field-error",
