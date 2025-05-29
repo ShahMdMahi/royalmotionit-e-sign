@@ -1,18 +1,8 @@
 "use server";
 
-import {
-  PDFDocument,
-  rgb,
-  StandardFonts,
-  PDFForm,
-  PDFPage,
-  degrees,
-} from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts, PDFForm, PDFPage, degrees } from "pdf-lib";
 import { DocumentField, DocumentFieldType, Document } from "@/types/document";
-import {
-  convertToDocumentField,
-  convertToDocumentFields,
-} from "@/utils/document-field-converter";
+import { convertToDocumentField, convertToDocumentFields } from "@/utils/document-field-converter";
 import { getFromR2, uploadToR2 } from "@/actions/r2";
 import { prisma } from "@/prisma/prisma";
 import { auth } from "@/auth";
@@ -46,7 +36,7 @@ async function drawFieldBackgroundAndBorder(
   page: PDFPage,
   field: any, // Using any here as we'll handle the type conversion internally
   x: number,
-  y: number,
+  y: number
 ) {
   // Convert field to proper DocumentField type if needed
   const typedField = convertToDocumentField(field);
@@ -117,11 +107,7 @@ async function drawFieldBackgroundAndBorder(
  * @param text Watermark text
  * @param opacity Opacity of the watermark (0-1)
  */
-async function addWatermark(
-  pdfDoc: PDFDocument,
-  text: string,
-  opacity: number = 0.15,
-) {
+async function addWatermark(pdfDoc: PDFDocument, text: string, opacity: number = 0.15) {
   const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
   // Add watermark to each page
@@ -155,21 +141,11 @@ async function addWatermark(
  * @param document Document object with metadata
  * @param signers Array of signers
  */
-function addDocumentMetadata(
-  pdfDoc: PDFDocument,
-  document: any,
-  signers: any[],
-) {
+function addDocumentMetadata(pdfDoc: PDFDocument, document: any, signers: any[]) {
   // Set document metadata
   pdfDoc.setTitle(document.title || "Signed Document");
   pdfDoc.setSubject("Electronically Signed Document");
-  pdfDoc.setKeywords([
-    "electronic signature",
-    "signed document",
-    "legal document",
-    document.id,
-    ...signers.map((s) => s.email),
-  ]);
+  pdfDoc.setKeywords(["electronic signature", "signed document", "legal document", document.id, ...signers.map((s) => s.email)]);
   pdfDoc.setProducer("Royal Sign E-Signature Platform");
   pdfDoc.setCreator("Royal Sign");
 
@@ -189,8 +165,7 @@ function addDocumentMetadata(
     if (signer.completedAt) {
       const signerKey = `Signer${index + 1}` as keyof typeof metadata;
       // Use explicit type casting to avoid index signature issues
-      (metadata as Record<string, string>)[signerKey] =
-        `${signer.name || signer.email}:${new Date(signer.completedAt).toISOString()}`;
+      (metadata as Record<string, string>)[signerKey] = `${signer.name || signer.email}:${new Date(signer.completedAt).toISOString()}`;
     }
   });
 
@@ -209,10 +184,7 @@ function addDocumentMetadata(
  * @param fields Array of document fields
  * @returns Processed fields with updated values and visibility flags
  */
-function processFieldConditionalsAndFormulas(
-  fields: DocumentField[],
-): DocumentField[] {
-  // First pass - evaluate all formula fields
+function processFieldConditionalsAndFormulas(fields: DocumentField[]): DocumentField[] {    // First pass - evaluate all formula fields
   const fieldsWithFormulas = fields.map((field) => {
     // If this is a formula field, evaluate its value
     if (field.type === "formula" && field.validationRule) {
@@ -226,6 +198,13 @@ function processFieldConditionalsAndFormulas(
         console.error(`Error evaluating formula for field ${field.id}:`, error);
         return field;
       }
+    }
+    // Make sure checkbox fields have proper value representation
+    if (field.type === "checkbox" && !field.value) {
+      return {
+        ...field,
+        value: "false" // Default checkbox value when empty
+      };
     }
     return field;
   });
@@ -241,10 +220,7 @@ function processFieldConditionalsAndFormulas(
           isVisible,
         };
       } catch (error) {
-        console.error(
-          `Error evaluating visibility for field ${field.id}:`,
-          error,
-        );
+        console.error(`Error evaluating visibility for field ${field.id}:`, error);
         // Default to showing the field if there's an error
         return {
           ...field,
@@ -267,6 +243,8 @@ function processFieldConditionalsAndFormulas(
  * @returns Result of the operation with the URL of the final document
  */
 export async function generateFinalPDF(documentId: string) {
+  // print document id in big red style in console
+  console.log(`%cGenerating final PDF for document ID: ${documentId}`, "color: red; font-size: 20px; font-weight: bold;");
   try {
     const userSession = await auth();
 
@@ -295,12 +273,13 @@ export async function generateFinalPDF(documentId: string) {
       };
     }
 
+    // print document details in big red style in console
+    console.log(`%cDocument details: ${JSON.stringify(document, null, 2)}`, "color: red; font-size: 16px; font-weight: bold;");
+
     // Check access rights
     const session = await auth();
     const isAuthor = document.authorId === session?.user?.id;
-    const isSigner = document.signers.some(
-      (s: { email: string }) => s.email === session?.user?.email,
-    );
+    const isSigner = document.signers.some((s: { email: string }) => s.email === session?.user?.email);
 
     if (!isAuthor && !isSigner) {
       return {
@@ -310,8 +289,7 @@ export async function generateFinalPDF(documentId: string) {
     }
 
     // Check if the signer has completed
-    const signerCompleted =
-      document.signers.length > 0 && document.signers[0].status === "COMPLETED";
+    const signerCompleted = document.signers.length > 0 && document.signers[0].status === "COMPLETED";
 
     if (!signerCompleted) {
       return {
@@ -319,6 +297,9 @@ export async function generateFinalPDF(documentId: string) {
         message: "The signer has not completed the document",
       };
     }
+
+    // print singerCompleted in big red style in console
+    console.log(`%cSigner completed: ${signerCompleted}`, "color: red; font-size: 16px; font-weight: bold;");
 
     // Get the original PDF from storage
     if (!document.key) {
@@ -339,6 +320,9 @@ export async function generateFinalPDF(documentId: string) {
       };
     }
 
+    // // print originalPdfResult in big red style in console
+    // console.log(`%cOriginal PDF retrieved successfully: ${JSON.stringify(originalPdfResult, null, 2)}`, "color: red; font-size: 16px; font-weight: bold;");
+
     // Load the PDF document
     const pdfBytes = originalPdfResult.data.Body;
     const pdfDoc = await PDFDocument.load(pdfBytes);
@@ -353,7 +337,7 @@ export async function generateFinalPDF(documentId: string) {
     // Embed fields and signatures
     for (const field of processedFields) {
       // Skip fields with no value or that should be hidden
-      if (!field.value || !field.isVisible) continue;
+      if ((!field.value && field.type !== 'checkbox') || field.isVisible === false) continue;
 
       const page = pdfDoc.getPage(field.pageNumber - 1);
       const { width: pageWidth, height: pageHeight } = page.getSize(); // Convert coordinates to PDF coordinate system (0,0 is bottom-left in PDF)
@@ -367,79 +351,126 @@ export async function generateFinalPDF(documentId: string) {
         case "signature":
         case "initial":
           // For signatures and initials, embed the image
-          if (field.value.startsWith("data:image")) {
+          if (field.value && field.value.startsWith("data:image")) {
             try {
               // Extract base64 data
               const base64Data = field.value.split(",")[1];
               if (!base64Data) continue;
 
-              // Embed the image
-              const signatureImage = await pdfDoc.embedPng(
-                Buffer.from(base64Data, "base64"),
-              );
+              // Determine image format - default to PNG but check for JPEG
+              let signatureImage;
+              if (field.value.includes("data:image/jpeg") || field.value.includes("data:image/jpg")) {
+                signatureImage = await pdfDoc.embedJpg(Buffer.from(base64Data, "base64"));
+              } else {
+                signatureImage = await pdfDoc.embedPng(Buffer.from(base64Data, "base64"));
+              }
 
-              // Draw the image
+              // Calculate proportional dimensions to maintain aspect ratio
+              const imgWidth = signatureImage.width;
+              const imgHeight = signatureImage.height;
+              
+              // Maintain aspect ratio while fitting within field boundaries
+              let drawWidth = field.width;
+              let drawHeight = field.height;
+              
+              const imgAspect = imgWidth / imgHeight;
+              const fieldAspect = field.width / field.height;
+              
+              if (imgAspect > fieldAspect) {
+                // Image is wider than field proportionally
+                drawHeight = field.width / imgAspect;
+              } else {
+                // Image is taller than field proportionally
+                drawWidth = field.height * imgAspect;
+              }
+              
+              // Center the image within the field
+              const offsetX = (field.width - drawWidth) / 2;
+              const offsetY = (field.height - drawHeight) / 2;
+              
+              // Draw the image with better positioning
               page.drawImage(signatureImage, {
+                x: x + offsetX,
+                y: y + offsetY,
+                width: drawWidth,
+                height: drawHeight,
+                opacity: 1.0, // Full opacity for better visibility
+              });
+              
+              // Draw a thin border around the signature for better visibility
+              page.drawRectangle({
                 x,
-                y,
+                y, 
                 width: field.width,
                 height: field.height,
-                opacity: 0.95,
+                borderColor: rgb(0.7, 0.7, 0.7),
+                borderWidth: 0.5,
+                borderOpacity: 0.5,
               });
             } catch (error) {
               console.error("Error embedding signature:", error);
-              // Continue with other fields even if one fails
+              // Add fallback text if signature embedding fails
+              try {
+                const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+                const fontSize = 10;
+                page.drawText(field.type === "signature" ? "Signature" : "Initial", {
+                  x: x + 4,
+                  y: y + field.height / 2 - fontSize / 2,
+                  size: fontSize,
+                  font,
+                  color: rgb(0.5, 0.5, 0.5),
+                });
+              } catch (fallbackError) {
+                console.error("Error adding fallback signature text:", fallbackError);
+              }
             }
           }
           break;
 
         case "checkbox":
           // For checkboxes, draw a checked box if value is true
-          if (field.value === "true" || field.value === "checked") {
-            // Embed checkbox using custom drawing
+          {
+            // Ensure proper box dimensions - make it more square if needed
+            const boxSize = Math.min(field.width, field.height);
+            const centerX = x + (field.width - boxSize) / 2;
+            const centerY = y + (field.height - boxSize) / 2;
+            
+            // Draw the checkbox border with consistent style
             page.drawRectangle({
-              x,
-              y,
-              width: field.width,
-              height: field.height,
-              borderWidth: 1,
+              x: centerX,
+              y: centerY,
+              width: boxSize,
+              height: boxSize,
+              borderWidth: 1.5,
               borderColor: rgb(0, 0, 0),
             });
-
-            // Draw checkmark (using lines)
-            const checkX = x + field.width * 0.2;
-            const checkY = y + field.height * 0.5;
-            page.drawLine({
-              start: { x: checkX, y: checkY },
-              end: {
-                x: checkX + field.width * 0.2,
-                y: checkY - field.height * 0.2,
-              },
-              thickness: 2,
-              color: rgb(0, 0, 0),
-            });
-            page.drawLine({
-              start: {
-                x: checkX + field.width * 0.2,
-                y: checkY - field.height * 0.2,
-              },
-              end: {
-                x: checkX + field.width * 0.6,
-                y: checkY + field.height * 0.3,
-              },
-              thickness: 2,
-              color: rgb(0, 0, 0),
-            });
-          } else {
-            // Just draw empty box
-            page.drawRectangle({
-              x,
-              y,
-              width: field.width,
-              height: field.height,
-              borderWidth: 1,
-              borderColor: rgb(0, 0, 0),
-            });
+            
+            // Draw checkmark if checked
+            if (field.value === "true" || field.value === "checked") {
+              // Calculate checkmark points based on box size
+              const checkStartX = centerX + boxSize * 0.2;
+              const checkMiddleX = centerX + boxSize * 0.4;
+              const checkEndX = centerX + boxSize * 0.8;
+              
+              const checkStartY = centerY + boxSize * 0.5;
+              const checkMiddleY = centerY + boxSize * 0.3;
+              const checkEndY = centerY + boxSize * 0.7;
+              
+              // Draw the checkmark with thicker lines
+              page.drawLine({
+                start: { x: checkStartX, y: checkStartY },
+                end: { x: checkMiddleX, y: checkMiddleY },
+                thickness: 2,
+                color: rgb(0, 0, 0),
+              });
+              
+              page.drawLine({
+                start: { x: checkMiddleX, y: checkMiddleY },
+                end: { x: checkEndX, y: checkEndY },
+                thickness: 2,
+                color: rgb(0, 0, 0),
+              });
+            }
           }
           break;
 
@@ -448,18 +479,16 @@ export async function generateFinalPDF(documentId: string) {
         case "phone":
         case "number":
           // For text fields, add the text
-          if (field.value) {
+          {
             // Load font
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const fontSize = field.fontSize || 12;
 
             // Apply any text color
-            const textColor = field.textColor
-              ? parseHexColor(field.textColor)
-              : rgb(0, 0, 0);
+            const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
 
             // Draw text with precise positioning and overflow handling
-            const textValue = String(field.value);
+            const textValue = String(field.value || "");
             // Calculate text width to handle overflow with ellipsis
             const textWidth = font.widthOfTextAtSize(textValue, fontSize);
             const fieldContentWidth = field.width - 8; // Padding on both sides
@@ -469,11 +498,7 @@ export async function generateFinalPDF(documentId: string) {
             if (textWidth > fieldContentWidth) {
               // Text is too long, add ellipsis
               let truncated = textValue;
-              while (
-                font.widthOfTextAtSize(truncated + "...", fontSize) >
-                  fieldContentWidth &&
-                truncated.length > 0
-              ) {
+              while (font.widthOfTextAtSize(truncated + "...", fontSize) > fieldContentWidth && truncated.length > 0) {
                 truncated = truncated.slice(0, -1);
               }
               displayText = truncated + "...";
@@ -497,29 +522,47 @@ export async function generateFinalPDF(documentId: string) {
 
         case "date":
           // For date fields, format and add the date
-          if (field.value) {
+          {
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-            let dateText = field.value;
+            let dateText = field.value || "";
 
             // Try to format date if it's a valid date
             try {
-              const date = new Date(field.value);
-              if (!isNaN(date.getTime())) {
-                dateText = date.toLocaleDateString();
+              if (dateText) {
+                const date = new Date(dateText);
+                if (!isNaN(date.getTime())) {
+                  // Format date as MM/DD/YYYY for better readability
+                  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                  const day = date.getDate().toString().padStart(2, '0');
+                  const year = date.getFullYear();
+                  dateText = `${month}/${day}/${year}`;
+                }
               }
             } catch (err) {
+              console.error("Error formatting date:", err);
               // Use the original value if parsing fails
             }
 
             // Draw date text with better styling
             const fontSize = field.fontSize || 12;
-            const textColor = field.textColor
-              ? parseHexColor(field.textColor)
-              : rgb(0, 0, 0);
+            const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
+            
+            // Calculate text width for potential truncation
+            const textWidth = font.widthOfTextAtSize(dateText, fontSize);
+            const fieldWidth = field.width - 8;
+            
+            // Truncate if needed
+            if (textWidth > fieldWidth) {
+              dateText = dateText.substring(0, Math.floor(dateText.length * (fieldWidth / textWidth)) - 3) + "...";
+            }
+
+            // Calculate vertical position for better alignment
+            const textHeight = font.heightAtSize(fontSize);
+            const centerY = y + field.height / 2 - textHeight / 3;
 
             page.drawText(dateText, {
               x: x + 4,
-              y: y + field.height / 2 - fontSize / 2,
+              y: centerY,
               size: fontSize,
               font,
               color: textColor,
@@ -529,36 +572,124 @@ export async function generateFinalPDF(documentId: string) {
         case "dropdown":
         case "radio":
           // For dropdown and radio fields, draw the selected option
-          if (field.value) {
+          {
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const fontSize = field.fontSize || 12;
-            const textColor = field.textColor
-              ? parseHexColor(field.textColor)
-              : rgb(0, 0, 0);
+            const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
+            
+            const displayValue = field.value || "";
+            
+            // Calculate text width for potential truncation
+            const textWidth = font.widthOfTextAtSize(displayValue, fontSize);
+            const fieldWidth = field.width - 8;
+            
+            // Handle text overflow with ellipsis if needed
+            let formattedValue = displayValue;
+            if (textWidth > fieldWidth) {
+              let truncated = displayValue;
+              while (font.widthOfTextAtSize(truncated + "...", fontSize) > fieldWidth && truncated.length > 0) {
+                truncated = truncated.slice(0, -1);
+              }
+              formattedValue = truncated + "...";
+            }
+            
+            // Calculate vertical position for better alignment
+            const textHeight = font.heightAtSize(fontSize);
+            const centerY = y + field.height / 2 - textHeight / 3;
 
-            page.drawText(field.value, {
+            // Draw the text with proper positioning
+            page.drawText(formattedValue, {
               x: x + 4,
-              y: y + field.height / 2 - fontSize / 2,
+              y: centerY,
               size: fontSize,
               font,
               color: textColor,
             });
+            
+            // For radio buttons, draw a visual indication of selection
+            if (field.type === "radio" && field.options) {
+              try {
+                // Check if options are available and draw a radio button
+                const options = field.options?.split(',').map(o => o.trim()) || [];
+                if (field.value && options.includes(field.value)) {
+                  // Draw a filled circle for the selected option
+                  const circleRadius = Math.min(8, field.height * 0.2);
+                  const circleX = x + field.width - circleRadius * 2;
+                  const circleY = y + field.height / 2;
+                  
+                  // Draw outer circle
+                  page.drawCircle({
+                    x: circleX,
+                    y: circleY,
+                    size: circleRadius * 2,
+                    borderWidth: 1,
+                    borderColor: rgb(0, 0, 0),
+                    opacity: 0.8,
+                  });
+                  
+                  // Draw inner filled circle to indicate selection
+                  page.drawCircle({
+                    x: circleX,
+                    y: circleY,
+                    size: circleRadius * 1.2, // Diameter is twice the radius
+                    color: rgb(0, 0, 0),
+                    opacity: 0.8,
+                  });
+                }
+              } catch (error) {
+                console.error("Error drawing radio options:", error);
+              }
+            }
           }
           break;
 
         case "formula":
-          // For formula fields, draw the computed value
-          if (field.value) {
+          // For formula fields, draw the computed value with special formatting
+          {
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const fontSize = field.fontSize || 12;
-            const textColor = field.textColor
-              ? parseHexColor(field.textColor)
-              : rgb(0, 0, 0);
+            const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
+            
+            let displayValue = field.value || "";
+            
+            // Try to identify and format numeric results
+            const numValue = parseFloat(displayValue);
+            if (!isNaN(numValue)) {
+              // If it seems to be a monetary value (has 2 decimal places)
+              if (field.validationRule && 
+                  (field.validationRule.includes('*') || 
+                   field.validationRule.includes('+') || 
+                   field.validationRule.includes('-') || 
+                   field.validationRule.includes('/'))) {
+                // Format with 2 decimal places for calculations
+                displayValue = numValue.toFixed(2);
+              } else if (Number.isInteger(numValue)) {
+                // Use integer format if it's a whole number
+                displayValue = numValue.toString();
+              }
+            }
+            
+            // Calculate text width for potential truncation
+            const textWidth = font.widthOfTextAtSize(displayValue, fontSize);
+            const fieldWidth = field.width - 8;
+            
+            // Handle text overflow with ellipsis if needed
+            if (textWidth > fieldWidth) {
+              let truncated = displayValue;
+              while (font.widthOfTextAtSize(truncated + "...", fontSize) > fieldWidth && truncated.length > 0) {
+                truncated = truncated.slice(0, -1);
+              }
+              displayValue = truncated + "...";
+            }
+            
+            // Calculate vertical position for better alignment
+            const textHeight = font.heightAtSize(fontSize);
+            const centerY = y + field.height / 2 - textHeight / 3;
 
-            // Add a special format for formula fields to indicate they're computed
-            page.drawText(field.value, {
+            // Draw the formula result
+            page.drawText(displayValue, {
               x: x + 4,
-              y: y + field.height / 2 - fontSize / 2,
+              y: centerY,
               size: fontSize,
               font,
               color: textColor,
@@ -568,27 +699,51 @@ export async function generateFinalPDF(documentId: string) {
 
         case "payment":
           // For payment fields, format the value as currency
-          if (field.value) {
+          {
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const fontSize = field.fontSize || 12;
-            const textColor = field.textColor
-              ? parseHexColor(field.textColor)
-              : rgb(0, 0, 0);
+            const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
 
             // Format as currency
-            let formattedValue = field.value;
-            try {
-              formattedValue = new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-              }).format(Number(field.value));
-            } catch (error) {
-              // Use original value if formatting fails
+            let formattedValue = field.value || "$0.00";
+            if (field.value) {
+              try {
+                const numValue = parseFloat(field.value);
+                if (!isNaN(numValue)) {
+                  formattedValue = new Intl.NumberFormat("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  }).format(numValue);
+                }
+              } catch (error) {
+                console.error("Error formatting payment value:", error);
+                // Use original value if formatting fails
+              }
             }
+            
+            // Calculate text width for potential truncation
+            const textWidth = font.widthOfTextAtSize(formattedValue, fontSize);
+            const fieldWidth = field.width - 8;
+            
+            // Handle text overflow with ellipsis if needed
+            if (textWidth > fieldWidth) {
+              let truncated = formattedValue;
+              while (font.widthOfTextAtSize(truncated + "...", fontSize) > fieldWidth && truncated.length > 0) {
+                truncated = truncated.slice(0, -1);
+              }
+              formattedValue = truncated + "...";
+            }
+            
+            // Calculate vertical position for better alignment
+            const textHeight = font.heightAtSize(fontSize);
+            const centerY = y + field.height / 2 - textHeight / 3;
 
+            // Draw the payment value with proper currency formatting
             page.drawText(formattedValue, {
               x: x + 4,
-              y: y + field.height / 2 - fontSize / 2,
+              y: centerY,
               size: fontSize,
               font,
               color: textColor,
@@ -598,16 +753,35 @@ export async function generateFinalPDF(documentId: string) {
 
         default:
           // Default handling for any other field types
-          if (field.value) {
+          {
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const fontSize = field.fontSize || 12;
-            const textColor = field.textColor
-              ? parseHexColor(field.textColor)
-              : rgb(0, 0, 0);
+            const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
+            
+            const displayValue = field.value || "";
+            
+            // Calculate text width for potential truncation
+            const textWidth = font.widthOfTextAtSize(displayValue, fontSize);
+            const fieldWidth = field.width - 8;
+            
+            // Handle text overflow with ellipsis if needed
+            let formattedValue = displayValue;
+            if (textWidth > fieldWidth) {
+              let truncated = displayValue;
+              while (font.widthOfTextAtSize(truncated + "...", fontSize) > fieldWidth && truncated.length > 0) {
+                truncated = truncated.slice(0, -1);
+              }
+              formattedValue = truncated + "...";
+            }
+            
+            // Calculate vertical position for better alignment
+            const textHeight = font.heightAtSize(fontSize);
+            const centerY = y + field.height / 2 - textHeight / 3;
 
-            page.drawText(field.value, {
+            // Draw the generic field value
+            page.drawText(formattedValue, {
               x: x + 4,
-              y: y + field.height / 2 - fontSize / 2,
+              y: centerY,
               size: fontSize,
               font,
               color: textColor,
@@ -646,12 +820,7 @@ export async function generateFinalPDF(documentId: string) {
     // Add document metadata
     pdfDoc.setTitle(document.title || "Signed Document");
     pdfDoc.setSubject("Electronically Signed Document");
-    pdfDoc.setKeywords([
-      "electronic signature",
-      "signed document",
-      "legal document",
-      document.id,
-    ]);
+    pdfDoc.setKeywords(["electronic signature", "signed document", "legal document", document.id]);
     pdfDoc.setProducer("Royal Sign E-Signature Platform");
     pdfDoc.setCreator("Royal Sign");
 
@@ -681,7 +850,11 @@ export async function generateFinalPDF(documentId: string) {
     }
 
     // Create a unique key for the signed document
-    const finalKey = `signed/${document.id}/${Date.now()}.pdf`;
+    // Include timestamp to ensure it's always a unique file
+    const finalKey = `signed/${document.id}/${Date.now()}-completed.pdf`;
+    
+    // Store reference to previous signed document if exists for cleanup later
+    const previousSignedUrl = document.url;
 
     // Try uploading with retry logic
     let uploadAttempts = 0;
@@ -732,6 +905,7 @@ export async function generateFinalPDF(documentId: string) {
         documentType: "SIGNED",
         signedAt: new Date(),
         url: `${process.env.R2_PUBLIC_URL}/${finalKey}`,
+        key: finalKey,
       },
     });
 
@@ -743,6 +917,10 @@ export async function generateFinalPDF(documentId: string) {
         actorEmail: session?.user?.email ?? undefined,
         actorName: session?.user?.name ?? undefined,
         actorRole: isAuthor ? "AUTHOR" : "SIGNER",
+        details: JSON.stringify({
+          fieldsEmbedded: true,
+          finalDocumentUrl: `${process.env.R2_PUBLIC_URL}/${finalKey}`
+        })
       },
     }); // Revalidate paths
     revalidatePath(`/documents/${documentId}`);

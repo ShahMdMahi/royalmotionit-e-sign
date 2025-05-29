@@ -56,6 +56,9 @@ export default async function Documents() {
               },
             },
           },
+          orderBy: {
+            updatedAt: "desc", // Order by updatedAt to show most recent documents first
+          }
         });
 
         // Pass an empty array for authorDocuments for non-admin users
