@@ -28,20 +28,18 @@ export function preparePdfData(pdfData: any): { data: string } | null {
   const validatePdfHeader = (buffer: Uint8Array): boolean => {
     if (buffer.length < 5) return false;
     // Check for the PDF header signature
-    return buffer[0] === 0x25 && // %
-           buffer[1] === 0x50 && // P
-           buffer[2] === 0x44 && // D
-           buffer[3] === 0x46 && // F
-           buffer[4] === 0x2D;   // -
+    return (
+      buffer[0] === 0x25 && // %
+      buffer[1] === 0x50 && // P
+      buffer[2] === 0x44 && // D
+      buffer[3] === 0x46 && // F
+      buffer[4] === 0x2d
+    ); // -
   };
 
   try {
     // If it's already an object with data property and not an array
-    if (
-      typeof pdfData === "object" &&
-      !Array.isArray(pdfData) &&
-      "data" in pdfData
-    ) {
+    if (typeof pdfData === "object" && !Array.isArray(pdfData) && "data" in pdfData) {
       const { data } = pdfData;
 
       // If nested data is Uint8Array, convert to data URL
@@ -72,11 +70,7 @@ export function preparePdfData(pdfData: any): { data: string } | null {
     }
 
     // If pdfData has a byteLength property, it might be an ArrayBuffer
-    if (
-      typeof pdfData === "object" &&
-      "byteLength" in pdfData &&
-      !(pdfData instanceof Uint8Array)
-    ) {
+    if (typeof pdfData === "object" && "byteLength" in pdfData && !(pdfData instanceof Uint8Array)) {
       const uint8Array = new Uint8Array(pdfData);
       return { data: arrayBufferToDataUrl(uint8Array) };
     }
@@ -87,11 +81,7 @@ export function preparePdfData(pdfData: any): { data: string } | null {
     }
 
     // Check if we're dealing with a Node.js Buffer or similar structure
-    if (
-      typeof pdfData === "object" &&
-      "buffer" in pdfData &&
-      typeof pdfData.buffer === "object"
-    ) {
+    if (typeof pdfData === "object" && "buffer" in pdfData && typeof pdfData.buffer === "object") {
       try {
         const uint8Array = new Uint8Array(pdfData.buffer);
         return { data: arrayBufferToDataUrl(uint8Array) };
@@ -115,11 +105,7 @@ export function preparePdfData(pdfData: any): { data: string } | null {
  * @param scaleFactor Current scale factor
  * @returns Scaled screen coordinates
  */
-export function pdfToScreenCoordinates(
-  x: number,
-  y: number,
-  scaleFactor: number,
-) {
+export function pdfToScreenCoordinates(x: number, y: number, scaleFactor: number) {
   return {
     x: Number(x) * scaleFactor,
     y: Number(y) * scaleFactor,
@@ -133,11 +119,7 @@ export function pdfToScreenCoordinates(
  * @param scaleFactor Current scale factor
  * @returns PDF coordinates
  */
-export function screenToPdfCoordinates(
-  screenX: number,
-  screenY: number,
-  scaleFactor: number,
-) {
+export function screenToPdfCoordinates(screenX: number, screenY: number, scaleFactor: number) {
   return {
     x: Number(screenX) / scaleFactor,
     y: Number(screenY) / scaleFactor,
@@ -151,11 +133,7 @@ export function screenToPdfCoordinates(
  * @param viewerScale Current viewer scale
  * @returns Combined scale factor
  */
-export function calculateFieldScaleFactor(
-  pageSize: { width: number },
-  renderedWidth: number,
-  viewerScale: number = 1,
-): number {
+export function calculateFieldScaleFactor(pageSize: { width: number }, renderedWidth: number, viewerScale: number = 1): number {
   if (pageSize.width > 0 && renderedWidth > 0) {
     // Simple direct calculation - most reliable approach
     return renderedWidth / pageSize.width;
@@ -172,11 +150,7 @@ export function calculateFieldScaleFactor(
  * @param viewerScale The current viewer scale factor (from zoom controls)
  * @returns The correct scale factor to convert between PDF coordinates and screen coordinates
  */
-export function getAccurateScaleFactor(
-  pageElement: HTMLElement | null,
-  pageSize: { width: number; height: number },
-  viewerScale: number,
-): number {
+export function getAccurateScaleFactor(pageElement: HTMLElement | null, pageSize: { width: number; height: number }, viewerScale: number): number {
   // If we don't have both pieces of information, fall back to the viewer scale
   if (!pageElement || pageSize.width <= 0) {
     return viewerScale;
@@ -206,14 +180,9 @@ export function getAccurateScaleFactor(
  * @param decimals Number of decimal places for precision (default: 3)
  * @returns The scaled and rounded value
  */
-export function preciseScaledValue(
-  value: number | string,
-  scaleFactor: number,
-  decimals: number = 3,
-): number {
+export function preciseScaledValue(value: number | string, scaleFactor: number, decimals: number = 3): number {
   // Ensure we're working with a number
-  const numericValue =
-    typeof value === "string" ? parseFloat(value) : Number(value);
+  const numericValue = typeof value === "string" ? parseFloat(value) : Number(value);
 
   // Apply scaling
   const scaled = numericValue * scaleFactor;
@@ -245,19 +214,13 @@ export function getExactFieldPosition(
   scaleFactor: number,
   viewerScale: number = 1,
   pageElement: HTMLElement | null = null,
-  debug: boolean = false,
+  debug: boolean = false
 ) {
   // Convert all values to numbers
   const x = typeof field.x === "string" ? parseFloat(field.x) : Number(field.x);
   const y = typeof field.y === "string" ? parseFloat(field.y) : Number(field.y);
-  const width =
-    typeof field.width === "string"
-      ? parseFloat(field.width)
-      : Number(field.width);
-  const height =
-    typeof field.height === "string"
-      ? parseFloat(field.height)
-      : Number(field.height);
+  const width = typeof field.width === "string" ? parseFloat(field.width) : Number(field.width);
+  const height = typeof field.height === "string" ? parseFloat(field.height) : Number(field.height);
 
   // Calculate exact values with direct multiplication - simplest and most reliable approach
   // scaleFactor already includes zoom level since it's calculated from actual rendered page size

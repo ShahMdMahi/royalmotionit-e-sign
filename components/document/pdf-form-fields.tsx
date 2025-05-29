@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { DocumentField } from "@/types/document";
-import { SignatureCapture } from "@/components/document/signature-capture";
 
 interface PdfFormFieldProps {
   field: DocumentField;
@@ -27,16 +26,7 @@ interface PdfFormFieldProps {
   className?: string;
 }
 
-export function PdfTextField({
-  field,
-  value,
-  onChangeAction,
-  onFocusAction,
-  onBlurAction,
-  error,
-  style,
-  className,
-}: PdfFormFieldProps) {
+export function PdfTextField({ field, value, onChangeAction, onFocusAction, onBlurAction, error, style, className }: PdfFormFieldProps) {
   return (
     <Input
       id={field.id}
@@ -58,16 +48,7 @@ export function PdfTextField({
   );
 }
 
-export function PdfTextareaField({
-  field,
-  value,
-  onChangeAction,
-  onFocusAction,
-  onBlurAction,
-  error,
-  style,
-  className,
-}: PdfFormFieldProps) {
+export function PdfTextareaField({ field, value, onChangeAction, onFocusAction, onBlurAction, error, style, className }: PdfFormFieldProps) {
   return (
     <Textarea
       id={field.id}
@@ -88,20 +69,11 @@ export function PdfTextareaField({
   );
 }
 
-export function PdfCheckboxField({
-  field,
-  value,
-  onChangeAction,
-  onFocusAction,
-  onBlurAction,
-  error,
-  style,
-  className,
-}: PdfFormFieldProps) {
+export function PdfCheckboxField({ field, value, onChangeAction, onFocusAction, onBlurAction, error, style, className }: PdfFormFieldProps) {
   return (
-    <div 
+    <div
       className={cn(
-        "flex items-center justify-center h-full w-full pdf-form-field pdf-checkbox-field", 
+        "flex items-center justify-center h-full w-full pdf-form-field pdf-checkbox-field",
         error && "pdf-field-error",
         value && "pdf-field-success",
         field.required && "pdf-field-required",
@@ -118,25 +90,13 @@ export function PdfCheckboxField({
         }}
         onFocus={() => onFocusAction?.(field.id)}
         onBlur={onBlurAction}
-        className={cn(
-          "h-4 w-4 data-[state=checked]:bg-primary",
-          error && "border-destructive"
-        )}
+        className={cn("h-4 w-4 data-[state=checked]:bg-primary", error && "border-destructive")}
       />
     </div>
   );
 }
 
-export function PdfDateField({
-  field,
-  value,
-  onChangeAction,
-  onFocusAction,
-  onBlurAction,
-  error,
-  style,
-  className,
-}: PdfFormFieldProps) {
+export function PdfDateField({ field, value, onChangeAction, onFocusAction, onBlurAction, error, style, className }: PdfFormFieldProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -158,34 +118,22 @@ export function PdfDateField({
           <CalendarIcon className="mr-1 h-3 w-3" />
           {value ? format(new Date(value), "PPP") : field.placeholder || field.label || "Select date"}
         </Button>
-      </PopoverTrigger>      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={value ? new Date(value) : undefined}
-          onSelect={(date) => date && onChangeAction(field.id, date.toISOString())}
-          initialFocus
-        />
+      </PopoverTrigger>{" "}
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar mode="single" selected={value ? new Date(value) : undefined} onSelect={(date) => date && onChangeAction(field.id, date.toISOString())} initialFocus />
       </PopoverContent>
     </Popover>
   );
 }
 
-export function PdfDropdownField({
-  field,
-  value,
-  onChangeAction,
-  onFocusAction,
-  onBlurAction,
-  error,
-  style,
-  className,
-}: PdfFormFieldProps) {
+export function PdfDropdownField({ field, value, onChangeAction, onFocusAction, onBlurAction, error, style, className }: PdfFormFieldProps) {
   const options = field.options ? field.options.split(",").map((opt) => opt.trim()) : [];
 
   return (
     <Select
       value={value}
-      onValueChange={(value) => onChangeAction(field.id, value)}      onOpenChange={(open) => {
+      onValueChange={(value) => onChangeAction(field.id, value)}
+      onOpenChange={(open) => {
         if (open) {
           onFocusAction?.(field.id);
         } else {
@@ -217,20 +165,11 @@ export function PdfDropdownField({
   );
 }
 
-export function PdfRadioField({
-  field,
-  value,
-  onChangeAction,
-  onFocusAction,
-  onBlurAction,
-  error,
-  style,
-  className,
-}: PdfFormFieldProps) {
+export function PdfRadioField({ field, value, onChangeAction, onFocusAction, onBlurAction, error, style, className }: PdfFormFieldProps) {
   const options = field.options ? field.options.split(",").map((opt) => opt.trim()) : [];
 
   return (
-    <div 
+    <div
       style={style}
       className={cn(
         "flex items-center justify-center h-full w-full bg-background/90 rounded-md border p-1 pdf-form-field pdf-radio-field",
@@ -242,15 +181,13 @@ export function PdfRadioField({
       onClick={() => onFocusAction?.(field.id)}
       onBlur={onBlurAction}
     >
-      <RadioGroup
-        value={value}
-        onValueChange={(value) => onChangeAction(field.id, value)}
-        className="flex"
-      >
+      <RadioGroup value={value} onValueChange={(value) => onChangeAction(field.id, value)} className="flex">
         {options.map((option, index) => (
           <div key={`${field.id}-${index}`} className="flex items-center space-x-1 mr-2">
             <RadioGroupItem value={option} id={`${field.id}-${index}`} className="h-3 w-3" />
-            <Label htmlFor={`${field.id}-${index}`} className="text-xs">{option}</Label>
+            <Label htmlFor={`${field.id}-${index}`} className="text-xs">
+              {option}
+            </Label>
           </div>
         ))}
       </RadioGroup>
@@ -258,16 +195,7 @@ export function PdfRadioField({
   );
 }
 
-export function PdfSignatureField({
-  field,
-  value,
-  onChangeAction,
-  onFocusAction,
-  onBlurAction,
-  error,
-  style,
-  className,
-}: PdfFormFieldProps) {
+export function PdfSignatureField({ field, value, onChangeAction, onFocusAction, onBlurAction, error, style, className }: PdfFormFieldProps) {
   // Add debug log when signature field is clicked
   const handleSignatureClick = () => {
     console.log(`Signature field clicked: ${field.id}, label: ${field.label || field.type}`);
@@ -293,16 +221,10 @@ export function PdfSignatureField({
     >
       {value ? (
         <div className="w-full h-full flex items-center justify-center">
-          <img 
-            src={value} 
-            alt="Signature" 
-            className="max-h-full max-w-full object-contain"
-          />
+          <img src={value} alt="Signature" className="max-h-full max-w-full object-contain" />
         </div>
       ) : (
-        <span className="text-muted-foreground">
-          {field.label || `Click to add ${field.type === "initial" ? "initials" : "signature"}`}
-        </span>
+        <span className="text-muted-foreground">{field.label || `Click to add ${field.type === "initial" ? "initials" : "signature"}`}</span>
       )}
     </Button>
   );

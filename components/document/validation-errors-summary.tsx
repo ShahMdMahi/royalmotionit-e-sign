@@ -13,11 +13,7 @@ interface ValidationErrorsSummaryProps {
   fieldLabels?: Record<string, string>;
 }
 
-export function ValidationErrorsSummary({
-  errors,
-  onFieldClickAction,
-  fieldLabels = {},
-}: ValidationErrorsSummaryProps) {
+export function ValidationErrorsSummary({ errors, onFieldClickAction, fieldLabels = {} }: ValidationErrorsSummaryProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   if (errors.length === 0) {
@@ -31,17 +27,8 @@ export function ValidationErrorsSummary({
           <AlertTriangle className="h-4 w-4 mr-2" />
           {errors.length} {errors.length === 1 ? "Error" : "Errors"} Found
         </CardTitle>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0"
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          {isExpanded ? (
-            <ChevronUp className="h-4 w-4 text-muted-foreground" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          )}
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setIsExpanded(!isExpanded)}>
+          {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </Button>
       </CardHeader>
       {isExpanded && (
@@ -58,11 +45,7 @@ export function ValidationErrorsSummary({
                   >
                     <XCircle className="h-3 w-3 mr-2 flex-shrink-0 mt-0.5" />
                     <span className="text-left">
-                      {fieldLabels[error.fieldId] ? (
-                        <span className="font-medium">
-                          {fieldLabels[error.fieldId]}: 
-                        </span>
-                      ) : null}
+                      {fieldLabels[error.fieldId] ? <span className="font-medium">{fieldLabels[error.fieldId]}:</span> : null}
                       {error.message}
                     </span>
                   </Button>

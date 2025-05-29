@@ -2,7 +2,6 @@
 
 import { Document as PrismaDocument, Signer } from "@prisma/client";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-// Replace PDFViewer with our new component
 import { SignDocumentPdfViewerSimple } from "@/components/document/sign-document-pdf-viewer-simple";
 import { getFromR2 } from "@/actions/r2";
 import { toast } from "sonner";
@@ -12,7 +11,6 @@ import { ArrowLeft, CheckCircle, Save, Send, AlertTriangle, AlertCircle, Menu, X
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useRouter } from "next/navigation";
-import { PageNavigation } from "@/components/document/page-navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,7 +57,7 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const signatureRef = useRef<SignatureCanvasRef | null>(null);
   const [date] = useState<Date | undefined>(new Date());
-
+  console.log("Total page", totalPages);
   // Memoized calculations for performance
   const requiredFields = useMemo(() => fields.filter((field) => field.required), [fields]);
 

@@ -1,18 +1,17 @@
 "use client";
 
 import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
+import { Document, Page } from "react-pdf";
 import { DocumentField } from "@/types/document";
 import { FieldValidationError } from "@/types/validation";
-import { handlePageChange, handleTotalPagesChange } from "@/actions/pdf-viewer-actions";
 import { usePdfWorker } from "@/hooks/use-pdf-worker";
 import { cn } from "@/lib/utils";
-import { preparePdfData, pdfToScreenCoordinates } from "@/utils/pdf-utils";
+import {  pdfToScreenCoordinates } from "@/utils/pdf-utils";
 import { PageNavigation } from "@/components/document/page-navigation";
 import { FieldErrorTooltip } from "@/components/document/field-error-tooltip";
 import { PdfFormField } from "@/components/document/pdf-form-fields";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, Maximize, RefreshCw } from "lucide-react";
+import { ZoomIn, ZoomOut,  RefreshCw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Import react-pdf styles
@@ -54,11 +53,11 @@ export function SignDocumentPdfViewerSimple({
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageSize, setPageSize] = useState({ width: 0, height: 0 });
   const [activeField, setActiveField] = useState<string | null>(null);
-  const [isZoomedIn, setIsZoomedIn] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
   const viewerContainerRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
   const { isLoaded: workerLoaded, error: workerError } = usePdfWorker();
+  console.log("PDF worker loaded:", workerLoaded, "Error:", workerError);
   // Handle document loading errors with detailed logging
   const handleError = useCallback(
     (error: Error) => {
@@ -135,24 +134,24 @@ export function SignDocumentPdfViewerSimple({
   }, [fields, currentPage, currentSignerId]);
 
   // Create field icon component based on field type
-  const getFieldIcon = useCallback((type: string) => {
-    switch (type) {
-      case "signature":
-        return <FileSignature className="h-3.5 w-3.5" />;
-      case "initial":
-        return <Edit className="h-3.5 w-3.5" />;
-      case "text":
-        return <Type className="h-3.5 w-3.5" />;
-      case "checkbox":
-        return <Check className="h-3.5 w-3.5" />;
-      case "date":
-        return <Calendar className="h-3.5 w-3.5" />;
-      case "textarea":
-        return <FileText className="h-3.5 w-3.5" />;
-      default:
-        return <Type className="h-3.5 w-3.5" />;
-    }
-  }, []);
+//   const getFieldIcon = useCallback((type: string) => {
+//     switch (type) {
+//       case "signature":
+//         return <FileSignature className="h-3.5 w-3.5" />;
+//       case "initial":
+//         return <Edit className="h-3.5 w-3.5" />;
+//       case "text":
+//         return <Type className="h-3.5 w-3.5" />;
+//       case "checkbox":
+//         return <Check className="h-3.5 w-3.5" />;
+//       case "date":
+//         return <Calendar className="h-3.5 w-3.5" />;
+//       case "textarea":
+//         return <FileText className="h-3.5 w-3.5" />;
+//       default:
+//         return <Type className="h-3.5 w-3.5" />;
+//     }
+//   }, []);
 
   // Get field status classes for styling
   const getFieldStatusClasses = useCallback(

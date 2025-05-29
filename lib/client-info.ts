@@ -20,10 +20,7 @@ export function getClientInfo() {
   return {
     userAgent: getUserAgent(),
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown",
-    language:
-      typeof navigator !== "undefined"
-        ? navigator.language || "Unknown"
-        : "Unknown",
+    language: typeof navigator !== "undefined" ? navigator.language || "Unknown" : "Unknown",
     // IP address should be determined on the server side in a real application
     // This is just a placeholder for demonstration
     ipAddress: "127.0.0.1",
