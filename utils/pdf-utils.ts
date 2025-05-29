@@ -24,6 +24,17 @@ export function preparePdfData(pdfData: any): { data: string } | null {
     return null;
   }
 
+  // Validate PDF header if possible - most PDFs start with %PDF
+  const validatePdfHeader = (buffer: Uint8Array): boolean => {
+    if (buffer.length < 5) return false;
+    // Check for the PDF header signature
+    return buffer[0] === 0x25 && // %
+           buffer[1] === 0x50 && // P
+           buffer[2] === 0x44 && // D
+           buffer[3] === 0x46 && // F
+           buffer[4] === 0x2D;   // -
+  };
+
   try {
     // If it's already an object with data property and not an array
     if (
@@ -52,6 +63,11 @@ export function preparePdfData(pdfData: any): { data: string } | null {
 
     // Direct Uint8Array
     if (pdfData instanceof Uint8Array) {
+      // Validate the PDF header for Uint8Array
+      if (!validatePdfHeader(pdfData)) {
+        console.warn("PDF data does not have a valid PDF header signature");
+        // Continue anyway as it might be a valid PDF with a non-standard header
+      }
       return { data: arrayBufferToDataUrl(pdfData) };
     }
 

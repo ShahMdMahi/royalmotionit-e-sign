@@ -1,0 +1,86 @@
+/* PDF Form Fields Styling */
+
+/* Base styles for all PDF form input fields */
+.pdf-form-field {
+  background-color: transparent;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease-in-out;
+  width: 100%;
+  height: 100%;
+}
+
+.pdf-form-field:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(var(--primary), 0.5);
+}
+
+/* Text field specific styles */
+.pdf-text-field {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+/* Checkbox field container */
+.pdf-checkbox-field {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Custom styling for radio buttons in PDF */
+.pdf-radio-field {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Dropdown styling in PDF */
+.pdf-dropdown-field {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m8 10 4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  padding-right: 2rem;
+}
+
+/* Calendar button in PDF */
+.pdf-date-field {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Signature display area */
+.pdf-signature-field {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pdf-signature-field img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Required field indicator */
+.pdf-field-required::after {
+  content: "*";
+  color: hsl(var(--destructive));
+  margin-left: 0.25rem;
+}
+
+/* Error state */
+.pdf-field-error {
+  border-color: hsl(var(--destructive));
+}
+
+.pdf-field-error:focus {
+  box-shadow: 0 0 0 2px rgba(var(--destructive), 0.3);
+}
+
+/* Success/completed state */
+.pdf-field-success {
+  border-color: hsl(var(--success));
+}

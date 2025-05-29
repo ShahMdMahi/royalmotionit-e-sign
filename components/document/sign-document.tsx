@@ -2,7 +2,8 @@
 
 import { Document as PrismaDocument, Signer } from "@prisma/client";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { PDFViewer } from "@/components/common/pdf-viewer";
+// Replace PDFViewer with our new component
+import { SignDocumentPdfViewerSimple } from "@/components/document/sign-document-pdf-viewer-simple";
 import { getFromR2 } from "@/actions/r2";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -217,7 +218,9 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
           case "signature":
           case "initial":
             setActiveFieldId(fieldId);
-            setIsSignatureModalOpen(true);
+            // Force signature modal to open when clicking on a signature field
+            console.log(`Opening signature modal for field: ${fieldId}`);
+            setTimeout(() => setIsSignatureModalOpen(true), 0);
             break;
           case "date":
             handleFieldChange(fieldId, format(date || new Date(), "yyyy-MM-dd"));
@@ -309,9 +312,21 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
       return;
     }
 
-    const signature = signatureRef.current.toDataURL();
-    handleFieldChange(activeFieldId!, signature);
-    setIsSignatureModalOpen(false);
+    if (!activeFieldId) {
+      toast.error("No active signature field selected");
+      return;
+    }
+
+    try {
+      const signature = signatureRef.current.toDataURL();
+      console.log(`Saving signature for field: ${activeFieldId}`);
+      handleFieldChange(activeFieldId, signature);
+      toast.success("Signature saved successfully");
+      setIsSignatureModalOpen(false);
+    } catch (error) {
+      console.error("Error saving signature:", error);
+      toast.error("Failed to save signature. Please try again.");
+    }
   }, [activeFieldId, handleFieldChange]);
 
   // Validate fields with enhanced error reporting
@@ -971,26 +986,28 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
               <CardContent className="p-0">
                 {pdfData && (
                   <div className="h-[100vh] w-full mx-auto">
-                    <PDFViewer
+                    <SignDocumentPdfViewerSimple
                       pdfData={pdfData}
                       fields={fields}
                       fieldValues={fieldValues}
-                      highlightFields={true}
-                      onPageChangeAction={async (page) => {
+                      fieldErrors={fieldErrors}
+                      currentPage={currentPage}
+                      currentSignerId={signer.id}
+                      onPageChangeAction={async (page: number) => {
                         setCurrentPage(page);
                         return page;
                       }}
-                      onTotalPagesChangeAction={async (pages) => {
+                      onTotalPagesChangeAction={async (pages: number) => {
                         setTotalPages(pages);
                         return pages;
                       }}
                       onFieldClickAction={handleFieldClick}
-                      debug={process.env.NODE_ENV === "development"} // Enable debug mode to help diagnose positioning issues
+                      onFieldChangeAction={handleFieldChange}
                     />
                   </div>
                 )}
               </CardContent>
-              <CardFooter className="border-t p-2">
+              {/* <CardFooter className="border-t p-2">
                 <PageNavigation
                   currentPage={currentPage}
                   totalPages={totalPages}
@@ -999,7 +1016,7 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
                     return page;
                   }}
                 />
-              </CardFooter>
+              </CardFooter> */}
             </Card>
           </div>
         </div>
