@@ -3,7 +3,7 @@
 import { PDFDocument, rgb, StandardFonts, PDFForm, PDFPage, degrees } from "pdf-lib";
 import { DocumentField, DocumentFieldType, Document } from "@/types/document";
 import { convertToDocumentField, convertToDocumentFields } from "@/utils/document-field-converter";
-import { getFromR2, uploadToR2 } from "@/actions/r2";
+import { deleteFromR2, getFromR2, uploadToR2 } from "@/actions/r2";
 import { prisma } from "@/prisma/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
@@ -149,11 +149,11 @@ async function addDocumentIdHeader(pdfDoc: PDFDocument, documentId: string) {
   for (let i = 0; i < pdfDoc.getPageCount(); i++) {
     const page = pdfDoc.getPage(i);
     const { height } = page.getSize();
-    
+
     // Position in top left corner with small margin
     const x = 15;
     const y = height - 20; // From top edge
-    
+
     // Draw header text
     page.drawText(headerText, {
       x,
@@ -215,7 +215,8 @@ function addDocumentMetadata(pdfDoc: PDFDocument, document: any, signers: any[])
  * @param fields Array of document fields
  * @returns Processed fields with updated values and visibility flags
  */
-function processFieldConditionalsAndFormulas(fields: DocumentField[]): DocumentField[] {    // First pass - evaluate all formula fields
+function processFieldConditionalsAndFormulas(fields: DocumentField[]): DocumentField[] {
+  // First pass - evaluate all formula fields
   const fieldsWithFormulas = fields.map((field) => {
     // If this is a formula field, evaluate its value
     if (field.type === "formula" && field.validationRule) {
@@ -234,7 +235,7 @@ function processFieldConditionalsAndFormulas(fields: DocumentField[]): DocumentF
     if (field.type === "checkbox" && !field.value) {
       return {
         ...field,
-        value: "false" // Default checkbox value when empty
+        value: "false", // Default checkbox value when empty
       };
     }
     return field;
@@ -368,7 +369,7 @@ export async function generateFinalPDF(documentId: string) {
     // Embed fields and signatures
     for (const field of processedFields) {
       // Skip fields with no value or that should be hidden
-      if ((!field.value && field.type !== 'checkbox') || field.isVisible === false) continue;
+      if ((!field.value && field.type !== "checkbox") || field.isVisible === false) continue;
 
       const page = pdfDoc.getPage(field.pageNumber - 1);
       const { width: pageWidth, height: pageHeight } = page.getSize(); // Convert coordinates to PDF coordinate system (0,0 is bottom-left in PDF)
@@ -399,14 +400,14 @@ export async function generateFinalPDF(documentId: string) {
               // Calculate proportional dimensions to maintain aspect ratio
               const imgWidth = signatureImage.width;
               const imgHeight = signatureImage.height;
-              
+
               // Maintain aspect ratio while fitting within field boundaries
               let drawWidth = field.width;
               let drawHeight = field.height;
-              
+
               const imgAspect = imgWidth / imgHeight;
               const fieldAspect = field.width / field.height;
-              
+
               if (imgAspect > fieldAspect) {
                 // Image is wider than field proportionally
                 drawHeight = field.width / imgAspect;
@@ -414,11 +415,11 @@ export async function generateFinalPDF(documentId: string) {
                 // Image is taller than field proportionally
                 drawWidth = field.height * imgAspect;
               }
-              
+
               // Center the image within the field
               const offsetX = (field.width - drawWidth) / 2;
               const offsetY = (field.height - drawHeight) / 2;
-              
+
               // Draw the image with better positioning
               page.drawImage(signatureImage, {
                 x: x + offsetX,
@@ -427,11 +428,11 @@ export async function generateFinalPDF(documentId: string) {
                 height: drawHeight,
                 opacity: 1.0, // Full opacity for better visibility
               });
-              
+
               // Draw a thin border around the signature for better visibility
               page.drawRectangle({
                 x,
-                y, 
+                y,
                 width: field.width,
                 height: field.height,
                 borderColor: rgb(0.7, 0.7, 0.7),
@@ -465,7 +466,7 @@ export async function generateFinalPDF(documentId: string) {
             const boxSize = Math.min(field.width, field.height);
             const centerX = x + (field.width - boxSize) / 2;
             const centerY = y + (field.height - boxSize) / 2;
-            
+
             // Draw the checkbox border with consistent style
             page.drawRectangle({
               x: centerX,
@@ -475,18 +476,18 @@ export async function generateFinalPDF(documentId: string) {
               borderWidth: 1.5,
               borderColor: rgb(0, 0, 0),
             });
-            
+
             // Draw checkmark if checked
             if (field.value === "true" || field.value === "checked") {
               // Calculate checkmark points based on box size
               const checkStartX = centerX + boxSize * 0.2;
               const checkMiddleX = centerX + boxSize * 0.4;
               const checkEndX = centerX + boxSize * 0.8;
-              
+
               const checkStartY = centerY + boxSize * 0.5;
               const checkMiddleY = centerY + boxSize * 0.3;
               const checkEndY = centerY + boxSize * 0.7;
-              
+
               // Draw the checkmark with thicker lines
               page.drawLine({
                 start: { x: checkStartX, y: checkStartY },
@@ -494,7 +495,7 @@ export async function generateFinalPDF(documentId: string) {
                 thickness: 2,
                 color: rgb(0, 0, 0),
               });
-              
+
               page.drawLine({
                 start: { x: checkMiddleX, y: checkMiddleY },
                 end: { x: checkEndX, y: checkEndY },
@@ -563,8 +564,8 @@ export async function generateFinalPDF(documentId: string) {
                 const date = new Date(dateText);
                 if (!isNaN(date.getTime())) {
                   // Format date as MM/DD/YYYY for better readability
-                  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                  const day = date.getDate().toString().padStart(2, '0');
+                  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+                  const day = date.getDate().toString().padStart(2, "0");
                   const year = date.getFullYear();
                   dateText = `${month}/${day}/${year}`;
                 }
@@ -577,11 +578,11 @@ export async function generateFinalPDF(documentId: string) {
             // Draw date text with better styling
             const fontSize = field.fontSize || 12;
             const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
-            
+
             // Calculate text width for potential truncation
             const textWidth = font.widthOfTextAtSize(dateText, fontSize);
             const fieldWidth = field.width - 8;
-            
+
             // Truncate if needed
             if (textWidth > fieldWidth) {
               dateText = dateText.substring(0, Math.floor(dateText.length * (fieldWidth / textWidth)) - 3) + "...";
@@ -607,13 +608,13 @@ export async function generateFinalPDF(documentId: string) {
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const fontSize = field.fontSize || 12;
             const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
-            
+
             const displayValue = field.value || "";
-            
+
             // Calculate text width for potential truncation
             const textWidth = font.widthOfTextAtSize(displayValue, fontSize);
             const fieldWidth = field.width - 8;
-            
+
             // Handle text overflow with ellipsis if needed
             let formattedValue = displayValue;
             if (textWidth > fieldWidth) {
@@ -623,7 +624,7 @@ export async function generateFinalPDF(documentId: string) {
               }
               formattedValue = truncated + "...";
             }
-            
+
             // Calculate vertical position for better alignment
             const textHeight = font.heightAtSize(fontSize);
             const centerY = y + field.height / 2 - textHeight / 3;
@@ -636,18 +637,18 @@ export async function generateFinalPDF(documentId: string) {
               font,
               color: textColor,
             });
-            
+
             // For radio buttons, draw a visual indication of selection
             if (field.type === "radio" && field.options) {
               try {
                 // Check if options are available and draw a radio button
-                const options = field.options?.split(',').map(o => o.trim()) || [];
+                const options = field.options?.split(",").map((o) => o.trim()) || [];
                 if (field.value && options.includes(field.value)) {
                   // Draw a filled circle for the selected option
                   const circleRadius = Math.min(8, field.height * 0.2);
                   const circleX = x + field.width - circleRadius * 2;
                   const circleY = y + field.height / 2;
-                  
+
                   // Draw outer circle
                   page.drawCircle({
                     x: circleX,
@@ -657,7 +658,7 @@ export async function generateFinalPDF(documentId: string) {
                     borderColor: rgb(0, 0, 0),
                     opacity: 0.8,
                   });
-                  
+
                   // Draw inner filled circle to indicate selection
                   page.drawCircle({
                     x: circleX,
@@ -680,18 +681,14 @@ export async function generateFinalPDF(documentId: string) {
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const fontSize = field.fontSize || 12;
             const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
-            
+
             let displayValue = field.value || "";
-            
+
             // Try to identify and format numeric results
             const numValue = parseFloat(displayValue);
             if (!isNaN(numValue)) {
               // If it seems to be a monetary value (has 2 decimal places)
-              if (field.validationRule && 
-                  (field.validationRule.includes('*') || 
-                   field.validationRule.includes('+') || 
-                   field.validationRule.includes('-') || 
-                   field.validationRule.includes('/'))) {
+              if (field.validationRule && (field.validationRule.includes("*") || field.validationRule.includes("+") || field.validationRule.includes("-") || field.validationRule.includes("/"))) {
                 // Format with 2 decimal places for calculations
                 displayValue = numValue.toFixed(2);
               } else if (Number.isInteger(numValue)) {
@@ -699,11 +696,11 @@ export async function generateFinalPDF(documentId: string) {
                 displayValue = numValue.toString();
               }
             }
-            
+
             // Calculate text width for potential truncation
             const textWidth = font.widthOfTextAtSize(displayValue, fontSize);
             const fieldWidth = field.width - 8;
-            
+
             // Handle text overflow with ellipsis if needed
             if (textWidth > fieldWidth) {
               let truncated = displayValue;
@@ -712,7 +709,7 @@ export async function generateFinalPDF(documentId: string) {
               }
               displayValue = truncated + "...";
             }
-            
+
             // Calculate vertical position for better alignment
             const textHeight = font.heightAtSize(fontSize);
             const centerY = y + field.height / 2 - textHeight / 3;
@@ -745,7 +742,7 @@ export async function generateFinalPDF(documentId: string) {
                     style: "currency",
                     currency: "USD",
                     minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
+                    maximumFractionDigits: 2,
                   }).format(numValue);
                 }
               } catch (error) {
@@ -753,11 +750,11 @@ export async function generateFinalPDF(documentId: string) {
                 // Use original value if formatting fails
               }
             }
-            
+
             // Calculate text width for potential truncation
             const textWidth = font.widthOfTextAtSize(formattedValue, fontSize);
             const fieldWidth = field.width - 8;
-            
+
             // Handle text overflow with ellipsis if needed
             if (textWidth > fieldWidth) {
               let truncated = formattedValue;
@@ -766,7 +763,7 @@ export async function generateFinalPDF(documentId: string) {
               }
               formattedValue = truncated + "...";
             }
-            
+
             // Calculate vertical position for better alignment
             const textHeight = font.heightAtSize(fontSize);
             const centerY = y + field.height / 2 - textHeight / 3;
@@ -788,13 +785,13 @@ export async function generateFinalPDF(documentId: string) {
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const fontSize = field.fontSize || 12;
             const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
-            
+
             const displayValue = field.value || "";
-            
+
             // Calculate text width for potential truncation
             const textWidth = font.widthOfTextAtSize(displayValue, fontSize);
             const fieldWidth = field.width - 8;
-            
+
             // Handle text overflow with ellipsis if needed
             let formattedValue = displayValue;
             if (textWidth > fieldWidth) {
@@ -804,7 +801,7 @@ export async function generateFinalPDF(documentId: string) {
               }
               formattedValue = truncated + "...";
             }
-            
+
             // Calculate vertical position for better alignment
             const textHeight = font.heightAtSize(fontSize);
             const centerY = y + field.height / 2 - textHeight / 3;
@@ -852,11 +849,12 @@ export async function generateFinalPDF(documentId: string) {
     await addDocumentIdHeader(pdfDoc, document.id);
 
     // Add document metadata
-    pdfDoc.setTitle(document.title || "Signed Document");
-    pdfDoc.setSubject("Electronically Signed Document");
-    pdfDoc.setKeywords(["electronic signature", "signed document", "legal document", document.id]);
+    pdfDoc.setTitle(document.title || "Signed Document by Royal Sign");
+    pdfDoc.setSubject("Electronically Signed Document by Royal Sign");
+    pdfDoc.setKeywords(["royalmotionit", "electronic signature", "signed document", "legal document", document.id]);
     pdfDoc.setProducer("Royal Sign E-Signature Platform");
     pdfDoc.setCreator("Royal Sign");
+    pdfDoc.setAuthor(document.authorName || "Royal Sign");
 
     // Set creation and modification dates
     if (document.createdAt) {
@@ -885,10 +883,11 @@ export async function generateFinalPDF(documentId: string) {
 
     // Create a unique key for the signed document
     // Include timestamp to ensure it's always a unique file
-    const finalKey = `signed/${document.id}/${Date.now()}-completed.pdf`;
-    
+    const finalKey = `documents/${document.id}-${Date.now()}-signed.pdf`;
+
     // Store reference to previous signed document if exists for cleanup later
     const previousSignedUrl = document.url;
+    const previousKey = document.key;
 
     // Try uploading with retry logic
     let uploadAttempts = 0;
@@ -931,6 +930,16 @@ export async function generateFinalPDF(documentId: string) {
       };
     }
 
+    try {
+      await deleteFromR2({
+        Bucket: process.env.R2_BUCKET_NAME,
+        Key: previousKey,
+      });
+    } catch (e) {
+      console.error("Error deleting previous signed document from R2:", e);
+      // Non-fatal error - we continue even if the deletion fails
+    }
+
     // Update document status and URL
     await prisma.document.update({
       where: { id: documentId },
@@ -953,10 +962,40 @@ export async function generateFinalPDF(documentId: string) {
         actorRole: isAuthor ? "AUTHOR" : "SIGNER",
         details: JSON.stringify({
           fieldsEmbedded: true,
-          finalDocumentUrl: `${process.env.R2_PUBLIC_URL}/${finalKey}`
-        })
+          finalDocumentUrl: `${process.env.R2_PUBLIC_URL}/${finalKey}`,
+        }),
       },
-    }); // Revalidate paths
+    });
+
+    // Send the signed PDF document to the signer via email
+    try {
+      // Get the first signer (single signer model)
+      const signer = document.signers[0];
+
+      if (signer && signer.email) {
+        // Import the email action to send signed document with PDF attachment
+        const { sendSignedDocumentWithPdf } = await import("@/actions/email");
+
+        // Send email with PDF attachment to the signer
+        await sendSignedDocumentWithPdf(
+          signer.name || "Signer",
+          signer.email,
+          document.title || "Signed Document",
+          documentId,
+          finalPdfBytes,
+          document.authorName || "Royal Sign",
+          document.authorEmail || undefined,
+          "Your document has been successfully signed. Please find the attached PDF for your records."
+        );
+
+        console.log(`Sent signed PDF via email to ${signer.email}`);
+      }
+    } catch (emailError) {
+      console.error("Error sending signed PDF to signer via email:", emailError);
+      // Non-fatal error - we continue even if the email fails
+    }
+
+    // Revalidate paths
     revalidatePath(`/documents/${documentId}`);
     revalidatePath(`/documents`);
 

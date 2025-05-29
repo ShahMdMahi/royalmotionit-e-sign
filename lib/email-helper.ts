@@ -4,6 +4,11 @@ interface Payload {
   recipient: string;
   subject: string;
   html: string;
+  attachments?: Array<{
+    filename: string;
+    content: Buffer | Uint8Array;
+    contentType?: string;
+  }>;
 }
 
 const smtpSettings = {
@@ -22,9 +27,10 @@ const smtpSettings = {
  * @param {string} payload.recipient - The recipient's email address.
  * @param {string} payload.subject - The subject of the email.
  * @param {string} payload.html - The HTML content of the email.
+ * @param {Array<{filename: string, content: Buffer | Uint8Array, contentType?: string}>} [payload.attachments] - Optional file attachments.
  */
 export const sendEmail = async (payload: Payload) => {
-  const { recipient, subject, html } = payload;
+  const { recipient, subject, html, attachments } = payload;
 
   // Log email sending attempt
   console.log(`Attempting to send email to: ${recipient}`);
@@ -41,6 +47,13 @@ export const sendEmail = async (payload: Payload) => {
     console.log(`To: ${recipient}`);
     console.log(`Subject: ${subject}`);
     console.log("Content preview:", html.substring(0, 100) + "...");
+    
+    if (attachments && attachments.length > 0) {
+      console.log(`Email has ${attachments.length} attachment(s):`);
+      attachments.forEach((attachment, index) => {
+        console.log(`  Attachment ${index + 1}: ${attachment.filename} (${attachment.content.byteLength} bytes)`);
+      });
+    }
 
     return; // Don't attempt to send without credentials
   }
@@ -48,12 +61,19 @@ export const sendEmail = async (payload: Payload) => {
   const transporter = nodemailer.createTransport(smtpSettings);
 
   try {
-    const info = await transporter.sendMail({
+    const mailOptions: any = {
       from: `"Royal Sign" <${process.env.GMAIL_SMTP_USER}>`,
       to: recipient,
       subject,
       html,
-    });
+    };
+    
+    // Add attachments if provided
+    if (attachments && attachments.length > 0) {
+      mailOptions.attachments = attachments;
+    }
+    
+    const info = await transporter.sendMail(mailOptions);
 
     console.log(`Email sent successfully to ${recipient}`);
     console.log(`Message ID: ${info.messageId}`);

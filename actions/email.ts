@@ -9,6 +9,7 @@ import { ResetPasswordEmail } from "@/emails/reset-password-email";
 import { DocumentSignEmail } from "@/emails/document-sign-email";
 import { DocumentSignedNotification } from "@/emails/document-signed-notification";
 import { NewSignerEmail } from "@/emails/new-signer-email";
+import { DocumentSignedWithPdf } from "@/emails/document-signed-with-pdf";
 
 /**
  * Sends a welcome email to a new user
@@ -256,5 +257,48 @@ export async function sendNewSignerCredentialsEmail(
     });
   } catch (error) {
     console.error("Error sending new signer credentials email:", error);
+  }
+}
+
+export async function sendSignedDocumentWithPdf(
+  recipientName: string,
+  recipientEmail: string,
+  documentTitle: string,
+  documentId: string,
+  pdfContent: Buffer | Uint8Array,
+  senderName?: string,
+  senderEmail?: string,
+  message?: string,
+): Promise<void> {
+  try {
+    const emailContent = await render(
+      DocumentSignedWithPdf({
+        recipientName,
+        documentTitle,
+        documentId,
+        senderName: senderName || "Royal Sign",
+        senderEmail: senderEmail || process.env.GMAIL_SMTP_USER || "no-reply@royalsign.com",
+        message: message || "Your document has been successfully signed. Please find the attached PDF.",
+      }),
+    );
+
+    const pdfFilename = `${documentTitle.replace(/[^a-zA-Z0-9]/g, "_")}-signed.pdf`;
+
+    await sendEmail({
+      recipient: recipientEmail,
+      subject: `Signed Document: "${documentTitle}"`,
+      html: emailContent,
+      attachments: [
+        {
+          filename: pdfFilename,
+          content: pdfContent,
+          contentType: "application/pdf",
+        },
+      ],
+    });
+
+    console.log(`Signed document email with PDF sent to ${recipientEmail}`);
+  } catch (error) {
+    console.error("Error sending signed document with PDF:", error);
   }
 }
