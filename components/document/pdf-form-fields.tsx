@@ -199,18 +199,9 @@ export function PdfSignatureField({ field, value, onChangeAction, onFocusAction,
   // Add debug log when signature field is clicked
   const handleSignatureClick = () => {
     console.log(`Signature field clicked: ${field.id}, label: ${field.label || field.type}`);
-    // Call onFocusAction to notify parent components that this field is selected
     if (onFocusAction) {
       console.log(`Calling onFocusAction for signature field: ${field.id}`);
       onFocusAction(field.id);
-    }
-    
-    // Ensure onChangeAction is properly used in the component
-    // This helps satisfy the TypeScript linter
-    if (onChangeAction && false) {
-      // This is just a placeholder - in a real implementation,
-      // onChangeAction would be called when signature data changes
-      onChangeAction(field.id, "");
     }
   };
 
@@ -219,7 +210,6 @@ export function PdfSignatureField({ field, value, onChangeAction, onFocusAction,
       variant="outline"
       id={field.id}
       onClick={handleSignatureClick}
-      onBlur={() => onBlurAction?.()}
       className={cn(
         "h-full w-full p-1 relative bg-background/90 hover:bg-primary/5 transition-colors text-sm pdf-form-field pdf-signature-field",
         error && "border-destructive pdf-field-error",
