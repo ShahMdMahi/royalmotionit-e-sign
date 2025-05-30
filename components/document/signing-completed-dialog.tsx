@@ -41,7 +41,7 @@ export function SigningCompletedDialog({
         }
         return prev - 1;
       });
-    }, 1000);
+    }, 10000);
 
     return () => clearInterval(timer);
   }, [documentId, router]);

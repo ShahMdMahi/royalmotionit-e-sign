@@ -21,7 +21,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import SignatureCanvasWrapper, { SignatureCanvasRef } from "./signature-canvas-wrapper";
 import { format } from "date-fns";
 import { completeDocumentSigning } from "@/actions/sign-document";
-import { getUserAgent } from "@/lib/client-info";
+import { getIpAddress, getUserAgent } from "@/lib/client-info";
 import { SigningCompletedDialog } from "@/components/document/signing-completed-dialog";
 import { SignConfirmationDialog } from "@/components/document/sign-confirmation-dialog";
 import { DocumentField } from "@/types/document";
@@ -549,6 +549,7 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
 
       // Get client user agent for tracking
       const userAgent = getUserAgent();
+      const ipAddress = await getIpAddress();
 
       // // Print user agent in a big red style in the browser console
       // console.log(
@@ -562,7 +563,7 @@ export function SignDocumentComponent({ document, signer, fields }: SignDocument
         document.id,
         signer.id,
         fieldValues,
-        { userAgent, ipAddress: "127.0.0.1" } // In a real app, IP would be collected server-side
+        { userAgent, ipAddress }
       );
 
       // Print result in a big red style in the browser console

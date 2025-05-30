@@ -12,17 +12,35 @@ export function getUserAgent(): string {
 }
 
 /**
- * This is a client-side function that can be called to help with client identification
- * In a real application, you would use a service to get the actual IP address server-side
- * @returns A client identification object
+ * Gets the IP address of the client from the server
+ * @returns Promise that resolves to the IP address as a string
  */
-export function getClientInfo() {
+export async function getIpAddress(): Promise<string> {
+  try {
+    const response = await fetch("/api/client-info");
+    if (!response.ok) {
+      throw new Error("Failed to fetch IP address");
+    }
+    const data = await response.json();
+    return data.ipAddress || "127.0.0.1";
+  } catch (error) {
+    console.error("Error fetching IP address:", error);
+    return "127.0.0.1";
+  }
+}
+
+/**
+ * This is a client-side function that can be called to help with client identification
+ * Gets the actual IP address from the server
+ * @returns A Promise that resolves to a client identification object
+ */
+export async function getClientInfo() {
+  const ipAddress = await getIpAddress();
+
   return {
     userAgent: getUserAgent(),
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown",
     language: typeof navigator !== "undefined" ? navigator.language || "Unknown" : "Unknown",
-    // IP address should be determined on the server side in a real application
-    // This is just a placeholder for demonstration
-    ipAddress: "127.0.0.1",
+    ipAddress,
   };
 }

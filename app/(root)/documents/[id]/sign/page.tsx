@@ -4,12 +4,9 @@ import { redirect } from "next/navigation";
 import { DocumentField } from "@/types/document";
 import { normalizeDatabaseDocument } from "@/actions/document-normalizers";
 import { SignDocumentClientWrapper } from "@/components/document/sign-document-client-wrapper";
+import { DocumentType } from "@prisma/client";
 
-export default async function SignDocument({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function SignDocument({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session || !session.user.id || !session.user.email) {
     redirect("/auth/login");
@@ -33,6 +30,12 @@ export default async function SignDocument({
       redirect("/documents");
     }
 
+    if (prismaDocument.type === DocumentType.SIGNED) {
+      setTimeout(() => {
+        redirect(`/documents/${id}`);
+      }, 10000);
+    }
+
     // Normalize the document to handle null vs undefined differences
     const normalizedDoc = await normalizeDatabaseDocument(prismaDocument);
 
@@ -41,17 +44,14 @@ export default async function SignDocument({
     const signer = prismaDocument.signers?.[0];
 
     // Check if the current user is the authorized signer
-    if (
-      !signer ||
-      signer.email.toLowerCase() !== (session.user.email || "").toLowerCase()
-    ) {
+    if (!signer || signer.email.toLowerCase() !== (session.user.email || "").toLowerCase()) {
       redirect("/documents");
     }
 
-    // Check if document is ready for signing
-    if (normalizedDoc.status !== "PENDING") {
-      redirect(`/documents/${id}`);
-    }
+    // // Check if document is ready for signing
+    // if (normalizedDoc.status !== "PENDING") {
+    //   redirect(`/documents/${id}`);
+    // }
 
     // Sequential signing check is no longer needed in a single-signer system
     // Since there's only one signer, they're always the next in line to sign
@@ -77,9 +77,7 @@ export default async function SignDocument({
             data: { signerId: signer.id },
           });
         }
-        console.log(
-          `Assigned ${unassignedFields.length} unassigned fields to signer ${signer.id}`,
-        );
+        console.log(`Assigned ${unassignedFields.length} unassigned fields to signer ${signer.id}`);
       }
 
       // Record in document history
@@ -99,9 +97,7 @@ export default async function SignDocument({
     const fields = normalizedDoc.fields || [];
     console.log(`Total fields in document: ${fields.length}`);
     console.log(`Signer ID: ${signer.id}`);
-    console.log(
-      `Fields with signer ID assigned: ${fields.filter((field) => field.signerId).length}`,
-    );
+    console.log(`Fields with signer ID assigned: ${fields.filter((field) => field.signerId).length}`);
 
     const signerFields = fields
       .filter((field) => field.signerId === signer.id)
@@ -142,13 +138,7 @@ export default async function SignDocument({
     };
 
     // Return the client wrapper component with the properly structured data
-    return (
-      <SignDocumentClientWrapper
-        document={documentForComponent}
-        signer={signer}
-        fields={signerFields}
-      />
-    );
+    return <SignDocumentClientWrapper document={documentForComponent} signer={signer} fields={signerFields} />;
   } catch (error) {
     console.error("Error fetching document for signing:", error);
     redirect("/documents");
