@@ -27,7 +27,7 @@ export const AccountVerificationEmail = ({
   verificationToken,
 }: AccountVerificationEmailProps) => {
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://royal-sign.vercel.app";
+    process.env.NEXT_PUBLIC_APP_URL || "https://sign.royalmotionit.com";
   const verificationUrl = `${baseUrl}/auth/verify-email/${verificationToken}`;
 
   // Theme colors from globals.css using exact OKLCH values

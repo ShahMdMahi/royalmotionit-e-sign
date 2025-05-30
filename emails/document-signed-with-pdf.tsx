@@ -31,7 +31,7 @@ export const DocumentSignedWithPdf = ({
   message,
 }: DocumentSignedWithPdfProps) => {
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://royal-sign.vercel.app";
+    process.env.NEXT_PUBLIC_APP_URL || "https://sign.royalmotionit.com";
 
   // Theme colors from globals.css using exact OKLCH values
   const theme = {

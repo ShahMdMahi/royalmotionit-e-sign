@@ -27,7 +27,7 @@ export const ResetPasswordEmail = ({
   resetToken,
 }: ResetPasswordEmailProps) => {
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://royal-sign.vercel.app";
+    process.env.NEXT_PUBLIC_APP_URL || "https://sign.royalmotionit.com";
   const resetPasswordUrl = `${baseUrl}/auth/reset-password/${resetToken}`;
 
   // Theme colors from globals.css using exact OKLCH values
