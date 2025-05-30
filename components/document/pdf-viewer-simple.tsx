@@ -23,6 +23,7 @@ import "react-pdf/dist/esm/Page/TextLayer.css";
 // Import local PDF viewer styles for additional customization
 import "@/app/pdf-viewer.css";
 import Image from "next/image";
+import { PromisePolyfill } from "@/components/common/promise-polyfill";
 
 interface PDFViewerSimpleProps {
   pdfData: Uint8Array;
@@ -410,10 +411,12 @@ export function PDFViewerSimple({
   );
 
   return (
-    <div
-      className="relative h-full w-full pdf-viewer-container"
-      ref={viewerContainerRef}
-    >
+    <>
+      <PromisePolyfill />
+      <div
+        className="relative h-full w-full pdf-viewer-container"
+        ref={viewerContainerRef}
+      >
       {!workerLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-50">
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
@@ -588,6 +591,7 @@ export function PDFViewerSimple({
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
+import "@/lib/polyfills";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,6 +28,9 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script src="/promise-polyfill.js"></script>
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full`}
         suppressHydrationWarning
