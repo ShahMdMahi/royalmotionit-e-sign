@@ -190,6 +190,7 @@ function addDocumentMetadata(pdfDoc: PDFDocument, document: any, signers: any[])
   const metadata = {
     DocumentId: document.id,
     SignedAt: new Date().toISOString(),
+    DocumentHash: document.fileHash || 'Not available',
   };
   // Add signer information
   signers.forEach((signer, index) => {
@@ -268,6 +269,8 @@ function processFieldConditionalsAndFormulas(fields: DocumentField[]): DocumentF
     };
   });
 }
+
+// Document hash is retrieved from the database, no need for a calculation function
 
 /**
  * Generate a final signed PDF with all fields and signatures embedded
@@ -855,6 +858,7 @@ export async function generateFinalPDF(documentId: string) {
     pdfDoc.setProducer("Royal Sign E-Signature Platform");
     pdfDoc.setCreator("Royal Sign");
     pdfDoc.setAuthor(document.authorName || "Royal Sign");
+    
 
     // Set creation and modification dates
     if (document.createdAt) {
@@ -862,6 +866,20 @@ export async function generateFinalPDF(documentId: string) {
     }
     pdfDoc.setModificationDate(new Date()); // Flatten the form - this makes all form fields part of the document content
     form.flatten();
+
+    // Use the existing document hash from the database
+    const documentHash = document.fileHash || "Not available";
+
+    // Get client info from signers (if available)
+    const signerClientInfo = document.signers[0]?.clientInfo
+      ? JSON.parse(document.signers[0].clientInfo)
+      : { 
+          userAgent: "Not recorded",
+          ipAddress: "Not recorded"
+        };
+
+    // Add certification page with signature verification information
+    await addCertificationPage(pdfDoc, document, document.signers, documentHash, signerClientInfo);
 
     // Save the PDF
     let finalPdfBytes;
@@ -1012,5 +1030,487 @@ export async function generateFinalPDF(documentId: string) {
       message: "Failed to generate final document",
       error: String(error),
     };
+  }
+}
+
+/**
+ * Add a certification page at the end of the PDF document
+ * This page includes details about the signing process, document hash, and participant information
+ * 
+ * @param pdfDoc PDF document object
+ * @param document Document object with metadata
+ * @param signers Array of signers
+ * @param documentHash SHA256 hash of the original document
+ * @param clientInfo Client information including IP address and user agent
+ */
+async function addCertificationPage(
+  pdfDoc: PDFDocument,
+  document: any,
+  signers: any[],
+  documentHash: string,
+  clientInfo?: { userAgent?: string; ipAddress?: string }
+) {
+  // Add a new page at the end of the document for certification
+  const certPage = pdfDoc.addPage();
+  const { width, height } = certPage.getSize();
+  
+  // Embed fonts we'll use on the page
+  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  
+  // Define text sizes and colors
+  const titleSize = 16;
+  const headingSize = 12;
+  const textSize = 10;
+  const smallTextSize = 8;
+  
+  // Define colors
+  const titleColor = rgb(0.1, 0.1, 0.4); // Dark blue
+  const headingColor = rgb(0.2, 0.2, 0.2); // Dark gray
+  const textColor = rgb(0.3, 0.3, 0.3); // Medium gray
+  const lineColor = rgb(0.8, 0.8, 0.8); // Light gray
+
+  // Title of certification page
+  certPage.drawText('Electronic Signature Certification', {
+    x: 50,
+    y: height - 50,
+    size: titleSize,
+    font: boldFont,
+    color: titleColor,
+  });
+
+  // Section: Document Information
+  let yPosition = height - 90;
+  
+  certPage.drawText('Document Information', {
+    x: 50,
+    y: yPosition,
+    size: headingSize,
+    font: boldFont,
+    color: headingColor,
+  });
+  
+  yPosition -= 25;
+  
+  // Document ID
+  certPage.drawText('Document ID:', {
+    x: 50,
+    y: yPosition,
+    size: textSize,
+    font: boldFont,
+    color: textColor,
+  });
+  
+  certPage.drawText(document.id || 'Unknown', {
+    x: 150,
+    y: yPosition,
+    size: textSize,
+    font: regularFont,
+    color: textColor,
+  });
+  
+  yPosition -= 20;
+  
+  // Document Title
+  certPage.drawText('Title:', {
+    x: 50,
+    y: yPosition,
+    size: textSize,
+    font: boldFont,
+    color: textColor,
+  });
+  
+  certPage.drawText(document.title || 'Untitled Document', {
+    x: 150,
+    y: yPosition,
+    size: textSize,
+    font: regularFont,
+    color: textColor,
+  });
+  
+  yPosition -= 20;
+  
+  // Document Hash
+  certPage.drawText('Document Hash:', {
+    x: 50,
+    y: yPosition,
+    size: textSize,
+    font: boldFont,
+    color: textColor,
+  });
+  
+  // For hash display, check if it's long and needs to be displayed in a special way
+  const hash = documentHash || 'Not available';
+  if (hash.length > 40) {
+    // Display hash in a shorter format by showing first and last parts
+    const displayHash = `${hash.substring(0, 15)}...${hash.substring(hash.length - 15)}`;
+    certPage.drawText(displayHash, {
+      x: 150,
+      y: yPosition,
+      size: textSize,
+      font: regularFont,
+      color: textColor,
+    });
+    
+    // Add full hash in smaller text below
+    yPosition -= 15;
+    certPage.drawText("Full hash:", {
+      x: 50,
+      y: yPosition,
+      size: smallTextSize,
+      font: boldFont,
+      color: textColor,
+    });
+    
+    certPage.drawText(hash, {
+      x: 150,
+      y: yPosition,
+      size: smallTextSize,
+      font: regularFont,
+      color: textColor,
+    });
+  } else {
+    certPage.drawText(hash, {
+      x: 150,
+      y: yPosition,
+      size: textSize,
+      font: regularFont,
+      color: textColor,
+    });
+  }
+  
+  yPosition -= 20;
+  
+  // Created Date
+  certPage.drawText('Created Date:', {
+    x: 50,
+    y: yPosition,
+    size: textSize,
+    font: boldFont,
+    color: textColor,
+  });
+  
+  const createdDate = document.createdAt 
+    ? new Date(document.createdAt).toLocaleString() 
+    : 'Unknown';
+    
+  certPage.drawText(createdDate, {
+    x: 150,
+    y: yPosition,
+    size: textSize,
+    font: regularFont,
+    color: textColor,
+  });
+  
+  yPosition -= 20;
+  
+  // Completion Date
+  certPage.drawText('Completed Date:', {
+    x: 50,
+    y: yPosition,
+    size: textSize,
+    font: boldFont,
+    color: textColor,
+  });
+  
+  const completedDate = document.signedAt || new Date().toLocaleString();
+  
+  certPage.drawText(typeof completedDate === 'string' ? completedDate : completedDate.toLocaleString(), {
+    x: 150,
+    y: yPosition,
+    size: textSize,
+    font: regularFont,
+    color: textColor,
+  });
+  
+  // Horizontal line
+  yPosition -= 30;
+  certPage.drawLine({
+    start: { x: 50, y: yPosition },
+    end: { x: width - 50, y: yPosition },
+    thickness: 1,
+    color: lineColor,
+  });
+  
+  // Section: Author Information
+  yPosition -= 30;
+  
+  certPage.drawText('Document Author', {
+    x: 50,
+    y: yPosition,
+    size: headingSize,
+    font: boldFont,
+    color: headingColor,
+  });
+  
+  yPosition -= 25;
+  
+  // Author Name
+  certPage.drawText('Name:', {
+    x: 50,
+    y: yPosition,
+    size: textSize,
+    font: boldFont,
+    color: textColor,
+  });
+  
+  certPage.drawText(document.authorName || 'Unknown', {
+    x: 150,
+    y: yPosition,
+    size: textSize,
+    font: regularFont,
+    color: textColor,
+  });
+  
+  yPosition -= 20;
+  
+  // Author Email
+  certPage.drawText('Email:', {
+    x: 50,
+    y: yPosition,
+    size: textSize,
+    font: boldFont,
+    color: textColor,
+  });
+  
+  certPage.drawText(document.authorEmail || 'Unknown', {
+    x: 150,
+    y: yPosition,
+    size: textSize,
+    font: regularFont,
+    color: textColor,
+  });
+  
+  // Horizontal line
+  yPosition -= 30;
+  certPage.drawLine({
+    start: { x: 50, y: yPosition },
+    end: { x: width - 50, y: yPosition },
+    thickness: 1,
+    color: lineColor,
+  });
+  
+  // Section: Signer Information
+  yPosition -= 30;
+  
+  certPage.drawText('Signature Information', {
+    x: 50,
+    y: yPosition,
+    size: headingSize,
+    font: boldFont,
+    color: headingColor,
+  });
+  
+  // For each signer
+  for (const signer of signers) {
+    if (signer.status === 'COMPLETED') {
+      yPosition -= 25;
+      
+      // Signer Name
+      certPage.drawText('Signer Name:', {
+        x: 50,
+        y: yPosition,
+        size: textSize,
+        font: boldFont,
+        color: textColor,
+      });
+      
+      certPage.drawText(signer.name || 'Unknown', {
+        x: 150,
+        y: yPosition,
+        size: textSize,
+        font: regularFont,
+        color: textColor,
+      });
+      
+      yPosition -= 20;
+      
+      // Signer Email
+      certPage.drawText('Signer Email:', {
+        x: 50,
+        y: yPosition,
+        size: textSize,
+        font: boldFont,
+        color: textColor,
+      });
+      
+      certPage.drawText(signer.email || 'Unknown', {
+        x: 150,
+        y: yPosition,
+        size: textSize,
+        font: regularFont,
+        color: textColor,
+      });
+      
+      yPosition -= 20;
+      
+      // Signed Date
+      certPage.drawText('Signed Date:', {
+        x: 50,
+        y: yPosition,
+        size: textSize,
+        font: boldFont,
+        color: textColor,
+      });
+      
+      const signedDate = signer.completedAt 
+        ? new Date(signer.completedAt).toLocaleString() 
+        : 'Unknown';
+        
+      certPage.drawText(signedDate, {
+        x: 150,
+        y: yPosition,
+        size: textSize,
+        font: regularFont,
+        color: textColor,
+      });
+    }
+  }
+  
+  // Horizontal line
+  yPosition -= 30;
+  certPage.drawLine({
+    start: { x: 50, y: yPosition },
+    end: { x: width - 50, y: yPosition },
+    thickness: 1,
+    color: lineColor,
+  });
+  
+  // Section: System Information
+  yPosition -= 30;
+  
+  certPage.drawText('System Information', {
+    x: 50,
+    y: yPosition,
+    size: headingSize,
+    font: boldFont,
+    color: headingColor,
+  });
+  
+  yPosition -= 25;
+  
+  // IP Address
+  certPage.drawText('IP Address:', {
+    x: 50,
+    y: yPosition,
+    size: textSize,
+    font: boldFont,
+    color: textColor,
+  });
+  
+  certPage.drawText(clientInfo?.ipAddress || 'Not recorded', {
+    x: 150,
+    y: yPosition,
+    size: textSize,
+    font: regularFont,
+    color: textColor,
+  });
+  
+  yPosition -= 20;
+  
+  // User Agent
+  certPage.drawText('User Agent:', {
+    x: 50,
+    y: yPosition,
+    size: textSize,
+    font: boldFont,
+    color: textColor,
+  });
+  
+  // User agent might be long, so handle wrapping if needed
+  const userAgent = clientInfo?.userAgent || 'Not recorded';
+  const maxWidth = width - 200;
+  const userAgentWidth = regularFont.widthOfTextAtSize(userAgent, textSize);
+  
+  if (userAgentWidth > maxWidth) {
+    // Split into multiple lines if too long
+    let userAgentText = '';
+    let currentLine = '';
+    const words = userAgent.split(' ');
+    
+    for (const word of words) {
+      const testLine = currentLine + (currentLine ? ' ' : '') + word;
+      const lineWidth = regularFont.widthOfTextAtSize(testLine, textSize);
+      
+      if (lineWidth < maxWidth) {
+        currentLine = testLine;
+      } else {
+        // Draw the current line
+        certPage.drawText(currentLine, {
+          x: 150,
+          y: yPosition,
+          size: textSize,
+          font: regularFont,
+          color: textColor,
+        });
+        
+        // Move to next line
+        yPosition -= 15;
+        currentLine = word;
+      }
+    }
+    
+    // Draw the last line
+    if (currentLine) {
+      certPage.drawText(currentLine, {
+        x: 150,
+        y: yPosition,
+        size: textSize,
+        font: regularFont,
+        color: textColor,
+      });
+    }
+  } else {
+    // Single line is fine
+    certPage.drawText(userAgent, {
+      x: 150,
+      y: yPosition,
+      size: textSize,
+      font: regularFont,
+      color: textColor,
+    });
+  }
+  
+  // Footer with verification text
+  const footerY = 50;
+  const footerText = `This document was electronically signed through Royal Sign E-Signature Platform. To verify this document, please visit ${process.env.NEXT_PUBLIC_APP_URL || 'the Royal Sign platform'}.`;
+  
+  // Calculate text wrap for footer
+  const maxFooterWidth = width - 100;
+  const words = footerText.split(' ');
+  let currentLine = '';
+  let footerYPosition = footerY;
+  
+  for (const word of words) {
+    const testLine = currentLine + (currentLine ? ' ' : '') + word;
+    const lineWidth = regularFont.widthOfTextAtSize(testLine, smallTextSize);
+    
+    if (lineWidth < maxFooterWidth) {
+      currentLine = testLine;
+    } else {
+      // Draw the current line
+      certPage.drawText(currentLine, {
+        x: 50,
+        y: footerYPosition,
+        size: smallTextSize,
+        font: regularFont,
+        color: textColor,
+      });
+      
+      // Move to next line
+      footerYPosition -= 12;
+      currentLine = word;
+    }
+  }
+  
+  // Draw the last line
+  if (currentLine) {
+    certPage.drawText(currentLine, {
+      x: 50,
+      y: footerYPosition,
+      size: smallTextSize,
+      font: regularFont,
+      color: textColor,
+    });
   }
 }
