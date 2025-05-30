@@ -899,54 +899,8 @@ export async function generateFinalPDF(documentId: string) {
       // We'll import our attachment handler to embed files in the PDF
       const { embedAttachmentsInPdf } = await import("./attachment-actions");
       finalPdfBytes = await embedAttachmentsInPdf(document.id, finalPdfBytes);
-      
-      // Secure the PDF using node-qpdf to prevent manipulation
-      console.log("Securing PDF with node-qpdf...");
-      const { Qpdf } = await import('node-qpdf');
-      const fs = await import('fs');
-      const path = await import('path');
-      const os = await import('os');
-      
-      // Create temporary files for the qpdf process
-      const tempDir = os.tmpdir();
-      const inputPath = path.join(tempDir, `${document.id}-original.pdf`);
-      const outputPath = path.join(tempDir, `${document.id}-secured.pdf`);
-      
-      // Write the PDF bytes to a temporary file
-      await fs.promises.writeFile(inputPath, Buffer.from(finalPdfBytes));
-      
-      // Create a secure owner password (only used internally)
-      const ownerPassword = `Royal-${document.id}-${Date.now()}`;
-      
-      // Configure qpdf options
-      const qpdf = new Qpdf();
-      await qpdf.encrypt({
-        keyLength: 256,
-        inputFile: inputPath,
-        outputFile: outputPath,
-        password: "", // No user password needed - document can be opened by anyone
-        ownerPassword: ownerPassword, // But owner password prevents editing
-        allowPrinting: true,
-        allowModify: false, // No editing allowed
-        allowCopy: true, // Allow copying text
-        allowAnnotations: false, // No annotations allowed
-      });
-      
-      // Read the secured PDF back into memory
-      finalPdfBytes = await fs.promises.readFile(outputPath);
-      
-      // Clean up temporary files
-      try {
-        await fs.promises.unlink(inputPath);
-        await fs.promises.unlink(outputPath);
-      } catch (cleanupError) {
-        console.error("Error cleaning up temporary PDF files:", cleanupError);
-        // Non-fatal error - continue with the process
-      }
-      
-      console.log("PDF secured successfully");
     } catch (error) {
-      console.error("Error saving or securing PDF document:", error);
+      console.error("Error saving PDF document:", error);
       return {
         success: false,
         message: "Failed to generate final PDF document",
