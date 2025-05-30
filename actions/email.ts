@@ -10,6 +10,7 @@ import { DocumentSignEmail } from "@/emails/document-sign-email";
 import { DocumentSignedNotification } from "@/emails/document-signed-notification";
 import { NewSignerEmail } from "@/emails/new-signer-email";
 import { DocumentSignedWithPdf } from "@/emails/document-signed-with-pdf";
+import { DocumentSignedWithPdfToAdmin } from "@/emails/document-signed-with-pdf-to-admin";
 
 /**
  * Sends a welcome email to a new user
@@ -260,6 +261,18 @@ export async function sendNewSignerCredentialsEmail(
   }
 }
 
+/**
+ * Sends a signed document with PDF attachment to the user who signed it
+ * @param recipientName - The recipient's name
+ * @param recipientEmail - The recipient's email address
+ * @param documentTitle - The title of the document
+ * @param documentId - The ID of the document
+ * @param pdfContent - The PDF content as Buffer or Uint8Array
+ * @param senderName - Optional name of the sender
+ * @param senderEmail - Optional email of the sender
+ * @param message - Optional message
+ * @returns Promise that resolves when email is sent or rejects on error
+ */
 export async function sendSignedDocumentWithPdf(
   recipientName: string,
   recipientEmail: string,
@@ -300,5 +313,60 @@ export async function sendSignedDocumentWithPdf(
     console.log(`Signed document email with PDF sent to ${recipientEmail}`);
   } catch (error) {
     console.error("Error sending signed document with PDF:", error);
+  }
+}
+
+/**
+ * Sends a signed document with PDF attachment to the admin
+ * @param adminName - The admin's name
+ * @param adminEmail - The admin's email address
+ * @param documentTitle - The title of the document
+ * @param documentId - The ID of the document
+ * @param signerName - The name of the person who signed the document
+ * @param signerEmail - The email of the person who signed the document
+ * @param pdfContent - The PDF content as Buffer or Uint8Array
+ * @param message - Optional message
+ * @returns Promise that resolves when email is sent or rejects on error
+ */
+export async function sendSignedDocumentWithPdfToAdmin(
+  adminName: string,
+  adminEmail: string,
+  documentTitle: string,
+  documentId: string,
+  signerName: string,
+  signerEmail: string,
+  pdfContent: Buffer | Uint8Array,
+  message?: string,
+): Promise<void> {
+  try {
+    const emailContent = await render(
+      DocumentSignedWithPdfToAdmin({
+        adminName,
+        documentTitle,
+        documentId,
+        signerName,
+        signerEmail,
+        message,
+      }),
+    );
+
+    const pdfFilename = `${documentTitle.replace(/[^a-zA-Z0-9]/g, "_")}-signed.pdf`;
+
+    await sendEmail({
+      recipient: adminEmail,
+      subject: `Admin Notification: Document "${documentTitle}" Signed`,
+      html: emailContent,
+      attachments: [
+        {
+          filename: pdfFilename,
+          content: pdfContent,
+          contentType: "application/pdf",
+        },
+      ],
+    });
+
+    console.log(`Admin notification email with signed PDF sent to ${adminEmail}`);
+  } catch (error) {
+    console.error("Error sending admin notification with signed PDF:", error);
   }
 }

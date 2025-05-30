@@ -994,7 +994,7 @@ export async function generateFinalPDF(documentId: string) {
 
       if (signer && signer.email) {
         // Import the email action to send signed document with PDF attachment
-        const { sendSignedDocumentWithPdf } = await import("@/actions/email");
+        const { sendSignedDocumentWithPdf, sendSignedDocumentWithPdfToAdmin } = await import("@/actions/email");
 
         // Send email with PDF attachment to the signer
         await sendSignedDocumentWithPdf(
@@ -1009,9 +1009,22 @@ export async function generateFinalPDF(documentId: string) {
         );
 
         console.log(`Sent signed PDF via email to ${signer.email}`);
+
+        await sendSignedDocumentWithPdfToAdmin(
+          document.author.name,
+          document.author.email,
+          document.title,
+          documentId,
+          signer.name,
+          signer.email,
+          finalPdfBytes,
+          "The document has been successfully signed by the signer. Please find the attached PDF for your records."
+        );
+
+        console.log(`Sent signed PDF to admin for document ${documentId}`);
       }
     } catch (emailError) {
-      console.error("Error sending signed PDF to signer via email:", emailError);
+      console.error("Error sending signed PDF via email:", emailError);
       // Non-fatal error - we continue even if the email fails
     }
 
@@ -1069,7 +1082,7 @@ async function addCertificationPage(pdfDoc: PDFDocument, document: any, signers:
   // Add logo to the top right corner of the certification page
   try {
     // Read the logo file - resolve path correctly from project root
-    const logoPath = path.resolve(process.cwd(), 'public', 'name_logo.png');
+    const logoPath = path.resolve(process.cwd(), 'assets', 'name_logo.png');
     const logoBytes = fs.readFileSync(logoPath);
     const logoImage = await pdfDoc.embedPng(logoBytes);
     

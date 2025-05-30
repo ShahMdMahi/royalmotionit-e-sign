@@ -521,28 +521,28 @@ export async function completeDocumentSigning(
     });
 
     // Send notification to document author
-    try {
-      // Get document author information
-      const documentAuthor = await prisma.user.findUnique({
-        where: { id: document.authorId },
-        select: { name: true, email: true },
-      });
+    // try {
+    //   // Get document author information
+    //   const documentAuthor = await prisma.user.findUnique({
+    //     where: { id: document.authorId },
+    //     select: { name: true, email: true },
+    //   });
 
-      // Send email notification to document author
-      if (documentAuthor && documentAuthor.email) {
-        await sendDocumentSignedNotification(
-          documentAuthor.name || "Document Owner",
-          documentAuthor.email,
-          document.title || "Untitled Document",
-          document.id,
-          session?.user?.name ?? signer.name ?? "Signer",
-          session?.user?.email ?? signer.email ?? ""
-        );
-      }
-    } catch (error) {
-      console.error("Error sending notification to document author:", error);
-      // Non-fatal error, continue with the process
-    }
+    //   // Send email notification to document author
+    //   if (documentAuthor && documentAuthor.email) {
+    //     await sendDocumentSignedNotification(
+    //       documentAuthor.name || "Document Owner",
+    //       documentAuthor.email,
+    //       document.title || "Untitled Document",
+    //       document.id,
+    //       session?.user?.name ?? signer.name ?? "Signer",
+    //       session?.user?.email ?? signer.email ?? ""
+    //     );
+    //   }
+    // } catch (error) {
+    //   console.error("Error sending notification to document author:", error);
+    //   // Non-fatal error, continue with the process
+    // }
 
     // With single signer model, we always generate the final PDF when the signer completes
     // since there's only one signer
