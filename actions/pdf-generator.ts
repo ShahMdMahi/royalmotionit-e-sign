@@ -372,8 +372,20 @@ export async function generateFinalPDF(documentId: string) {
     // Process all conditional logic and formulas
     const processedFields = processFieldConditionalsAndFormulas(typedFields);
 
+    // Extract signatures for certification page
+    const signatures = new Map<string, string>();
+
     // Embed fields and signatures
     for (const field of processedFields) {
+      // Collect signature data for certification page
+      if (field.type === 'signature' && field.value && field.value.startsWith('data:image')) {
+        // Find the signer email for this signature field
+        const signer = document.signers.find((s: any) => s.id === field.signerId);
+        if (signer?.email) {
+          signatures.set(signer.email, field.value);
+        }
+      }
+
       // Skip fields with no value or that should be hidden
       if ((!field.value && field.type !== "checkbox") || field.isVisible === false) continue;
 
@@ -876,7 +888,7 @@ export async function generateFinalPDF(documentId: string) {
     };
 
     // Add certification page with signature verification information
-    await addCertificationPage(pdfDoc, document, document.signers, documentHash, signerClientInfo);
+    await addCertificationPage(pdfDoc, document, document.signers, documentHash, signerClientInfo, signatures);
 
     // Save the PDF
     let finalPdfBytes;
@@ -887,8 +899,54 @@ export async function generateFinalPDF(documentId: string) {
       // We'll import our attachment handler to embed files in the PDF
       const { embedAttachmentsInPdf } = await import("./attachment-actions");
       finalPdfBytes = await embedAttachmentsInPdf(document.id, finalPdfBytes);
+      
+      // Secure the PDF using node-qpdf to prevent manipulation
+      console.log("Securing PDF with node-qpdf...");
+      const { Qpdf } = await import('node-qpdf');
+      const fs = await import('fs');
+      const path = await import('path');
+      const os = await import('os');
+      
+      // Create temporary files for the qpdf process
+      const tempDir = os.tmpdir();
+      const inputPath = path.join(tempDir, `${document.id}-original.pdf`);
+      const outputPath = path.join(tempDir, `${document.id}-secured.pdf`);
+      
+      // Write the PDF bytes to a temporary file
+      await fs.promises.writeFile(inputPath, Buffer.from(finalPdfBytes));
+      
+      // Create a secure owner password (only used internally)
+      const ownerPassword = `Royal-${document.id}-${Date.now()}`;
+      
+      // Configure qpdf options
+      const qpdf = new Qpdf();
+      await qpdf.encrypt({
+        keyLength: 256,
+        inputFile: inputPath,
+        outputFile: outputPath,
+        password: "", // No user password needed - document can be opened by anyone
+        ownerPassword: ownerPassword, // But owner password prevents editing
+        allowPrinting: true,
+        allowModify: false, // No editing allowed
+        allowCopy: true, // Allow copying text
+        allowAnnotations: false, // No annotations allowed
+      });
+      
+      // Read the secured PDF back into memory
+      finalPdfBytes = await fs.promises.readFile(outputPath);
+      
+      // Clean up temporary files
+      try {
+        await fs.promises.unlink(inputPath);
+        await fs.promises.unlink(outputPath);
+      } catch (cleanupError) {
+        console.error("Error cleaning up temporary PDF files:", cleanupError);
+        // Non-fatal error - continue with the process
+      }
+      
+      console.log("PDF secured successfully");
     } catch (error) {
-      console.error("Error saving PDF document:", error);
+      console.error("Error saving or securing PDF document:", error);
       return {
         success: false,
         message: "Failed to generate final PDF document",
@@ -1057,8 +1115,9 @@ export async function generateFinalPDF(documentId: string) {
  * @param signers Array of signers
  * @param documentHash SHA256 hash of the original document
  * @param clientInfo Client information including IP address and user agent
+ * @param signatures Map of signer email to signature image data
  */
-async function addCertificationPage(pdfDoc: PDFDocument, document: any, signers: any[], documentHash: string, clientInfo?: { userAgent?: string; ipAddress?: string }) {
+async function addCertificationPage(pdfDoc: PDFDocument, document: any, signers: any[], documentHash: string, clientInfo?: { userAgent?: string; ipAddress?: string }, signatures?: Map<string, string>) {
   // Add a new page at the end of the document for certification
   const certPage = pdfDoc.addPage();
   const { width, height } = certPage.getSize();
@@ -1430,19 +1489,25 @@ async function addCertificationPage(pdfDoc: PDFDocument, document: any, signers:
         color: textColor,
       });
 
-      // Look for a signature in the fields associated with this signer
-      const signerSignatureField = document.fields.find((field: any) => 
-        field.type === 'signature' && field.signerEmail === signer.email && field.value
-      );
+      // Look for a signature in the passed signatures map first, then fallback to document fields
+      let signerSignatureValue = signatures?.get(signer.email);
+      
+      if (!signerSignatureValue) {
+        // Fallback to looking in document fields if not found in signatures map
+        const signerSignatureField = document.fields.find((field: any) => 
+          field.type === 'signature' && field.signerEmail === signer.email && field.value
+        );
+        signerSignatureValue = signerSignatureField?.value;
+      }
 
-      if (signerSignatureField && signerSignatureField.value && signerSignatureField.value.startsWith('data:image')) {
+      if (signerSignatureValue && signerSignatureValue.startsWith('data:image')) {
         try {
           // Extract base64 data
-          const base64Data = signerSignatureField.value.split(",")[1];
+          const base64Data = signerSignatureValue.split(",")[1];
           if (base64Data) {
             // Determine image format and embed
             let signatureImage;
-            if (signerSignatureField.value.includes("data:image/jpeg") || signerSignatureField.value.includes("data:image/jpg")) {
+            if (signerSignatureValue.includes("data:image/jpeg") || signerSignatureValue.includes("data:image/jpg")) {
               signatureImage = await pdfDoc.embedJpg(Buffer.from(base64Data, "base64"));
             } else {
               signatureImage = await pdfDoc.embedPng(Buffer.from(base64Data, "base64"));
