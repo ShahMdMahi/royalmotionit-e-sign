@@ -1,7 +1,7 @@
 "use server";
 
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 import { PDFDocument, rgb, StandardFonts, PDFForm, PDFPage, degrees } from "pdf-lib";
 import { DocumentField, DocumentFieldType, Document } from "@/types/document";
 import { convertToDocumentField, convertToDocumentFields } from "@/utils/document-field-converter";
@@ -378,7 +378,7 @@ export async function generateFinalPDF(documentId: string) {
     // Embed fields and signatures
     for (const field of processedFields) {
       // Collect signature data for certification page
-      if (field.type === 'signature' && field.value && field.value.startsWith('data:image')) {
+      if (field.type === "signature" && field.value && field.value.startsWith("data:image")) {
         // Find the signer email for this signature field
         const signer = document.signers.find((s: any) => s.id === field.signerId);
         if (signer?.email) {
@@ -1071,7 +1071,14 @@ export async function generateFinalPDF(documentId: string) {
  * @param clientInfo Client information including IP address and user agent
  * @param signatures Map of signer email to signature image data
  */
-async function addCertificationPage(pdfDoc: PDFDocument, document: any, signers: any[], documentHash: string, clientInfo?: { userAgent?: string; ipAddress?: string }, signatures?: Map<string, string>) {
+async function addCertificationPage(
+  pdfDoc: PDFDocument,
+  document: any,
+  signers: any[],
+  documentHash: string,
+  clientInfo?: { userAgent?: string; ipAddress?: string },
+  signatures?: Map<string, string>
+) {
   // Add a new page at the end of the document for certification
   const certPage = pdfDoc.addPage();
   const { width, height } = certPage.getSize();
@@ -1094,16 +1101,20 @@ async function addCertificationPage(pdfDoc: PDFDocument, document: any, signers:
 
   // Add logo to the top right corner of the certification page
   try {
-    // Read the logo file - resolve path correctly from project root
-    const logoPath = path.resolve(process.cwd(), 'assets', 'name_logo.png');
-    const logoBytes = fs.readFileSync(logoPath);
+    // Use base64 encoded logo instead of reading from filesystem
+    // This ensures the logo is available in any deployment environment
+    const logoBase64 =
+      "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";
+
+    // Decode and embed the logo
+    const logoBytes = Buffer.from(logoBase64, "base64");
     const logoImage = await pdfDoc.embedPng(logoBytes);
-    
+
     // Get dimensions of the logo
     const logoWidth = 120; // Set fixed width for the logo
     const aspectRatio = logoImage.height / logoImage.width;
     const logoHeight = logoWidth * aspectRatio;
-    
+
     // Draw the logo in the top right corner
     certPage.drawImage(logoImage, {
       x: width - logoWidth - 50, // Position from right edge with 50pt margin
@@ -1111,11 +1122,11 @@ async function addCertificationPage(pdfDoc: PDFDocument, document: any, signers:
       width: logoWidth,
       height: logoHeight,
     });
-    
+
     // Add certificate generation time below the logo
     const generationTime = formatBangladeshiTime(new Date());
     const timeText = `Generated: ${generationTime}`;
-    
+
     // Draw the generation time text below the logo
     certPage.drawText(timeText, {
       x: width - regularFont.widthOfTextAtSize(timeText, smallTextSize) - 50, // Right align with same margin as logo
@@ -1127,11 +1138,11 @@ async function addCertificationPage(pdfDoc: PDFDocument, document: any, signers:
   } catch (error) {
     console.error("Error embedding logo in certification page:", error);
     // Continue without logo if there's an error
-    
+
     // Still add generation time even if logo fails
     const generationTime = formatBangladeshiTime(new Date());
     const timeText = `Generated: ${generationTime}`;
-    
+
     certPage.drawText(timeText, {
       x: width - regularFont.widthOfTextAtSize(timeText, smallTextSize) - 50,
       y: height - 45, // Position at top right if no logo
@@ -1445,16 +1456,14 @@ async function addCertificationPage(pdfDoc: PDFDocument, document: any, signers:
 
       // Look for a signature in the passed signatures map first, then fallback to document fields
       let signerSignatureValue = signatures?.get(signer.email);
-      
+
       if (!signerSignatureValue) {
         // Fallback to looking in document fields if not found in signatures map
-        const signerSignatureField = document.fields.find((field: any) => 
-          field.type === 'signature' && field.signerEmail === signer.email && field.value
-        );
+        const signerSignatureField = document.fields.find((field: any) => field.type === "signature" && field.signerEmail === signer.email && field.value);
         signerSignatureValue = signerSignatureField?.value;
       }
 
-      if (signerSignatureValue && signerSignatureValue.startsWith('data:image')) {
+      if (signerSignatureValue && signerSignatureValue.startsWith("data:image")) {
         try {
           // Extract base64 data
           const base64Data = signerSignatureValue.split(",")[1];
@@ -1470,21 +1479,21 @@ async function addCertificationPage(pdfDoc: PDFDocument, document: any, signers:
             // Calculate proportional dimensions while keeping signature a reasonable size
             const imgWidth = signatureImage.width;
             const imgHeight = signatureImage.height;
-            
+
             // Set a maximum width for the signature on the certification page
             const maxSignatureWidth = 150;
             const maxSignatureHeight = 50;
-            
+
             // Calculate display dimensions maintaining aspect ratio
             let drawWidth = imgWidth;
             let drawHeight = imgHeight;
-            
+
             if (drawWidth > maxSignatureWidth) {
               const scale = maxSignatureWidth / drawWidth;
               drawWidth = maxSignatureWidth;
               drawHeight = imgHeight * scale;
             }
-            
+
             if (drawHeight > maxSignatureHeight) {
               const scale = maxSignatureHeight / drawHeight;
               drawHeight = maxSignatureHeight;
@@ -1497,9 +1506,9 @@ async function addCertificationPage(pdfDoc: PDFDocument, document: any, signers:
               y: yPosition - drawHeight + 10, // Position it nicely relative to the text
               width: drawWidth,
               height: drawHeight,
-              opacity: 1.0
+              opacity: 1.0,
             });
-            
+
             // Adjust position further based on signature height
             yPosition -= Math.max(20, drawHeight);
           } else {
