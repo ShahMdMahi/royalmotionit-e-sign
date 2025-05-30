@@ -190,7 +190,7 @@ function addDocumentMetadata(pdfDoc: PDFDocument, document: any, signers: any[])
   const metadata = {
     DocumentId: document.id,
     SignedAt: new Date().toISOString(),
-    DocumentHash: document.fileHash || 'Not available',
+    DocumentHash: document.fileHash || "Not available",
   };
   // Add signer information
   signers.forEach((signer, index) => {
@@ -298,6 +298,7 @@ export async function generateFinalPDF(documentId: string) {
       include: {
         fields: true,
         signers: true,
+        author: true,
       },
     });
 
@@ -308,8 +309,8 @@ export async function generateFinalPDF(documentId: string) {
       };
     }
 
-    // print document details in big red style in console
-    console.log(`%cDocument details: ${JSON.stringify(document, null, 2)}`, "color: red; font-size: 16px; font-weight: bold;");
+    // // print document details in big red style in console
+    // console.log(`%cDocument details: ${JSON.stringify(document, null, 2)}`, "color: red; font-size: 16px; font-weight: bold;");
 
     // Check access rights
     const session = await auth();
@@ -333,8 +334,8 @@ export async function generateFinalPDF(documentId: string) {
       };
     }
 
-    // print singerCompleted in big red style in console
-    console.log(`%cSigner completed: ${signerCompleted}`, "color: red; font-size: 16px; font-weight: bold;");
+    // // print singerCompleted in big red style in console
+    // console.log(`%cSigner completed: ${signerCompleted}`, "color: red; font-size: 16px; font-weight: bold;");
 
     // Get the original PDF from storage
     if (!document.key) {
@@ -858,25 +859,30 @@ export async function generateFinalPDF(documentId: string) {
     pdfDoc.setProducer("Royal Sign E-Signature Platform");
     pdfDoc.setCreator("Royal Sign");
     pdfDoc.setAuthor(document.authorName || "Royal Sign");
-    
 
     // Set creation and modification dates
     if (document.createdAt) {
-      pdfDoc.setCreationDate(new Date(document.createdAt));
+      // For PDF metadata, we still need to use JavaScript Date objects,
+      // but we'll adjust to Bangladesh time (+6 hours)
+      const creationDate = new Date(document.createdAt);
+      creationDate.setTime(creationDate.getTime() + 6 * 60 * 60 * 1000);
+      pdfDoc.setCreationDate(creationDate);
     }
-    pdfDoc.setModificationDate(new Date()); // Flatten the form - this makes all form fields part of the document content
+
+    // Set modification date to current time in Bangladesh
+    const modificationDate = new Date();
+    modificationDate.setTime(modificationDate.getTime() + 6 * 60 * 60 * 1000);
+    pdfDoc.setModificationDate(modificationDate); // Flatten the form - this makes all form fields part of the document content
     form.flatten();
 
     // Use the existing document hash from the database
-    const documentHash = document.fileHash || "Not available";
+    const documentHash = document.hash || "Not available";
 
     // Get client info from signers (if available)
-    const signerClientInfo = document.signers[0]?.clientInfo
-      ? JSON.parse(document.signers[0].clientInfo)
-      : { 
-          userAgent: "Not recorded",
-          ipAddress: "Not recorded"
-        };
+    const signerClientInfo = {
+      userAgent: document.signers[0].userAgent || "Not Recorded",
+      ipAddress: document.signers[0].ipAddress || "Not Recorded",
+    };
 
     // Add certification page with signature verification information
     await addCertificationPage(pdfDoc, document, document.signers, documentHash, signerClientInfo);
@@ -900,8 +906,9 @@ export async function generateFinalPDF(documentId: string) {
     }
 
     // Create a unique key for the signed document
-    // Include timestamp to ensure it's always a unique file
-    const finalKey = `documents/${document.id}-${Date.now()}-signed.pdf`;
+    // Include timestamp to ensure it's always a unique file (using Bangladesh time)
+    const bdTimestamp = Date.now() + 6 * 60 * 60 * 1000; // Adjust timestamp to Bangladesh time
+    const finalKey = `documents/${document.id}-${bdTimestamp}-signed.pdf`;
 
     // Store reference to previous signed document if exists for cleanup later
     const previousSignedUrl = document.url;
@@ -959,12 +966,16 @@ export async function generateFinalPDF(documentId: string) {
     }
 
     // Update document status and URL
+    // Create a date object representing current time in Bangladesh
+    const bdSignedAt = new Date();
+    bdSignedAt.setTime(bdSignedAt.getTime() + 6 * 60 * 60 * 1000);
+
     await prisma.document.update({
       where: { id: documentId },
       data: {
         status: "COMPLETED",
         documentType: "SIGNED",
-        signedAt: new Date(),
+        signedAt: bdSignedAt,
         url: `${process.env.R2_PUBLIC_URL}/${finalKey}`,
         key: finalKey,
       },
@@ -1036,34 +1047,28 @@ export async function generateFinalPDF(documentId: string) {
 /**
  * Add a certification page at the end of the PDF document
  * This page includes details about the signing process, document hash, and participant information
- * 
+ *
  * @param pdfDoc PDF document object
  * @param document Document object with metadata
  * @param signers Array of signers
  * @param documentHash SHA256 hash of the original document
  * @param clientInfo Client information including IP address and user agent
  */
-async function addCertificationPage(
-  pdfDoc: PDFDocument,
-  document: any,
-  signers: any[],
-  documentHash: string,
-  clientInfo?: { userAgent?: string; ipAddress?: string }
-) {
+async function addCertificationPage(pdfDoc: PDFDocument, document: any, signers: any[], documentHash: string, clientInfo?: { userAgent?: string; ipAddress?: string }) {
   // Add a new page at the end of the document for certification
   const certPage = pdfDoc.addPage();
   const { width, height } = certPage.getSize();
-  
+
   // Embed fonts we'll use on the page
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  
+
   // Define text sizes and colors
   const titleSize = 16;
   const headingSize = 12;
   const textSize = 10;
   const smallTextSize = 8;
-  
+
   // Define colors
   const titleColor = rgb(0.1, 0.1, 0.4); // Dark blue
   const headingColor = rgb(0.2, 0.2, 0.2); // Dark gray
@@ -1071,7 +1076,7 @@ async function addCertificationPage(
   const lineColor = rgb(0.8, 0.8, 0.8); // Light gray
 
   // Title of certification page
-  certPage.drawText('Electronic Signature Certification', {
+  certPage.drawText("Electronic Signature Certification", {
     x: 50,
     y: height - 50,
     size: titleSize,
@@ -1081,66 +1086,66 @@ async function addCertificationPage(
 
   // Section: Document Information
   let yPosition = height - 90;
-  
-  certPage.drawText('Document Information', {
+
+  certPage.drawText("Document Information", {
     x: 50,
     y: yPosition,
     size: headingSize,
     font: boldFont,
     color: headingColor,
   });
-  
+
   yPosition -= 25;
-  
+
   // Document ID
-  certPage.drawText('Document ID:', {
+  certPage.drawText("Document ID:", {
     x: 50,
     y: yPosition,
     size: textSize,
     font: boldFont,
     color: textColor,
   });
-  
-  certPage.drawText(document.id || 'Unknown', {
+
+  certPage.drawText(document.id || "Unknown", {
     x: 150,
     y: yPosition,
     size: textSize,
     font: regularFont,
     color: textColor,
   });
-  
+
   yPosition -= 20;
-  
+
   // Document Title
-  certPage.drawText('Title:', {
+  certPage.drawText("Title:", {
     x: 50,
     y: yPosition,
     size: textSize,
     font: boldFont,
     color: textColor,
   });
-  
-  certPage.drawText(document.title || 'Untitled Document', {
+
+  certPage.drawText(document.title || "Untitled Document", {
     x: 150,
     y: yPosition,
     size: textSize,
     font: regularFont,
     color: textColor,
   });
-  
+
   yPosition -= 20;
-  
+
   // Document Hash
-  certPage.drawText('Document Hash:', {
+  certPage.drawText("Document Hash:", {
     x: 50,
     y: yPosition,
     size: textSize,
     font: boldFont,
     color: textColor,
   });
-  
+
   // For hash display, check if it's long and needs to be displayed in a special way
-  const hash = documentHash || 'Not available';
+  const hash = documentHash || "Not available";
   if (hash.length > 40) {
     // Display hash in a shorter format by showing first and last parts
     const displayHash = `${hash.substring(0, 15)}...${hash.substring(hash.length - 15)}`;
@@ -1151,7 +1156,7 @@ async function addCertificationPage(
       font: regularFont,
       color: textColor,
     });
-    
+
     // Add full hash in smaller text below
     yPosition -= 15;
     certPage.drawText("Full hash:", {
@@ -1161,7 +1166,7 @@ async function addCertificationPage(
       font: boldFont,
       color: textColor,
     });
-    
+
     certPage.drawText(hash, {
       x: 150,
       y: yPosition,
@@ -1178,22 +1183,20 @@ async function addCertificationPage(
       color: textColor,
     });
   }
-  
+
   yPosition -= 20;
-  
+
   // Created Date
-  certPage.drawText('Created Date:', {
+  certPage.drawText("Created Date:", {
     x: 50,
     y: yPosition,
     size: textSize,
     font: boldFont,
     color: textColor,
   });
-  
-  const createdDate = document.createdAt 
-    ? new Date(document.createdAt).toLocaleString() 
-    : 'Unknown';
-    
+
+  const createdDate = document.createdAt ? formatBangladeshiTime(document.createdAt) : "Unknown";
+
   certPage.drawText(createdDate, {
     x: 150,
     y: yPosition,
@@ -1201,28 +1204,28 @@ async function addCertificationPage(
     font: regularFont,
     color: textColor,
   });
-  
+
   yPosition -= 20;
-  
+
   // Completion Date
-  certPage.drawText('Completed Date:', {
+  certPage.drawText("Completed Date:", {
     x: 50,
     y: yPosition,
     size: textSize,
     font: boldFont,
     color: textColor,
   });
-  
-  const completedDate = document.signedAt || new Date().toLocaleString();
-  
-  certPage.drawText(typeof completedDate === 'string' ? completedDate : completedDate.toLocaleString(), {
+
+  const completedDate = document.signedAt ? formatBangladeshiTime(document.signedAt) : formatBangladeshiTime(new Date());
+
+  certPage.drawText(completedDate, {
     x: 150,
     y: yPosition,
     size: textSize,
     font: regularFont,
     color: textColor,
   });
-  
+
   // Horizontal line
   yPosition -= 30;
   certPage.drawLine({
@@ -1231,56 +1234,56 @@ async function addCertificationPage(
     thickness: 1,
     color: lineColor,
   });
-  
+
   // Section: Author Information
   yPosition -= 30;
-  
-  certPage.drawText('Document Author', {
+
+  certPage.drawText("Document Author", {
     x: 50,
     y: yPosition,
     size: headingSize,
     font: boldFont,
     color: headingColor,
   });
-  
+
   yPosition -= 25;
-  
+
   // Author Name
-  certPage.drawText('Name:', {
+  certPage.drawText("Name:", {
     x: 50,
     y: yPosition,
     size: textSize,
     font: boldFont,
     color: textColor,
   });
-  
-  certPage.drawText(document.authorName || 'Unknown', {
+
+  certPage.drawText(document.author.name || "Unknown", {
     x: 150,
     y: yPosition,
     size: textSize,
     font: regularFont,
     color: textColor,
   });
-  
+
   yPosition -= 20;
-  
+
   // Author Email
-  certPage.drawText('Email:', {
+  certPage.drawText("Email:", {
     x: 50,
     y: yPosition,
     size: textSize,
     font: boldFont,
     color: textColor,
   });
-  
-  certPage.drawText(document.authorEmail || 'Unknown', {
+
+  certPage.drawText(document.author.email || "Unknown", {
     x: 150,
     y: yPosition,
     size: textSize,
     font: regularFont,
     color: textColor,
   });
-  
+
   // Horizontal line
   yPosition -= 30;
   certPage.drawLine({
@@ -1289,74 +1292,72 @@ async function addCertificationPage(
     thickness: 1,
     color: lineColor,
   });
-  
+
   // Section: Signer Information
   yPosition -= 30;
-  
-  certPage.drawText('Signature Information', {
+
+  certPage.drawText("Signature Information", {
     x: 50,
     y: yPosition,
     size: headingSize,
     font: boldFont,
     color: headingColor,
   });
-  
+
   // For each signer
   for (const signer of signers) {
-    if (signer.status === 'COMPLETED') {
+    if (signer.status === "COMPLETED") {
       yPosition -= 25;
-      
+
       // Signer Name
-      certPage.drawText('Signer Name:', {
+      certPage.drawText("Signer Name:", {
         x: 50,
         y: yPosition,
         size: textSize,
         font: boldFont,
         color: textColor,
       });
-      
-      certPage.drawText(signer.name || 'Unknown', {
+
+      certPage.drawText(signer.name || "Unknown", {
         x: 150,
         y: yPosition,
         size: textSize,
         font: regularFont,
         color: textColor,
       });
-      
+
       yPosition -= 20;
-      
+
       // Signer Email
-      certPage.drawText('Signer Email:', {
+      certPage.drawText("Signer Email:", {
         x: 50,
         y: yPosition,
         size: textSize,
         font: boldFont,
         color: textColor,
       });
-      
-      certPage.drawText(signer.email || 'Unknown', {
+
+      certPage.drawText(signer.email || "Unknown", {
         x: 150,
         y: yPosition,
         size: textSize,
         font: regularFont,
         color: textColor,
       });
-      
+
       yPosition -= 20;
-      
+
       // Signed Date
-      certPage.drawText('Signed Date:', {
+      certPage.drawText("Signed Date:", {
         x: 50,
         y: yPosition,
         size: textSize,
         font: boldFont,
         color: textColor,
       });
-      
-      const signedDate = signer.completedAt 
-        ? new Date(signer.completedAt).toLocaleString() 
-        : 'Unknown';
-        
+
+      const signedDate = signer.completedAt ? formatBangladeshiTime(signer.completedAt) : "Unknown";
+
       certPage.drawText(signedDate, {
         x: 150,
         y: yPosition,
@@ -1366,7 +1367,7 @@ async function addCertificationPage(
       });
     }
   }
-  
+
   // Horizontal line
   yPosition -= 30;
   certPage.drawLine({
@@ -1375,63 +1376,63 @@ async function addCertificationPage(
     thickness: 1,
     color: lineColor,
   });
-  
+
   // Section: System Information
   yPosition -= 30;
-  
-  certPage.drawText('System Information', {
+
+  certPage.drawText("System Information", {
     x: 50,
     y: yPosition,
     size: headingSize,
     font: boldFont,
     color: headingColor,
   });
-  
+
   yPosition -= 25;
-  
+
   // IP Address
-  certPage.drawText('IP Address:', {
+  certPage.drawText("IP Address:", {
     x: 50,
     y: yPosition,
     size: textSize,
     font: boldFont,
     color: textColor,
   });
-  
-  certPage.drawText(clientInfo?.ipAddress || 'Not recorded', {
+
+  certPage.drawText(clientInfo?.ipAddress || "Not recorded", {
     x: 150,
     y: yPosition,
     size: textSize,
     font: regularFont,
     color: textColor,
   });
-  
+
   yPosition -= 20;
-  
+
   // User Agent
-  certPage.drawText('User Agent:', {
+  certPage.drawText("User Agent:", {
     x: 50,
     y: yPosition,
     size: textSize,
     font: boldFont,
     color: textColor,
   });
-  
+
   // User agent might be long, so handle wrapping if needed
-  const userAgent = clientInfo?.userAgent || 'Not recorded';
+  const userAgent = clientInfo?.userAgent || "Not recorded";
   const maxWidth = width - 200;
   const userAgentWidth = regularFont.widthOfTextAtSize(userAgent, textSize);
-  
+
   if (userAgentWidth > maxWidth) {
     // Split into multiple lines if too long
-    let userAgentText = '';
-    let currentLine = '';
-    const words = userAgent.split(' ');
-    
+    let userAgentText = "";
+    let currentLine = "";
+    const words = userAgent.split(" ");
+
     for (const word of words) {
-      const testLine = currentLine + (currentLine ? ' ' : '') + word;
+      const testLine = currentLine + (currentLine ? " " : "") + word;
       const lineWidth = regularFont.widthOfTextAtSize(testLine, textSize);
-      
+
       if (lineWidth < maxWidth) {
         currentLine = testLine;
       } else {
@@ -1443,13 +1444,13 @@ async function addCertificationPage(
           font: regularFont,
           color: textColor,
         });
-        
+
         // Move to next line
         yPosition -= 15;
         currentLine = word;
       }
     }
-    
+
     // Draw the last line
     if (currentLine) {
       certPage.drawText(currentLine, {
@@ -1470,21 +1471,21 @@ async function addCertificationPage(
       color: textColor,
     });
   }
-  
+
   // Footer with verification text
   const footerY = 50;
-  const footerText = `This document was electronically signed through Royal Sign E-Signature Platform. To verify this document, please visit ${process.env.NEXT_PUBLIC_APP_URL || 'the Royal Sign platform'}.`;
-  
+  const footerText = `This document was electronically signed through Royal Sign E-Signature Platform. To verify this document, please visit ${process.env.NEXT_PUBLIC_APP_URL || "the Royal Sign platform"}.`;
+
   // Calculate text wrap for footer
   const maxFooterWidth = width - 100;
-  const words = footerText.split(' ');
-  let currentLine = '';
+  const words = footerText.split(" ");
+  let currentLine = "";
   let footerYPosition = footerY;
-  
+
   for (const word of words) {
-    const testLine = currentLine + (currentLine ? ' ' : '') + word;
+    const testLine = currentLine + (currentLine ? " " : "") + word;
     const lineWidth = regularFont.widthOfTextAtSize(testLine, smallTextSize);
-    
+
     if (lineWidth < maxFooterWidth) {
       currentLine = testLine;
     } else {
@@ -1496,13 +1497,13 @@ async function addCertificationPage(
         font: regularFont,
         color: textColor,
       });
-      
+
       // Move to next line
       footerYPosition -= 12;
       currentLine = word;
     }
   }
-  
+
   // Draw the last line
   if (currentLine) {
     certPage.drawText(currentLine, {
@@ -1513,4 +1514,29 @@ async function addCertificationPage(
       color: textColor,
     });
   }
+}
+
+/**
+ * Format a date object or date string to Bangladeshi time format: DD-MMM-YYYY HH:MM:SS
+ *
+ * @param date Date object or date string
+ * @returns Formatted date string in Bangladeshi time
+ */
+function formatBangladeshiTime(date: Date | string | undefined): string {
+  if (!date) return "Unknown";
+
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+
+  // Bangladesh is UTC+6
+  const bangladeshiTime = new Date(dateObj.getTime() + 6 * 60 * 60 * 1000);
+
+  // Format to DD-MMM-YYYY HH:MM:SS
+  const day = bangladeshiTime.getUTCDate().toString().padStart(2, "0");
+  const month = bangladeshiTime.toLocaleString("en", { month: "short", timeZone: "UTC" });
+  const year = bangladeshiTime.getUTCFullYear();
+  const hours = bangladeshiTime.getUTCHours().toString().padStart(2, "0");
+  const minutes = bangladeshiTime.getUTCMinutes().toString().padStart(2, "0");
+  const seconds = bangladeshiTime.getUTCSeconds().toString().padStart(2, "0");
+
+  return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 }
