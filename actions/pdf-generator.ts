@@ -1,5 +1,7 @@
 "use server";
 
+import fs from 'fs';
+import path from 'path';
 import { PDFDocument, rgb, StandardFonts, PDFForm, PDFPage, degrees } from "pdf-lib";
 import { DocumentField, DocumentFieldType, Document } from "@/types/document";
 import { convertToDocumentField, convertToDocumentFields } from "@/utils/document-field-converter";
@@ -431,17 +433,6 @@ export async function generateFinalPDF(documentId: string) {
                 width: drawWidth,
                 height: drawHeight,
                 opacity: 1.0, // Full opacity for better visibility
-              });
-
-              // Draw a thin border around the signature for better visibility
-              page.drawRectangle({
-                x,
-                y,
-                width: field.width,
-                height: field.height,
-                borderColor: rgb(0.7, 0.7, 0.7),
-                borderWidth: 0.5,
-                borderOpacity: 0.5,
               });
             } catch (error) {
               console.error("Error embedding signature:", error);
@@ -1075,6 +1066,55 @@ async function addCertificationPage(pdfDoc: PDFDocument, document: any, signers:
   const textColor = rgb(0.3, 0.3, 0.3); // Medium gray
   const lineColor = rgb(0.8, 0.8, 0.8); // Light gray
 
+  // Add logo to the top right corner of the certification page
+  try {
+    // Read the logo file - resolve path correctly from project root
+    const logoPath = path.resolve(process.cwd(), 'public', 'name_logo.png');
+    const logoBytes = fs.readFileSync(logoPath);
+    const logoImage = await pdfDoc.embedPng(logoBytes);
+    
+    // Get dimensions of the logo
+    const logoWidth = 120; // Set fixed width for the logo
+    const aspectRatio = logoImage.height / logoImage.width;
+    const logoHeight = logoWidth * aspectRatio;
+    
+    // Draw the logo in the top right corner
+    certPage.drawImage(logoImage, {
+      x: width - logoWidth - 50, // Position from right edge with 50pt margin
+      y: height - logoHeight - 30, // Position from top edge with 30pt margin
+      width: logoWidth,
+      height: logoHeight,
+    });
+    
+    // Add certificate generation time below the logo
+    const generationTime = formatBangladeshiTime(new Date());
+    const timeText = `Generated: ${generationTime}`;
+    
+    // Draw the generation time text below the logo
+    certPage.drawText(timeText, {
+      x: width - regularFont.widthOfTextAtSize(timeText, smallTextSize) - 50, // Right align with same margin as logo
+      y: height - logoHeight - 45, // Position below the logo with some spacing
+      size: smallTextSize,
+      font: regularFont,
+      color: textColor,
+    });
+  } catch (error) {
+    console.error("Error embedding logo in certification page:", error);
+    // Continue without logo if there's an error
+    
+    // Still add generation time even if logo fails
+    const generationTime = formatBangladeshiTime(new Date());
+    const timeText = `Generated: ${generationTime}`;
+    
+    certPage.drawText(timeText, {
+      x: width - regularFont.widthOfTextAtSize(timeText, smallTextSize) - 50,
+      y: height - 45, // Position at top right if no logo
+      size: smallTextSize,
+      font: regularFont,
+      color: textColor,
+    });
+  }
+
   // Title of certification page
   certPage.drawText("Electronic Signature Certification", {
     x: 50,
@@ -1365,6 +1405,105 @@ async function addCertificationPage(pdfDoc: PDFDocument, document: any, signers:
         font: regularFont,
         color: textColor,
       });
+
+      yPosition -= 30;
+
+      // Add signer's signature if available
+      certPage.drawText("Signature:", {
+        x: 50,
+        y: yPosition,
+        size: textSize,
+        font: boldFont,
+        color: textColor,
+      });
+
+      // Look for a signature in the fields associated with this signer
+      const signerSignatureField = document.fields.find((field: any) => 
+        field.type === 'signature' && field.signerEmail === signer.email && field.value
+      );
+
+      if (signerSignatureField && signerSignatureField.value && signerSignatureField.value.startsWith('data:image')) {
+        try {
+          // Extract base64 data
+          const base64Data = signerSignatureField.value.split(",")[1];
+          if (base64Data) {
+            // Determine image format and embed
+            let signatureImage;
+            if (signerSignatureField.value.includes("data:image/jpeg") || signerSignatureField.value.includes("data:image/jpg")) {
+              signatureImage = await pdfDoc.embedJpg(Buffer.from(base64Data, "base64"));
+            } else {
+              signatureImage = await pdfDoc.embedPng(Buffer.from(base64Data, "base64"));
+            }
+
+            // Calculate proportional dimensions while keeping signature a reasonable size
+            const imgWidth = signatureImage.width;
+            const imgHeight = signatureImage.height;
+            
+            // Set a maximum width for the signature on the certification page
+            const maxSignatureWidth = 150;
+            const maxSignatureHeight = 50;
+            
+            // Calculate display dimensions maintaining aspect ratio
+            let drawWidth = imgWidth;
+            let drawHeight = imgHeight;
+            
+            if (drawWidth > maxSignatureWidth) {
+              const scale = maxSignatureWidth / drawWidth;
+              drawWidth = maxSignatureWidth;
+              drawHeight = imgHeight * scale;
+            }
+            
+            if (drawHeight > maxSignatureHeight) {
+              const scale = maxSignatureHeight / drawHeight;
+              drawHeight = maxSignatureHeight;
+              drawWidth = drawWidth * scale;
+            }
+
+            // Draw the signature image
+            certPage.drawImage(signatureImage, {
+              x: 150,
+              y: yPosition - drawHeight + 10, // Position it nicely relative to the text
+              width: drawWidth,
+              height: drawHeight,
+              opacity: 1.0
+            });
+            
+            // Adjust position further based on signature height
+            yPosition -= Math.max(20, drawHeight);
+          } else {
+            // Text fallback if no valid base64 data
+            certPage.drawText("(Digital signature applied)", {
+              x: 150,
+              y: yPosition,
+              size: textSize,
+              font: regularFont,
+              color: textColor,
+            });
+            yPosition -= 20;
+          }
+        } catch (error) {
+          console.error("Error embedding signature in certification page:", error);
+          // Fallback text
+          certPage.drawText("(Digital signature applied)", {
+            x: 150,
+            y: yPosition,
+            size: textSize,
+            font: regularFont,
+            color: textColor,
+          });
+          yPosition -= 20;
+        }
+      } else {
+        // No signature image available
+        certPage.drawText("(Digital signature applied)", {
+          x: 150,
+          y: yPosition,
+          size: textSize,
+          font: regularFont,
+          color: textColor,
+        });
+        yPosition -= 20;
+      }
     }
   }
 
