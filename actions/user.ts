@@ -1,10 +1,14 @@
 "use server";
 
-import { ChangeNameSchema, ChangePasswordSchema } from "@/schema";
+import {
+  ChangeNameSchema,
+  ChangePasswordSchema,
+  UpdateUserSchema,
+} from "@/schema";
 import { prisma } from "@/prisma/prisma";
 import bcryptjs from "bcryptjs";
 import { auth } from "@/auth";
-import { Role } from "@prisma/client";
+import { Role, User } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 // Types for form states
@@ -30,6 +34,17 @@ type ChangePasswordFormState = {
 type ChangeNotificationSettingsState = {
   message?: string | null;
   success?: boolean;
+};
+
+type UpdateUserFormState = {
+  errors?: {
+    name?: string[];
+    email?: string[];
+    role?: string[];
+  };
+  message?: string | null;
+  success?: boolean;
+  user?: User | null;
 };
 
 /**
@@ -278,6 +293,222 @@ export async function getUserByEmail(email: string) {
     return {
       success: false,
       message: "Error retrieving user information",
+    };
+  }
+}
+
+/**
+ * Update user by ID
+ * Only admins can update users
+ */
+export async function updateUser(
+  userId: string,
+  prevState: UpdateUserFormState,
+  formData: FormData,
+): Promise<UpdateUserFormState> {
+  try {
+    const session = await auth();
+
+    // Check if the current user is authenticated and has admin privileges
+    if (!session || !session.user || session.user.role !== Role.ADMIN) {
+      return {
+        success: false,
+        message: "Unauthorized: Only administrators can update users.",
+      };
+    }
+
+    // Validate form fields
+    const validatedFields = UpdateUserSchema.safeParse({
+      name: formData.get("name"),
+      email: formData.get("email"),
+      role: formData.get("role"),
+      emailVerified: formData.get("emailVerified") === "on",
+      notification: formData.get("notification") === "on",
+    });
+
+    // If form validation fails, return errors early
+    if (!validatedFields.success) {
+      return {
+        errors: validatedFields.error.flatten().fieldErrors,
+        message: "Please correct the errors in the form.",
+        success: false,
+      };
+    }
+
+    const { name, email, role, emailVerified, notification } =
+      validatedFields.data;
+
+    // Check if user exists
+    const userExists = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!userExists) {
+      return {
+        success: false,
+        message: "User not found.",
+      };
+    }
+
+    // Check if the email is already used by another user
+    if (email !== userExists.email) {
+      const emailExists = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (emailExists) {
+        return {
+          errors: { email: ["Email already in use"] },
+          message: "Email is already in use by another user.",
+          success: false,
+        };
+      }
+    }
+
+    // Update the user
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name,
+        email,
+        role: role as Role,
+        emailVerified: emailVerified ? new Date() : userExists.emailVerified,
+        notification,
+      },
+    });
+
+    // Revalidate the users page to refresh the list
+    revalidatePath("/admin/users");
+
+    return {
+      message: "User updated successfully.",
+      success: true,
+      user: updatedUser,
+    };
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return {
+      message: "An error occurred while updating the user.",
+      success: false,
+    };
+  }
+}
+
+/**
+ * Verify user's email directly by admin
+ * Only admins can verify users
+ */
+export async function verifyUserDirectly(userId: string) {
+  try {
+    const session = await auth();
+
+    // Check if the current user is authenticated and has admin privileges
+    if (!session || !session.user || session.user.role !== Role.ADMIN) {
+      return {
+        success: false,
+        message: "Unauthorized: Only administrators can verify users.",
+      };
+    }
+
+    // Check if the user exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        message: "User not found.",
+      };
+    }
+
+    // Set email as verified
+    await prisma.user.update({
+      where: { id: userId },
+      data: { emailVerified: new Date() },
+    });
+
+    // Revalidate the users page to refresh the list
+    revalidatePath("/admin/users");
+
+    return {
+      success: true,
+      message: "User email verified successfully.",
+    };
+  } catch (error) {
+    console.error("Error verifying user:", error);
+    return {
+      success: false,
+      message: "An error occurred while verifying the user.",
+    };
+  }
+}
+
+/**
+ * Send verification email to user
+ * Only admins can send verification emails
+ */
+export async function sendVerificationEmail(userId: string) {
+  try {
+    const session = await auth();
+
+    // Check if the current user is authenticated and has admin privileges
+    if (!session || !session.user || session.user.role !== Role.ADMIN) {
+      return {
+        success: false,
+        message:
+          "Unauthorized: Only administrators can send verification emails.",
+      };
+    }
+
+    // Check if the user exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || !user.email) {
+      return {
+        success: false,
+        message: "User not found or has no email.",
+      };
+    }
+
+    // Check if the email is already verified
+    if (user.emailVerified) {
+      return {
+        success: false,
+        message: "User's email is already verified.",
+      };
+    }
+
+    // Generate a verification token
+    const { generateVerificationToken } = await import("@/lib/token");
+    const verificationToken = await generateVerificationToken(user.email);
+
+    // Send the verification email
+    if (verificationToken.verificationToken?.token) {
+      const { sendAccountVerificationEmail } = await import("@/actions/email");
+      await sendAccountVerificationEmail(
+        user.name || "User",
+        user.email,
+        verificationToken.verificationToken.token,
+      );
+
+      return {
+        success: true,
+        message: "Verification email sent successfully.",
+      };
+    } else {
+      return {
+        success: false,
+        message: "Failed to generate verification token.",
+      };
+    }
+  } catch (error) {
+    console.error("Error sending verification email:", error);
+    return {
+      success: false,
+      message: "An error occurred while sending the verification email.",
     };
   }
 }

@@ -732,180 +732,219 @@ export function SignDocumentComponent({
 
   if (isLoading) {
     return (
-      <Card className="w-full max-w-7xl mx-auto my-8 border-border shadow-lg">
-        <CardHeader className="border-b border-border">
-          <CardTitle className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
-            <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <CheckCircle className="size-4 text-primary" />
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <div className="flex flex-col items-center space-y-4 max-w-sm text-center">
+          <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-t-2 border-b-2 border-primary"></div>
+          <div className="space-y-2">
+            <h3 className="text-lg sm:text-xl font-semibold">
+              Loading Document
+            </h3>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Please wait while we prepare your document for signing...
+            </p>
+            <div className="w-full max-w-xs">
+              <Progress value={30} className="w-full h-2" />
+              <p className="text-xs text-muted-foreground mt-1">
+                Retrieving document data...
+              </p>
             </div>
-            Loading Document for Signing...
-          </CardTitle>
-          <CardDescription>
-            Please wait while we prepare the document for your signature.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="flex flex-col justify-center items-center h-[60vh] space-y-4">
-            <Progress value={30} className="w-full max-w-md" />
-            <p className="text-muted-foreground">Retrieving document data...</p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   if (error && !pdfData) {
     return (
-      <Card className="w-full max-w-7xl mx-auto my-8 border-border shadow-lg">
-        <CardHeader className="border-b border-border bg-destructive/5">
-          <CardTitle className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
-            <div className="size-8 rounded-full bg-destructive/10 flex items-center justify-center">
-              <AlertTriangle className="size-4 text-destructive" />
-            </div>
-            Error Loading Document
-          </CardTitle>
-          <CardDescription>
-            There was an issue retrieving the document.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="flex flex-col justify-center items-center h-96 text-destructive space-y-4">
-            <div className="p-4 border border-destructive/50 bg-destructive/10 rounded-md max-w-md w-full">
-              <p className="flex items-start gap-2">
-                <AlertTriangle className="size-4 shrink-0 mt-1" /> {error}
-              </p>
-            </div>
-            <Button variant="outline" onClick={() => window.location.reload()}>
-              Retry Loading
-            </Button>
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <div className="flex flex-col items-center space-y-4 max-w-md text-center">
+          <div className="p-4 rounded-full bg-destructive/10">
+            <AlertTriangle className="h-8 w-8 text-destructive" />
           </div>
-        </CardContent>
-        <CardFooter className="border-t p-4 flex justify-between">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push(`/documents/${document.id}`)}
-          >
-            <ArrowLeft className="size-4 mr-2" /> Back
-          </Button>
-        </CardFooter>
-      </Card>
+          <div className="space-y-2">
+            <h3 className="text-lg sm:text-xl font-semibold text-destructive">
+              Document Error
+            </h3>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              {error || "Unable to load the document. Please try again later."}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => window.location.reload()}
+              >
+                Retry Loading
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push(`/documents/${document.id}`)}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="flex flex-col w-full">
-      <div className="p-4 border-b flex items-center justify-between bg-background shadow-sm">
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push(`/documents/${document.id}`)}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Back to Document</span>
-            <span className="sm:hidden">Back</span>
-          </Button>
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/20">
+      {/* Enhanced Header with better mobile responsiveness */}
+      <div className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
+        <div className="p-3 sm:p-4 lg:p-6">
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
+            {/* Left section - Navigation and title */}
+            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push(`/documents/${document.id}`)}
+                className="flex-shrink-0 h-8 sm:h-9"
+              >
+                <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline text-xs sm:text-sm">
+                  Back
+                </span>
+                <span className="hidden sm:inline ml-1">to Document</span>
+              </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-            className="md:hidden"
-          >
-            {isMobileSidebarOpen ? (
-              <X className="h-4 w-4" />
-            ) : (
-              <Menu className="h-4 w-4" />
-            )}
-            <span className="ml-2">Fields</span>
-          </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+                className="lg:hidden flex-shrink-0 h-8 sm:h-9"
+              >
+                {isMobileSidebarOpen ? (
+                  <X className="h-3 w-3 sm:h-4 sm:w-4" />
+                ) : (
+                  <Menu className="h-3 w-3 sm:h-4 sm:w-4" />
+                )}
+                <span className="ml-1 sm:ml-2 text-xs sm:text-sm">Fields</span>
+              </Button>
 
-          <h1 className="text-sm sm:text-lg font-medium hidden sm:block">
-            {document.title || "Untitled Document"}
-          </h1>
-        </div>
+              {/* Document title with responsive behavior */}
+              <div className="min-w-0 flex-1">
+                <h1 className="text-sm sm:text-lg lg:text-xl font-medium truncate">
+                  <span className="hidden sm:inline">
+                    {document.title || "Untitled Document"}
+                  </span>
+                  <span className="sm:hidden">
+                    {(document.title || "Document").length > 12
+                      ? `${(document.title || "Document").substring(0, 12)}...`
+                      : document.title || "Document"}
+                  </span>
+                </h1>
+                <p className="text-xs text-muted-foreground sm:hidden">
+                  Signing
+                </p>
+              </div>
+            </div>
 
-        <div className="flex items-center space-x-3">
-          <div className="hidden md:block">
-            <div className="flex items-center space-x-2">
-              <Progress value={completionPercentage} className="w-40 h-2" />
-              <span className="text-sm text-muted-foreground">
-                {completionPercentage}%
-              </span>
+            {/* Right section - Progress and actions */}
+            <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+              {/* Progress indicator - responsive visibility */}
+              <div className="hidden md:flex items-center space-x-2">
+                <Progress
+                  value={completionPercentage}
+                  className="w-32 lg:w-40 h-2"
+                />
+                <span className="text-sm text-muted-foreground whitespace-nowrap">
+                  {completionPercentage}%
+                </span>
+              </div>
+
+              {/* Mobile progress indicator */}
+              <div className="md:hidden">
+                <div className="text-xs text-muted-foreground">
+                  {completionPercentage}%
+                </div>
+              </div>
+
+              {/* Save progress button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  try {
+                    const backupData = {
+                      documentId: document.id,
+                      signerId: signer.id,
+                      fieldValues,
+                      timestamp: new Date().toISOString(),
+                    };
+                    sessionStorage.setItem(
+                      `signing-backup-${document.id}`,
+                      JSON.stringify(backupData),
+                    );
+                    toast.success("Progress saved locally");
+                  } catch (error) {
+                    console.log("Error while saving progress", error);
+                    toast.error("Failed to save progress");
+                  }
+                }}
+                className="hidden sm:flex h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm"
+              >
+                <Save className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Save</span>
+                <span className="hidden lg:inline ml-1">Progress</span>
+              </Button>
+
+              {/* Sign button */}
+              <Button
+                onClick={() => {
+                  if (!validateFields()) {
+                    toast.error(
+                      "Please complete all required fields before signing",
+                    );
+                    return;
+                  }
+                  setIsConfirmationModalOpen(true);
+                }}
+                disabled={isSigning || completionPercentage < 100}
+                className={`relative h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm ${isSigning ? "opacity-80" : ""}`}
+              >
+                {isSigning ? (
+                  <>
+                    <span className="animate-pulse">Signing...</span>
+                    <span className="absolute inset-0 flex items-center justify-center">
+                      <span className="animate-spin h-3 w-3 sm:h-4 sm:w-4 border-t-2 border-white border-opacity-50 rounded-full"></span>
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Sign</span>
+                    <span className="hidden lg:inline ml-1">Document</span>
+                  </>
+                )}
+              </Button>
             </div>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              // Manual save to session storage
-              try {
-                const backupData = {
-                  documentId: document.id,
-                  signerId: signer.id,
-                  fieldValues,
-                  timestamp: new Date().toISOString(),
-                };
-                sessionStorage.setItem(
-                  `signing-backup-${document.id}`,
-                  JSON.stringify(backupData),
-                );
-                toast.success("Progress saved locally");
-              } catch (error) {
-                console.log("Error while saving progress", error);
-                toast.error("Failed to save progress");
-              }
-            }}
-            className="hidden sm:flex"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            Save Progress
-          </Button>
-
-          <Button
-            onClick={() => {
-              if (!validateFields()) {
-                toast.error(
-                  "Please complete all required fields before signing",
-                );
-                return;
-              }
-
-              setIsConfirmationModalOpen(true);
-            }}
-            disabled={isSigning || completionPercentage < 100}
-            className={`relative ${isSigning ? "opacity-80" : ""}`}
-          >
-            {isSigning ? (
-              <>
-                <span className="animate-pulse">Signing Document...</span>
-                <span className="absolute inset-0 flex items-center justify-center">
-                  <span className="animate-spin h-4 w-4 border-t-2 border-primary border-opacity-50 rounded-full"></span>
-                </span>
-              </>
-            ) : (
-              <>
-                <Send className="h-4 w-4 mr-2" />
-                Sign Document
-              </>
-            )}
-          </Button>
+          {/* Mobile progress bar */}
+          <div className="mt-3 md:hidden">
+            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+              <span>Progress</span>
+              <span>{completionPercentage}% complete</span>
+            </div>
+            <Progress value={completionPercentage} className="w-full h-2" />
+          </div>
         </div>
       </div>
-      <div className="container mx-auto py-4 sm:py-8 px-2 sm:px-4">
-        {/* Show validation errors summary if there are any */}
+
+      {/* Main container with responsive layout */}
+      <div className="flex-1 container mx-auto py-3 sm:py-6 lg:py-8 px-2 sm:px-4 lg:px-6">
+        {/* Validation errors summary */}
         {fieldErrors.length > 0 && (
           <div className="mb-4 sm:mb-6">
             <ValidationErrorsSummary
               errors={fieldErrors}
               onFieldClickAction={(fieldId) => {
-                // Find the field and navigate to its page
                 const field = fields.find((f) => f.id === fieldId);
                 if (field) {
                   setCurrentPage(field.pageNumber);
-                  // Scroll the field into view after a short delay
                   setTimeout(() => {
                     const fieldElement = window.document.querySelector(
                       `[data-field-id="${fieldId}"]`,
@@ -927,13 +966,20 @@ export function SignDocumentComponent({
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-6 relative">
-          {/* Instruction sidebar - collapses to expandable section on mobile */}
+        {/* Responsive grid layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 relative">
+          {/* Sidebar for fields - Enhanced responsive behavior */}
           <div
-            className={`space-y-4 sm:space-y-6 ${isMobileSidebarOpen ? "block" : "hidden"} md:block${isMobileSidebarOpen ? " fixed inset-0 bg-background/95 backdrop-blur-sm z-50 overflow-auto p-4" : ""}`}
+            className={`
+              space-y-3 sm:space-y-4 lg:space-y-6 
+              ${isMobileSidebarOpen ? "block" : "hidden"} 
+              lg:block lg:col-span-1 xl:col-span-1
+              ${isMobileSidebarOpen ? "fixed inset-0 bg-background/95 backdrop-blur-sm z-50 overflow-auto p-4" : ""}
+            `}
           >
+            {/* Mobile sidebar header */}
             {isMobileSidebarOpen && (
-              <div className="flex justify-between items-center mb-4 md:hidden">
+              <div className="flex justify-between items-center mb-4 lg:hidden">
                 <h2 className="text-lg font-semibold">Document Fields</h2>
                 <Button
                   variant="ghost"
@@ -944,8 +990,10 @@ export function SignDocumentComponent({
                 </Button>
               </div>
             )}
-            <Card>
-              <CardHeader className="py-3 sm:py-6">
+
+            {/* Instructions card */}
+            <Card className="shadow-sm">
+              <CardHeader className="py-3 sm:py-4 lg:py-6">
                 <CardTitle className="text-base sm:text-lg">
                   Signing Instructions
                 </CardTitle>
@@ -970,9 +1018,7 @@ export function SignDocumentComponent({
                 <div className="pt-2">
                   <h3 className="text-sm font-medium mb-2">How to sign:</h3>
                   <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>
-                      • Fill out all required fields (*) in the panel below
-                    </li>
+                    <li>• Fill out all required fields (*) below</li>
                     <li>• Click on PDF fields to jump to that section</li>
                     <li>• Use Ctrl+S to save your progress</li>
                     <li>• Use Ctrl+Enter to sign when ready</li>
@@ -1001,15 +1047,17 @@ export function SignDocumentComponent({
               </CardContent>
             </Card>
 
-            {/* Field Summary */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Field Summary</CardTitle>
-                <CardDescription>
+            {/* Fields summary card */}
+            <Card className="shadow-sm">
+              <CardHeader className="py-3 sm:py-4">
+                <CardTitle className="text-base sm:text-lg">
+                  Field Summary
+                </CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   Complete all required fields to sign
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-2 sm:space-y-3">
                 {fields.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
                     No fields assigned to you
@@ -1017,12 +1065,6 @@ export function SignDocumentComponent({
                 ) : (
                   fields.map((field) => {
                     const isCompleted = !!fieldValues[field.id];
-                    const fieldStyle = field.color
-                      ? {
-                          borderColor: field.color,
-                          backgroundColor: `${field.color}10`,
-                        }
-                      : {};
                     const fieldError = fieldErrors.find(
                       (err) => err.fieldId === field.id,
                     );
@@ -1034,16 +1076,24 @@ export function SignDocumentComponent({
                         fieldErrors={fieldErrors}
                       >
                         <div
-                          className={`p-2 rounded border ${fieldError ? "border-destructive bg-destructive/5" : isCompleted ? "border-primary/40 bg-primary/5" : "border-border"} transition-colors`}
-                          style={fieldError || isCompleted ? {} : fieldStyle}
+                          className={`
+                            p-2 sm:p-3 rounded-lg border transition-all duration-200 hover:shadow-sm
+                            ${
+                              fieldError
+                                ? "border-destructive bg-destructive/5"
+                                : isCompleted
+                                  ? "border-primary/40 bg-primary/5"
+                                  : "border-border hover:border-primary/20"
+                            }
+                          `}
                         >
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2 min-w-0">
-                              {fieldError ? (
-                                <AlertCircle className="h-4 w-4 flex-shrink-0 text-destructive" />
-                              ) : null}
+                              {fieldError && (
+                                <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-destructive" />
+                              )}
                               <span
-                                className={`text-sm font-medium truncate ${field.required ? "text-primary" : ""}`}
+                                className={`text-xs sm:text-sm font-medium truncate ${field.required ? "text-primary" : ""}`}
                               >
                                 {field.label || field.type}
                                 {field.required && (
@@ -1064,17 +1114,17 @@ export function SignDocumentComponent({
                               {fieldError
                                 ? "Error"
                                 : isCompleted
-                                  ? "Completed"
+                                  ? "Done"
                                   : "Pending"}
                             </Badge>
                           </div>
 
-                          {/* Inline field editing */}
+                          {/* Enhanced inline field editing */}
                           <div className="space-y-2">
-                            {field.type === "text" ||
-                            field.type === "email" ||
-                            field.type === "phone" ||
-                            field.type === "number" ? (
+                            {(field.type === "text" ||
+                              field.type === "email" ||
+                              field.type === "phone" ||
+                              field.type === "number") && (
                               <Input
                                 type={
                                   field.type === "email"
@@ -1093,18 +1143,22 @@ export function SignDocumentComponent({
                                 onChange={(e) =>
                                   handleFieldChange(field.id, e.target.value)
                                 }
-                                className="h-8 text-xs"
+                                className="h-7 sm:h-8 text-xs sm:text-sm"
                               />
-                            ) : field.type === "date" ? (
+                            )}
+
+                            {field.type === "date" && (
                               <Input
                                 type="date"
                                 value={fieldValues[field.id] || ""}
                                 onChange={(e) =>
                                   handleFieldChange(field.id, e.target.value)
                                 }
-                                className="h-8 text-xs"
+                                className="h-7 sm:h-8 text-xs sm:text-sm"
                               />
-                            ) : field.type === "textarea" ? (
+                            )}
+
+                            {field.type === "textarea" && (
                               <Textarea
                                 placeholder={
                                   field.placeholder ||
@@ -1114,10 +1168,12 @@ export function SignDocumentComponent({
                                 onChange={(e) =>
                                   handleFieldChange(field.id, e.target.value)
                                 }
-                                className="min-h-16 text-xs resize-none"
+                                className="min-h-12 sm:min-h-16 text-xs sm:text-sm resize-none"
                                 rows={2}
                               />
-                            ) : field.type === "checkbox" ? (
+                            )}
+
+                            {field.type === "checkbox" && (
                               <div className="flex items-center space-x-2">
                                 <Checkbox
                                   id={field.id}
@@ -1129,11 +1185,16 @@ export function SignDocumentComponent({
                                     )
                                   }
                                 />
-                                <Label htmlFor={field.id} className="text-xs">
+                                <Label
+                                  htmlFor={field.id}
+                                  className="text-xs sm:text-sm"
+                                >
                                   {field.placeholder || "Check this box"}
                                 </Label>
                               </div>
-                            ) : field.type === "radio" ? (
+                            )}
+
+                            {field.type === "radio" && (
                               <RadioGroup
                                 value={fieldValues[field.id] || ""}
                                 onValueChange={(value) =>
@@ -1155,7 +1216,7 @@ export function SignDocumentComponent({
                                         />
                                         <Label
                                           htmlFor={`${field.id}-${index}`}
-                                          className="text-xs"
+                                          className="text-xs sm:text-sm"
                                         >
                                           {option.trim()}
                                         </Label>
@@ -1169,24 +1230,26 @@ export function SignDocumentComponent({
                                     />
                                     <Label
                                       htmlFor={`${field.id}-1`}
-                                      className="text-xs"
+                                      className="text-xs sm:text-sm"
                                     >
                                       Option 1
                                     </Label>
                                   </div>
                                 )}
                               </RadioGroup>
-                            ) : field.type === "dropdown" ? (
+                            )}
+
+                            {field.type === "dropdown" && (
                               <Select
                                 value={fieldValues[field.id] || ""}
                                 onValueChange={(value) =>
                                   handleFieldChange(field.id, value)
                                 }
                               >
-                                <SelectTrigger className="h-8 text-xs">
+                                <SelectTrigger className="h-7 sm:h-8 text-xs sm:text-sm">
                                   <SelectValue
                                     placeholder={
-                                      field.placeholder || "Select an option"
+                                      field.placeholder || "Select option"
                                     }
                                   />
                                 </SelectTrigger>
@@ -1209,53 +1272,52 @@ export function SignDocumentComponent({
                                   )}
                                 </SelectContent>
                               </Select>
-                            ) : field.type === "signature" ||
-                              field.type === "initial" ? (
+                            )}
+
+                            {(field.type === "signature" ||
+                              field.type === "initial") && (
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleFieldClick(field.id)}
-                                className="w-full h-8 text-xs"
+                                className="w-full h-7 sm:h-8 text-xs sm:text-sm"
                               >
                                 {isCompleted
                                   ? "Update Signature"
                                   : "Add Signature"}
                               </Button>
-                            ) : field.type === "image" ? (
+                            )}
+
+                            {field.type === "image" && (
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleFieldClick(field.id)}
-                                className="w-full h-8 text-xs"
+                                className="w-full h-7 sm:h-8 text-xs sm:text-sm"
                               >
                                 {isCompleted ? "Update Image" : "Upload Image"}
                               </Button>
-                            ) : field.type === "formula" ? (
-                              <div className="p-2 bg-muted rounded text-xs">
+                            )}
+
+                            {field.type === "formula" && (
+                              <div className="p-2 bg-muted rounded text-xs sm:text-sm">
                                 <span className="text-muted-foreground">
-                                  Formula Result:{" "}
+                                  Result:{" "}
                                   {fieldValues[field.id] || "Calculating..."}
                                 </span>
                               </div>
-                            ) : field.type === "payment" ? (
+                            )}
+
+                            {field.type === "payment" && (
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleFieldClick(field.id)}
-                                className="w-full h-8 text-xs"
+                                className="w-full h-7 sm:h-8 text-xs sm:text-sm"
                               >
                                 {isCompleted
                                   ? "Payment Completed"
                                   : "Complete Payment"}
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleFieldClick(field.id)}
-                                className="w-full h-8 text-xs"
-                              >
-                                Click to edit
                               </Button>
                             )}
                           </div>
@@ -1268,12 +1330,12 @@ export function SignDocumentComponent({
             </Card>
           </div>
 
-          {/* Main document viewer */}
-          <div className="col-span-1 md:col-span-3 space-y-4">
-            <Card className="overflow-hidden">
+          {/* Main document viewer with enhanced responsiveness */}
+          <div className="col-span-1 lg:col-span-3 xl:col-span-4 space-y-3 sm:space-y-4">
+            <Card className="overflow-hidden shadow-lg">
               <CardContent className="p-0">
                 {pdfData && (
-                  <div className="h-[100vh] w-full mx-auto">
+                  <div className="h-[80vh] sm:h-[85vh] lg:h-[95vh] xl:h-[100vh] w-full">
                     <SignDocumentPdfViewerSimple
                       pdfData={pdfData}
                       fields={fields}
@@ -1295,55 +1357,63 @@ export function SignDocumentComponent({
                   </div>
                 )}
               </CardContent>
-              {/* <CardFooter className="border-t p-2">
-                <PageNavigation
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChangeAction={async (page) => {
-                    setCurrentPage(page);
-                    return page;
-                  }}
-                />
-              </CardFooter> */}
             </Card>
           </div>
         </div>
       </div>
-      {/* Signature Dialog */}
+      {/* Enhanced Signature Dialog with full responsiveness */}
       <Dialog
         open={isSignatureModalOpen}
         onOpenChange={setIsSignatureModalOpen}
       >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Add your signature</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="w-[95vw] max-w-lg sm:max-w-xl lg:max-w-2xl p-0 overflow-hidden">
+          <DialogHeader className="p-4 sm:p-6">
+            <DialogTitle className="text-lg sm:text-xl">
+              Add your signature
+            </DialogTitle>
+            <DialogDescription className="text-sm sm:text-base">
               Please sign in the box below using your mouse or touch screen.
             </DialogDescription>
           </DialogHeader>
-          <div className="h-64 border border-border rounded-md">
-            <SignatureCanvasWrapper
-              ref={signatureRef}
-              canvasProps={{
-                className: "w-full h-full",
-                style: { background: "white" },
-              }}
-              penColor="black"
-            />
+
+          <div className="mx-4 sm:mx-6 mb-4 sm:mb-6">
+            <div className="h-48 sm:h-64 lg:h-72 border-2 border-dashed border-border rounded-lg bg-white shadow-inner">
+              <SignatureCanvasWrapper
+                ref={signatureRef}
+                canvasProps={{
+                  className: "w-full h-full rounded-lg",
+                  style: { background: "white" },
+                }}
+                penColor="black"
+              />
+            </div>
+
+            {/* Signature tips for mobile */}
+            <div className="mt-3 p-3 bg-muted/50 rounded-lg">
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                <strong>Tip:</strong> Use a stylus or your finger for the best
+                signature quality on touch devices.
+              </p>
+            </div>
           </div>
-          <DialogFooter className="flex flex-row gap-2 justify-between sm:justify-between">
-            <Button variant="outline" onClick={clearSignature}>
-              Clear
+
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 p-4 sm:p-6 pt-0 sm:pt-0">
+            <Button
+              variant="outline"
+              onClick={clearSignature}
+              className="w-full sm:w-auto"
+            >
+              Clear Signature
             </Button>
-            <Button onClick={saveSignature}>
+            <Button onClick={saveSignature} className="w-full sm:w-auto">
               <Save className="h-4 w-4 mr-2" />
               Save Signature
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      {/* Date Picker Dialog for date fields would be added here */}
-      {/* Show completion dialog when signing is completed */}
+
+      {/* Completion and confirmation dialogs */}
       {signingCompleted && (
         <SigningCompletedDialog
           documentId={document.id}
@@ -1351,7 +1421,7 @@ export function SignDocumentComponent({
           isLastSigner={isLastSigner}
         />
       )}
-      {/* Signing confirmation dialog */}
+
       <SignConfirmationDialog
         open={isConfirmationModalOpen}
         onOpenChangeAction={setIsConfirmationModalOpen}

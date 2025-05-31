@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Search, Trash2, Users } from "lucide-react";
+import { CheckCircle, Edit, Mail, Search, Trash2, Users } from "lucide-react";
 import Link from "next/link";
 import {
   Card,
@@ -33,8 +33,19 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { deleteUser } from "@/actions/user";
+import {
+  deleteUser,
+  sendVerificationEmail,
+  verifyUserDirectly,
+} from "@/actions/user";
 import { useRouter } from "next/navigation";
+import { EditUserDialog } from "./edit-user-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function UsersComponent({
   users,
@@ -45,7 +56,13 @@ export function UsersComponent({
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [userToEdit, setUserToEdit] = useState<User | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isVerifying, setIsVerifying] = useState<string | null>(null);
+  const [isSendingVerification, setIsSendingVerification] = useState<
+    string | null
+  >(null);
   const router = useRouter();
 
   // Filter users based on search term
@@ -79,6 +96,45 @@ export function UsersComponent({
     } finally {
       setIsDeleting(false);
       setUserToDelete(null);
+    }
+  };
+
+  // Handle direct email verification
+  const handleVerifyUser = async (userId: string) => {
+    try {
+      setIsVerifying(userId);
+      const response = await verifyUserDirectly(userId);
+
+      if (response.success) {
+        toast.success(response.message);
+        router.refresh(); // Refresh the current page to update the user list
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred. Please try again.");
+      console.error("Email verification error:", error);
+    } finally {
+      setIsVerifying(null);
+    }
+  };
+
+  // Handle sending verification email
+  const handleSendVerificationEmail = async (userId: string) => {
+    try {
+      setIsSendingVerification(userId);
+      const response = await sendVerificationEmail(userId);
+
+      if (response.success) {
+        toast.success(response.message);
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred. Please try again.");
+      console.error("Send verification email error:", error);
+    } finally {
+      setIsSendingVerification(null);
     }
   };
   // Calculate user stats
@@ -220,6 +276,9 @@ export function UsersComponent({
                       <TableHead className="text-xs sm:text-sm py-2 sm:py-3">
                         Role
                       </TableHead>
+                      <TableHead className="text-xs sm:text-sm py-2 sm:py-3">
+                        Verification
+                      </TableHead>
                       <TableHead className="text-xs sm:text-sm py-2 sm:py-3 text-right">
                         Actions
                       </TableHead>
@@ -265,18 +324,101 @@ export function UsersComponent({
                             </Badge>
                           )}
                         </TableCell>
+                        <TableCell className="py-2.5 sm:py-3">
+                          <div className="flex gap-1">
+                            {user.emailVerified ? (
+                              <Badge
+                                variant="outline"
+                                className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] xs:text-xs h-5 sm:h-6 inline-flex items-center"
+                              >
+                                <CheckCircle className="size-3 mr-1" /> Verified
+                              </Badge>
+                            ) : (
+                              <TooltipProvider>
+                                <div className="flex gap-1">
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-6 rounded-md bg-blue-50 border-blue-200 text-blue-700 text-[10px] xs:text-xs px-1.5"
+                                        onClick={() =>
+                                          handleVerifyUser(user.id)
+                                        }
+                                        disabled={isVerifying === user.id}
+                                      >
+                                        {isVerifying === user.id ? (
+                                          <div className="flex items-center">
+                                            <div className="size-3 mr-1 border-t-2 border-blue-700 rounded-full animate-spin"></div>
+                                            Verifying...
+                                          </div>
+                                        ) : (
+                                          <>
+                                            <CheckCircle className="size-3 mr-1" />{" "}
+                                            Verify
+                                          </>
+                                        )}
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="text-xs">
+                                        Directly verify this user&apos;s email
+                                        address
+                                      </p>
+                                    </TooltipContent>
+                                  </Tooltip>
+
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-6 rounded-md bg-slate-50 border-slate-200 text-slate-700 text-[10px] xs:text-xs px-1.5"
+                                        onClick={() =>
+                                          handleSendVerificationEmail(user.id)
+                                        }
+                                        disabled={
+                                          isSendingVerification === user.id
+                                        }
+                                      >
+                                        {isSendingVerification === user.id ? (
+                                          <div className="flex items-center">
+                                            <div className="size-3 mr-1 border-t-2 border-slate-700 rounded-full animate-spin"></div>
+                                            Sending...
+                                          </div>
+                                        ) : (
+                                          <>
+                                            <Mail className="size-3 mr-1" />{" "}
+                                            Email
+                                          </>
+                                        )}
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="text-xs">
+                                        Send verification email to user
+                                      </p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                              </TooltipProvider>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell className="text-right py-2.5 sm:py-3">
                           <div className="flex justify-end gap-0.5 sm:gap-1">
-                            <Link href={`/admin/users/${user.id}`}>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="size-7 sm:size-8"
-                              >
-                                <Edit className="size-3.5 sm:size-4" />
-                                <span className="sr-only">Edit user</span>
-                              </Button>
-                            </Link>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-7 sm:size-8"
+                              onClick={() => {
+                                setUserToEdit(user);
+                                setIsEditDialogOpen(true);
+                              }}
+                            >
+                              <Edit className="size-3.5 sm:size-4" />
+                              <span className="sr-only">Edit user</span>
+                            </Button>
 
                             <Button
                               variant="ghost"
@@ -352,6 +494,16 @@ export function UsersComponent({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Edit User Dialog */}
+        <EditUserDialog
+          user={userToEdit}
+          isOpen={isEditDialogOpen}
+          onCloseAction={() => {
+            setIsEditDialogOpen(false);
+            setUserToEdit(null);
+          }}
+        />
       </div>
     </div>
   );

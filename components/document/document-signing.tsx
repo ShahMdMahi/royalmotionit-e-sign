@@ -234,68 +234,206 @@ export function DocumentSigning({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="col-span-1 md:col-span-2">
-        <div className="flex flex-col space-y-4">
-          <div className="bg-background border rounded-lg overflow-hidden">
-            <PDFViewer
-              pdfData={pdfData}
-              onPageChangeAction={handlePageChange}
-              onTotalPagesChangeAction={handleTotalPagesChange}
-              fields={fields}
-              fieldValues={fieldValues}
-              highlightFields={true}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="col-span-1">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col space-y-4">
-              <h2 className="text-2xl font-semibold">{document.title}</h2>
-              <div className="text-sm text-muted-foreground">
-                {document.description && (
-                  <p className="mb-2">{document.description}</p>
-                )}
-                <p>
-                  <span className="font-medium">From: </span>
-                  {document.authorName || document.authorEmail}
-                </p>
-              </div>
-              <SigningFieldsTab
-                fields={signerFields}
-                currentPage={currentPage}
-                fieldValues={fieldValues}
-                validationErrors={validationErrors}
-                onFieldChangeAction={handleFieldChange}
-                onNavigateToFieldAction={handleNavigateToField}
-              />
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="agreement"
-                  checked={agreementChecked}
-                  onCheckedChange={(checked) => setAgreementChecked(!!checked)}
-                />
-                <Label htmlFor="agreement" className="text-sm">
-                  I agree that my electronic signature constitutes a legal
-                  signature
-                </Label>
-              </div>
-              <div className="pt-4 flex justify-end">
-                <Button
-                  onClick={handleSubmit}
-                  disabled={!isComplete || !agreementChecked || isSubmitting}
-                >
-                  {isSubmitting ? "Submitting..." : "Sign Document"}
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
+    <div className="min-h-screen bg-gray-50/50">
+      {/* Responsive Header */}
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-sm border-b border-gray-200">
+        <div className="container mx-auto px-3 sm:px-4 lg:px-6">
+          <div className="flex items-center justify-between h-14 sm:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+              <h1 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 truncate">
+                {document.title}
+              </h1>
+              <div className="hidden sm:block text-xs sm:text-sm text-gray-500">
+                Signing Document
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+
+            {/* Progress Indicator */}
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <div className="hidden sm:flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
+                <span className="font-medium">
+                  {Object.keys(fieldValues).length} / {requiredFieldIds.length}
+                </span>
+                <span className="hidden md:inline">fields completed</span>
+              </div>
+
+              {/* Mobile Progress Bar */}
+              <div className="sm:hidden w-16 bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{
+                    width: `${requiredFieldIds.length > 0 ? (Object.keys(fieldValues).length / requiredFieldIds.length) * 100 : 0}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
+          {/* PDF Viewer Section */}
+          <div className="lg:col-span-3 xl:col-span-4 order-2 lg:order-1">
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+              <div className="h-[50vh] sm:h-[60vh] lg:h-[70vh] xl:h-[75vh]">
+                <PDFViewer
+                  pdfData={pdfData}
+                  onPageChangeAction={handlePageChange}
+                  onTotalPagesChangeAction={handleTotalPagesChange}
+                  fields={fields}
+                  fieldValues={fieldValues}
+                  highlightFields={true}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar Section */}
+          <div className="lg:col-span-1 xl:col-span-1 order-1 lg:order-2">
+            <div className="space-y-4 sm:space-y-6">
+              {/* Document Info Card */}
+              <Card className="border-gray-200 shadow-sm">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-semibold text-gray-900 line-clamp-2">
+                        {document.title}
+                      </h2>
+                      {document.description && (
+                        <p className="mt-2 text-xs sm:text-sm text-gray-600 line-clamp-3">
+                          {document.description}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="text-xs sm:text-sm text-gray-600">
+                      <p>
+                        <span className="font-medium text-gray-900">
+                          From:{" "}
+                        </span>
+                        <span className="break-words">
+                          {document.authorName || document.authorEmail}
+                        </span>
+                      </p>
+                    </div>
+
+                    {/* Progress Summary */}
+                    <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs sm:text-sm font-medium text-gray-700">
+                          Progress
+                        </span>
+                        <span className="text-xs sm:text-sm text-gray-600">
+                          {Object.keys(fieldValues).length} /{" "}
+                          {requiredFieldIds.length}
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          style={{
+                            width: `${requiredFieldIds.length > 0 ? (Object.keys(fieldValues).length / requiredFieldIds.length) * 100 : 0}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Signing Fields Card */}
+              <Card className="border-gray-200 shadow-sm">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="space-y-4 sm:space-y-6">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                      Required Fields
+                    </h3>
+
+                    <SigningFieldsTab
+                      fields={signerFields}
+                      currentPage={currentPage}
+                      fieldValues={fieldValues}
+                      validationErrors={validationErrors}
+                      onFieldChangeAction={handleFieldChange}
+                      onNavigateToFieldAction={handleNavigateToField}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Agreement and Submit Card */}
+              <Card className="border-gray-200 shadow-sm">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="space-y-4 sm:space-y-6">
+                    <div className="space-y-3 sm:space-y-4">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id="agreement"
+                          checked={agreementChecked}
+                          onCheckedChange={(checked) =>
+                            setAgreementChecked(!!checked)
+                          }
+                          className="mt-0.5 h-4 w-4 sm:h-5 sm:w-5"
+                        />
+                        <Label
+                          htmlFor="agreement"
+                          className="text-xs sm:text-sm text-gray-700 leading-relaxed cursor-pointer"
+                        >
+                          I agree that my electronic signature constitutes a
+                          legal signature and has the same force and effect as a
+                          handwritten signature.
+                        </Label>
+                      </div>
+
+                      {/* Validation Summary */}
+                      {Object.keys(validationErrors).length > 0 && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
+                          <p className="text-xs sm:text-sm text-red-700 font-medium mb-2">
+                            Please fix the following errors:
+                          </p>
+                          <ul className="space-y-1 text-xs sm:text-sm text-red-600">
+                            {Object.values(validationErrors).map(
+                              (error, index) => (
+                                <li key={index} className="flex items-start">
+                                  <span className="mr-2">•</span>
+                                  <span>{error}</span>
+                                </li>
+                              ),
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={
+                        !isComplete || !agreementChecked || isSubmitting
+                      }
+                      className="w-full h-10 sm:h-12 text-sm sm:text-base font-medium"
+                      size="lg"
+                    >
+                      {isSubmitting ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                          <span>Submitting...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <span>Sign Document</span>
+                          <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                        </div>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

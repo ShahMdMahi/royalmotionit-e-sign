@@ -73,3 +73,13 @@ export const ChangePasswordSchema = z
     message: "New passwords do not match",
     path: ["confirmNewPassword"], // path of error
   });
+
+export const UpdateUserSchema = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  email: z.string().email({ message: "Valid email is required" }),
+  role: z.enum(["ADMIN", "USER"], {
+    message: "Role must be either ADMIN or USER",
+  }),
+  emailVerified: z.boolean().optional(),
+  notification: z.boolean().optional(),
+});
