@@ -121,7 +121,7 @@ export function EditUserDialog({
         <DialogHeader>
           <DialogTitle className="text-xl">Edit User</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Update the user's details and permissions
+            Update the user&apos;s details and permissions
           </DialogDescription>
         </DialogHeader>
 

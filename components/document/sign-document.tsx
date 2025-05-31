@@ -12,11 +12,9 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import {
   ArrowLeft,
-  CheckCircle,
   Save,
   Send,
   AlertTriangle,

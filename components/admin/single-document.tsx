@@ -27,11 +27,8 @@ import {
   Clock,
   Check,
   Info,
-  ArrowLeft,
   Edit,
   Hash,
-  UserIcon,
-  Calendar,
   FileSignature,
   Shield,
 } from "lucide-react";
