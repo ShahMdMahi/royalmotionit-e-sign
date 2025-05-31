@@ -1,4 +1,19 @@
-import { Body, Button, Container, Head, Heading, Hr, Html, Img, Link, Preview, Section, Text, Column, Row } from "@react-email/components";
+import {
+  Body,
+  Button,
+  Container,
+  Head,
+  Heading,
+  Hr,
+  Html,
+  Img,
+  Link,
+  Preview,
+  Section,
+  Text,
+  Column,
+  Row,
+} from "@react-email/components";
 
 interface DocumentSignedNotificationProps {
   authorName: string;
@@ -17,7 +32,8 @@ export const DocumentSignedNotification = ({
   signerEmail,
   isAllSignersCompleted = true, // Always true since we have a single signer
 }: DocumentSignedNotificationProps) => {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sign.royalmotionit.com";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL || "https://sign.royalmotionit.com";
 
   // Theme colors from globals.css using exact OKLCH values
   const theme = {
@@ -59,7 +75,13 @@ export const DocumentSignedNotification = ({
               backgroundImage: `linear-gradient(120deg, ${theme.primaryHex}30 0%, ${theme.primaryHex}70 100%)`,
             }}
           >
-            <Img src={`${baseUrl}/name_logo.png`} width="220" height="auto" alt="Royal Sign Logo" style={logo} />
+            <Img
+              src={`${baseUrl}/name_logo.png`}
+              width="220"
+              height="auto"
+              alt="Royal Sign Logo"
+              style={logo}
+            />
             <Heading
               style={{
                 ...heading,
@@ -72,11 +94,20 @@ export const DocumentSignedNotification = ({
 
           {/* Main content */}
           <Section style={contentSection}>
-            <Text style={greeting}>Hello{authorName ? ` ${authorName}` : ""},</Text>
+            <Text style={greeting}>
+              Hello{authorName ? ` ${authorName}` : ""},
+            </Text>
 
             <Text style={text}>
-              Great news! Your document <span style={{ ...highlight, color: theme.primaryHex }}>"{documentTitle}"</span> has been signed by{" "}
-              <span style={{ ...highlight, color: theme.primaryHex }}>{signerName}</span> ({signerEmail}).
+              Great news! Your document{" "}
+              <span style={{ ...highlight, color: theme.primaryHex }}>
+                "{documentTitle}"
+              </span>{" "}
+              has been signed by{" "}
+              <span style={{ ...highlight, color: theme.primaryHex }}>
+                {signerName}
+              </span>{" "}
+              ({signerEmail}).
             </Text>
 
             {/* Success notification */}
@@ -105,20 +136,41 @@ export const DocumentSignedNotification = ({
                     marginRight: "10px",
                   }}
                 />
-                Your document is now legally complete. You can download the signed document from the document details page.
+                Your document is now legally complete. You can download the
+                signed document from the document details page.
               </Text>
             </Section>
 
             {/* What's Next Section */}
-            <Text style={{ ...featuresHeading, marginTop: "30px", textAlign: "left" as const }}>What's next?</Text>
+            <Text
+              style={{
+                ...featuresHeading,
+                marginTop: "30px",
+                textAlign: "left" as const,
+              }}
+            >
+              What's next?
+            </Text>
 
             <Row>
               <Column style={featureColumn}>
-                <Img src={`${baseUrl}/icon_logo.png`} width="40" height="40" alt="Download" style={featureIcon} />
+                <Img
+                  src={`${baseUrl}/icon_logo.png`}
+                  width="40"
+                  height="40"
+                  alt="Download"
+                  style={featureIcon}
+                />
                 <Text style={featureText}>Download the signed document</Text>
               </Column>
               <Column style={featureColumn}>
-                <Img src={`${baseUrl}/icon_logo.png`} width="40" height="40" alt="Share" style={featureIcon} />
+                <Img
+                  src={`${baseUrl}/icon_logo.png`}
+                  width="40"
+                  height="40"
+                  alt="Share"
+                  style={featureIcon}
+                />
                 <Text style={featureText}>Share with other stakeholders</Text>
               </Column>
             </Row>
@@ -133,7 +185,9 @@ export const DocumentSignedNotification = ({
                   color: "#FFFFFF",
                 }}
               >
-                {isAllSignersCompleted ? "View Signed Document" : "View Document Status"}
+                {isAllSignersCompleted
+                  ? "View Signed Document"
+                  : "View Document Status"}
               </Button>
             </Section>
 
@@ -146,7 +200,8 @@ export const DocumentSignedNotification = ({
                 textAlign: "center" as const,
               }}
             >
-              If you're having trouble with the button above, copy and paste this URL into your browser:
+              If you're having trouble with the button above, copy and paste
+              this URL into your browser:
             </Text>
 
             <Text
@@ -177,9 +232,16 @@ export const DocumentSignedNotification = ({
               backgroundColor: `${theme.secondaryForegroundHex}08`,
             }}
           >
-            <Img src={`${baseUrl}/logo.png`} width="60" height="auto" alt="Royal Sign Logo" style={footerLogo} />
+            <Img
+              src={`${baseUrl}/logo.png`}
+              width="60"
+              height="auto"
+              alt="Royal Sign Logo"
+              style={footerLogo}
+            />
             <Text style={footerText}>
-              If you have any questions or need assistance, please contact our support team at
+              If you have any questions or need assistance, please contact our
+              support team at
               <Link
                 href="mailto:support@royalmotionit.com"
                 style={{
@@ -191,8 +253,12 @@ export const DocumentSignedNotification = ({
                 support@royalmotionit.com
               </Link>
             </Text>
-            <Text style={footerText}>Powered by Royal Sign e-Signature Platform</Text>
-            <Text style={copyright}>© {currentYear} Royal Motion IT. All rights reserved.</Text>
+            <Text style={footerText}>
+              Powered by Royal Sign e-Signature Platform
+            </Text>
+            <Text style={copyright}>
+              © {currentYear} Royal Motion IT. All rights reserved.
+            </Text>
           </Section>
         </Container>
       </Body>
@@ -205,7 +271,8 @@ export default DocumentSignedNotification;
 // Email styles
 const main = {
   backgroundColor: "#f8f9fc",
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif',
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif',
   color: "#333333",
 };
 

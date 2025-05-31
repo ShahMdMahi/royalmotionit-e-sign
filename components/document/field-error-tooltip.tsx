@@ -1,6 +1,11 @@
 "use client";
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { AlertCircle } from "lucide-react";
 import { FieldValidationError } from "@/types/validation";
 
@@ -10,7 +15,11 @@ interface FieldErrorTooltipProps {
   children: React.ReactNode;
 }
 
-export function FieldErrorTooltip({ fieldId, fieldErrors, children }: FieldErrorTooltipProps) {
+export function FieldErrorTooltip({
+  fieldId,
+  fieldErrors,
+  children,
+}: FieldErrorTooltipProps) {
   // Find errors for this field
   const errors = fieldErrors.filter((error) => error.fieldId === fieldId);
 

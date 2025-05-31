@@ -25,9 +25,9 @@ export async function saveDocumentFields(
         message: "You must be logged in to perform this action",
       };
     }
-    
+
     // Only allow admin users to edit document fields
-    if (session.user.role !== 'ADMIN') {
+    if (session.user.role !== "ADMIN") {
       return {
         success: false,
         message: "Only administrators can edit document fields",
@@ -299,9 +299,9 @@ export async function saveDocumentSigners(documentId: string, signers: any[]) {
         message: "You must be logged in to perform this action",
       };
     }
-    
+
     // Only allow admin users to manage document signers
-    if (session.user.role !== 'ADMIN') {
+    if (session.user.role !== "ADMIN") {
       return {
         success: false,
         message: "Only administrators can manage document signers",
@@ -468,9 +468,9 @@ export async function sendDocumentForSigning(
         message: "You must be logged in to perform this action",
       };
     }
-    
+
     // Only allow admin users to send documents for signing
-    if (session.user.role !== 'ADMIN') {
+    if (session.user.role !== "ADMIN") {
       return {
         success: false,
         message: "Only administrators can send documents for signing",

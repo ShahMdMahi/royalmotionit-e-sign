@@ -32,18 +32,22 @@ export function AdminProfileComponent({ session }: AdminProfileComponentProps) {
   };
 
   return (
-    <div className="container mx-auto p-6 md:p-8 space-y-10 max-w-7xl">
+    <div className="container mx-auto p-3 sm:p-5 md:p-8 space-y-4 sm:space-y-6 md:space-y-10 max-w-7xl">
       {/* Profile header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tighter">Admin Profile</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tighter">
+            Admin Profile
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Manage your admin profile and view advanced details
           </p>
         </div>
-        <div className="flex items-center gap-3 bg-primary/5 px-4 py-2 rounded-lg border border-primary/10">
-          <Shield className="size-5 text-primary" />
-          <span className="font-medium text-primary">Administrator Access</span>
+        <div className="flex items-center gap-2 sm:gap-3 bg-primary/5 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg border border-primary/10">
+          <Shield className="size-4 sm:size-5 text-primary" />
+          <span className="font-medium text-xs sm:text-sm text-primary">
+            Administrator Access
+          </span>
         </div>
       </div>
 

@@ -1,8 +1,16 @@
 "use client";
 
-import { forwardRef, useRef, useImperativeHandle, ForwardRefRenderFunction } from "react";
+import {
+  forwardRef,
+  useRef,
+  useImperativeHandle,
+  ForwardRefRenderFunction,
+} from "react";
 import dynamic from "next/dynamic";
-import type { SignatureCanvasMethods, SignatureCanvasProps } from "react-signature-canvas";
+import type {
+  SignatureCanvasMethods,
+  SignatureCanvasProps,
+} from "react-signature-canvas";
 import React from "react";
 
 // Create a typed interface for the dynamically imported component
@@ -13,7 +21,11 @@ interface DynamicSignatureCanvasProps extends SignatureCanvasProps {
 // Import SignatureCanvas with SSR disabled and explicitly type it
 const SignatureCanvas = dynamic(() => import("react-signature-canvas"), {
   ssr: false,
-  loading: () => <div className="h-full w-full flex items-center justify-center bg-muted/20">Loading signature pad...</div>,
+  loading: () => (
+    <div className="h-full w-full flex items-center justify-center bg-muted/20">
+      Loading signature pad...
+    </div>
+  ),
 }) as React.ComponentType<DynamicSignatureCanvasProps>;
 
 export interface ClientSignatureCanvasProps {
@@ -30,7 +42,10 @@ export interface SignatureCanvasRef {
   toDataURL: (type?: string, encoderOptions?: number) => string;
 }
 
-const ClientSignatureCanvas: ForwardRefRenderFunction<SignatureCanvasRef, ClientSignatureCanvasProps> = ({ canvasProps, penColor }, ref) => {
+const ClientSignatureCanvas: ForwardRefRenderFunction<
+  SignatureCanvasRef,
+  ClientSignatureCanvasProps
+> = ({ canvasProps, penColor }, ref) => {
   // Define a more specific type for the SignatureCanvas instead of 'any'
   const sigCanvas = useRef<SignatureCanvasMethods | null>(null);
 
@@ -54,7 +69,13 @@ const ClientSignatureCanvas: ForwardRefRenderFunction<SignatureCanvasRef, Client
     },
   }));
 
-  return <SignatureCanvas canvasProps={canvasProps} penColor={penColor} ref={sigCanvas} />;
+  return (
+    <SignatureCanvas
+      canvasProps={canvasProps}
+      penColor={penColor}
+      ref={sigCanvas}
+    />
+  );
 };
 
 // Add display name for better debugging

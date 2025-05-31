@@ -71,39 +71,44 @@ export async function AdminNavbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-primary/10">
-      <div className="container flex h-16 items-center justify-between">
-        <Link href="/admin/dashboard" className="flex items-center gap-2">
-          <div className="flex items-center gap-2">
-            <div className="relative h-8 w-8 overflow-hidden rounded-md bg-primary/10 flex items-center justify-center">
+      <div className="container flex h-14 sm:h-16 items-center justify-between">
+        <Link
+          href="/admin/dashboard"
+          className="flex items-center gap-1 sm:gap-2"
+        >
+          <div className="flex items-center gap-1 sm:gap-2">
+            <div className="relative h-7 w-7 sm:h-8 sm:w-8 overflow-hidden rounded-md bg-primary/10 flex items-center justify-center">
               <Image
                 src="/icon_logo.png"
                 alt="RoyalMotionIT"
                 width={24}
                 height={24}
-                className="object-contain"
+                className="object-contain w-5 h-5 sm:w-6 sm:h-6"
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-bold leading-none">
+              <span className="text-base sm:text-lg font-bold leading-none hidden xs:block">
                 Admin Panel
               </span>
-              <span className="text-xs text-muted-foreground">Royal Sign</span>
+              <span className="text-xs text-muted-foreground hidden sm:block">
+                Royal Sign
+              </span>
             </div>
           </div>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-5">
+        <nav className="hidden md:flex items-center gap-2 lg:gap-5">
           {adminNavItems.map((item) => (
             <Link
               key={item.name}
               href={item.href}
               className={cn(
-                "text-sm font-medium transition-colors hover:text-primary flex items-center gap-1.5 py-1.5 px-2 rounded-md hover:bg-muted/50",
+                "text-xs lg:text-sm font-medium transition-colors hover:text-primary flex items-center gap-1 lg:gap-1.5 py-1 lg:py-1.5 px-1.5 lg:px-2 rounded-md hover:bg-muted/50",
               )}
             >
               {item.icon}
-              <span>{item.name}</span>
+              <span className="hidden lg:inline">{item.name}</span>
             </Link>
           ))}
         </nav>
@@ -112,17 +117,21 @@ export async function AdminNavbar() {
           {/* User Profile Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="hidden md:flex">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <Avatar className="h-6 w-6">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1 sm:gap-2 h-8 sm:h-9"
+              >
+                <Avatar className="h-5 w-5 sm:h-6 sm:w-6">
                   {userImage ? (
                     <AvatarImage src={userImage} alt={userName || "Admin"} />
                   ) : (
-                    <AvatarFallback className="bg-primary/10 text-primary">
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs sm:text-sm">
                       {getInitials(userName)}
                     </AvatarFallback>
                   )}
                 </Avatar>
-                <span className="font-medium hidden sm:inline-block">
+                <span className="font-medium hidden lg:inline-block text-xs sm:text-sm">
                   {userName || "Admin"}
                 </span>
               </Button>

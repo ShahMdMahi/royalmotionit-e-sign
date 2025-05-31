@@ -93,7 +93,8 @@ export const DocumentSignedWithPdf = ({
             </Text>
 
             <Text style={text as any}>
-              Your document has been successfully signed and is attached to this email.
+              Your document has been successfully signed and is attached to this
+              email.
             </Text>
 
             <Section
@@ -161,7 +162,8 @@ export const DocumentSignedWithPdf = ({
                 • We recommend saving a copy of this document for your records
               </Text>
               <Text style={securityText as any}>
-                • You can also access this document online through your Royal Sign account
+                • You can also access this document online through your Royal
+                Sign account
               </Text>
             </Section>
 

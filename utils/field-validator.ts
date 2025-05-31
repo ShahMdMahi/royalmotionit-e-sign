@@ -16,7 +16,11 @@ export function validateDocumentField(field: DocumentField): {
   const errors: FieldValidationError[] = [];
 
   // Required field validation
-  if (field.required && (!field.value || (typeof field.value === 'string' && field.value.trim() === ""))) {
+  if (
+    field.required &&
+    (!field.value ||
+      (typeof field.value === "string" && field.value.trim() === ""))
+  ) {
     errors.push({
       fieldId: field.id,
       code: "required",
@@ -28,7 +32,10 @@ export function validateDocumentField(field: DocumentField): {
   }
 
   // If field is not required and has no value, it's valid
-  if (!field.value || (typeof field.value === 'string' && field.value.trim() === "")) {
+  if (
+    !field.value ||
+    (typeof field.value === "string" && field.value.trim() === "")
+  ) {
     return { valid: true, errors: [] };
   }
 

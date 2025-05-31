@@ -2,7 +2,10 @@
 
 import { forwardRef, useRef, useImperativeHandle } from "react";
 import dynamic from "next/dynamic";
-import type { SignatureCanvasMethods, SignatureCanvasProps } from "react-signature-canvas";
+import type {
+  SignatureCanvasMethods,
+  SignatureCanvasProps,
+} from "react-signature-canvas";
 import React from "react";
 
 // Create a typed interface for the dynamically imported component

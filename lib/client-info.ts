@@ -40,7 +40,10 @@ export async function getClientInfo() {
   return {
     userAgent: getUserAgent(),
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown",
-    language: typeof navigator !== "undefined" ? navigator.language || "Unknown" : "Unknown",
+    language:
+      typeof navigator !== "undefined"
+        ? navigator.language || "Unknown"
+        : "Unknown",
     ipAddress,
   };
 }

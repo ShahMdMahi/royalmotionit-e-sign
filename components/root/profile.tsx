@@ -32,7 +32,7 @@ export function ProfileComponent({ user, session }: ProfileComponentProps) {
   };
 
   return (
-    <div className="container mx-auto p-6 md:p-8 space-y-10 max-w-7xl">
+    <div className="container mx-auto p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 md:space-y-10 max-w-7xl">
       {/* Profile header */}
       <PageHeader
         title="My Profile"
@@ -51,18 +51,18 @@ export function ProfileComponent({ user, session }: ProfileComponentProps) {
 
       {/* Profile Details Card */}
       <Card className="overflow-hidden shadow-lg rounded-xl border-border transition-all duration-300 hover:shadow-xl">
-        <CardHeader className="p-6 border-b border-border bg-muted/10">
-          <CardTitle className="text-xl font-semibold flex items-center gap-3">
-            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <UserIcon className="size-5 text-primary" />
+        <CardHeader className="p-4 sm:p-6 border-b border-border bg-muted/10">
+          <CardTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2 sm:gap-3">
+            <div className="size-8 sm:size-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <UserIcon className="size-4 sm:size-5 text-primary" />
             </div>
             Profile Details
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
-          <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
-            <div className="flex flex-col items-center gap-4">
-              <Avatar className="w-36 h-36 border-2 border-primary shadow-md">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 sm:gap-8">
+            <div className="flex flex-col items-center gap-3 sm:gap-4">
+              <Avatar className="w-24 h-24 sm:w-32 md:w-36 sm:h-32 md:h-36 border-2 border-primary shadow-md">
                 <AvatarImage
                   src={user.image ?? undefined}
                   alt={user.name ?? "User"}
@@ -80,14 +80,14 @@ export function ProfileComponent({ user, session }: ProfileComponentProps) {
               </div>
             </div>
 
-            <div className="flex-1 grid gap-6 w-full">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-4 bg-card/50 rounded-lg border border-border shadow-sm">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <UserIcon className="size-4 text-primary" />
+            <div className="flex-1 grid gap-4 sm:gap-6 w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div className="p-3 sm:p-4 bg-card/50 rounded-lg border border-border shadow-sm">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                    <div className="size-6 sm:size-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <UserIcon className="size-3 sm:size-4 text-primary" />
                     </div>
-                    <span className="font-medium text-lg">
+                    <span className="font-medium text-base sm:text-lg">
                       Personal Details
                     </span>
                   </div>

@@ -137,7 +137,7 @@ export function AdminSettingsComponent() {
   };
 
   return (
-    <div className="container mx-auto p-6 md:p-8 space-y-10 max-w-7xl">
+    <div className="container mx-auto p-3 sm:p-5 md:p-8 space-y-4 sm:space-y-6 md:space-y-10 max-w-7xl">
       {/* Settings header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
@@ -156,20 +156,20 @@ export function AdminSettingsComponent() {
 
       {/* Settings tabs */}
       <Tabs defaultValue="profile" className="w-full">
-        <div className="mb-8 border-b border-border/80 overflow-x-auto">
-          <TabsList className="w-full md:w-auto justify-start bg-transparent h-12">
+        <div className="mb-4 sm:mb-6 md:mb-8 border-b border-border/80 overflow-x-auto">
+          <TabsList className="w-full md:w-auto justify-start bg-transparent h-10 sm:h-12">
             <TabsTrigger
               value="profile"
-              className="gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+              className="gap-1 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
             >
-              <User className="size-4" />
+              <User className="size-3 sm:size-4" />
               <span>Profile</span>
             </TabsTrigger>
             <TabsTrigger
               value="website"
-              className="gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+              className="gap-1 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
             >
-              <Globe className="size-4" />
+              <Globe className="size-3 sm:size-4" />
               <span>Website</span>
             </TabsTrigger>
           </TabsList>
@@ -186,18 +186,18 @@ export function AdminSettingsComponent() {
           <div className="grid grid-cols-1 gap-8">
             {/* Name Change Form */}
             <Card className="overflow-hidden shadow-lg rounded-xl border-border transition-all duration-300 hover:shadow-xl hover:border-primary/30">
-              <CardHeader className="p-6 border-b border-border bg-muted/10">
-                <CardTitle className="text-xl font-semibold flex items-center gap-3">
-                  <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="size-5 text-primary" />
+              <CardHeader className="p-4 sm:p-5 md:p-6 border-b border-border bg-muted/10">
+                <CardTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2 sm:gap-3">
+                  <div className="size-8 sm:size-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="size-4 sm:size-5 text-primary" />
                   </div>
                   Profile Information
                 </CardTitle>
-                <CardDescription className="text-base">
+                <CardDescription className="text-sm sm:text-base">
                   Update your profile
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-4 md:p-6">
                 <NameChangeForm />
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">

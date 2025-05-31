@@ -9,4 +9,3 @@ export const privateRoutes = [
   "/admin/settings",
   "/admin/users",
 ];
-

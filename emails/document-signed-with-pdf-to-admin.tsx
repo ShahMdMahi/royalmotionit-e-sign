@@ -94,8 +94,11 @@ export const DocumentSignedWithPdfToAdmin = ({
             </Text>
 
             <Text style={text as any}>
-              The document <strong style={{ color: theme.primaryHex }}>"{documentTitle}"</strong> has been 
-              signed by <strong>{signerName}</strong> ({signerEmail}).
+              The document{" "}
+              <strong style={{ color: theme.primaryHex }}>
+                "{documentTitle}"
+              </strong>{" "}
+              has been signed by <strong>{signerName}</strong> ({signerEmail}).
               The signed PDF document is attached to this email.
             </Text>
 
@@ -162,7 +165,8 @@ export const DocumentSignedWithPdfToAdmin = ({
             >
               <Text style={securityHeading as any}>Admin Actions:</Text>
               <Text style={securityText as any}>
-                • You can download a copy of the signed document from the admin panel
+                • You can download a copy of the signed document from the admin
+                panel
               </Text>
               <Text style={securityText as any}>
                 • Archive the document if no longer needed

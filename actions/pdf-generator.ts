@@ -2,9 +2,19 @@
 
 import fs from "fs";
 import path from "path";
-import { PDFDocument, rgb, StandardFonts, PDFForm, PDFPage, degrees } from "pdf-lib";
+import {
+  PDFDocument,
+  rgb,
+  StandardFonts,
+  PDFForm,
+  PDFPage,
+  degrees,
+} from "pdf-lib";
 import { DocumentField, DocumentFieldType, Document } from "@/types/document";
-import { convertToDocumentField, convertToDocumentFields } from "@/utils/document-field-converter";
+import {
+  convertToDocumentField,
+  convertToDocumentFields,
+} from "@/utils/document-field-converter";
 import { deleteFromR2, getFromR2, uploadToR2 } from "@/actions/r2";
 import { prisma } from "@/prisma/prisma";
 import { auth } from "@/auth";
@@ -38,7 +48,7 @@ async function drawFieldBackgroundAndBorder(
   page: PDFPage,
   field: any, // Using any here as we'll handle the type conversion internally
   x: number,
-  y: number
+  y: number,
 ) {
   // Convert field to proper DocumentField type if needed
   const typedField = convertToDocumentField(field);
@@ -109,7 +119,11 @@ async function drawFieldBackgroundAndBorder(
  * @param text Watermark text
  * @param opacity Opacity of the watermark (0-1)
  */
-async function addWatermark(pdfDoc: PDFDocument, text: string, opacity: number = 0.15) {
+async function addWatermark(
+  pdfDoc: PDFDocument,
+  text: string,
+  opacity: number = 0.15,
+) {
   const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
   // Add watermark to each page
@@ -174,11 +188,21 @@ async function addDocumentIdHeader(pdfDoc: PDFDocument, documentId: string) {
  * @param document Document object with metadata
  * @param signers Array of signers
  */
-function addDocumentMetadata(pdfDoc: PDFDocument, document: any, signers: any[]) {
+function addDocumentMetadata(
+  pdfDoc: PDFDocument,
+  document: any,
+  signers: any[],
+) {
   // Set document metadata
   pdfDoc.setTitle(document.title || "Signed Document");
   pdfDoc.setSubject("Electronically Signed Document");
-  pdfDoc.setKeywords(["electronic signature", "signed document", "legal document", document.id, ...signers.map((s) => s.email)]);
+  pdfDoc.setKeywords([
+    "electronic signature",
+    "signed document",
+    "legal document",
+    document.id,
+    ...signers.map((s) => s.email),
+  ]);
   pdfDoc.setProducer("Royal Sign E-Signature Platform");
   pdfDoc.setCreator("Royal Sign");
 
@@ -199,7 +223,8 @@ function addDocumentMetadata(pdfDoc: PDFDocument, document: any, signers: any[])
     if (signer.completedAt) {
       const signerKey = `Signer${index + 1}` as keyof typeof metadata;
       // Use explicit type casting to avoid index signature issues
-      (metadata as Record<string, string>)[signerKey] = `${signer.name || signer.email}:${new Date(signer.completedAt).toISOString()}`;
+      (metadata as Record<string, string>)[signerKey] =
+        `${signer.name || signer.email}:${new Date(signer.completedAt).toISOString()}`;
     }
   });
 
@@ -218,7 +243,9 @@ function addDocumentMetadata(pdfDoc: PDFDocument, document: any, signers: any[])
  * @param fields Array of document fields
  * @returns Processed fields with updated values and visibility flags
  */
-function processFieldConditionalsAndFormulas(fields: DocumentField[]): DocumentField[] {
+function processFieldConditionalsAndFormulas(
+  fields: DocumentField[],
+): DocumentField[] {
   // First pass - evaluate all formula fields
   const fieldsWithFormulas = fields.map((field) => {
     // If this is a formula field, evaluate its value
@@ -255,7 +282,10 @@ function processFieldConditionalsAndFormulas(fields: DocumentField[]): DocumentF
           isVisible,
         };
       } catch (error) {
-        console.error(`Error evaluating visibility for field ${field.id}:`, error);
+        console.error(
+          `Error evaluating visibility for field ${field.id}:`,
+          error,
+        );
         // Default to showing the field if there's an error
         return {
           ...field,
@@ -281,7 +311,10 @@ function processFieldConditionalsAndFormulas(fields: DocumentField[]): DocumentF
  */
 export async function generateFinalPDF(documentId: string) {
   // print document id in big red style in console
-  console.log(`%cGenerating final PDF for document ID: ${documentId}`, "color: red; font-size: 20px; font-weight: bold;");
+  console.log(
+    `%cGenerating final PDF for document ID: ${documentId}`,
+    "color: red; font-size: 20px; font-weight: bold;",
+  );
   try {
     const userSession = await auth();
 
@@ -317,7 +350,9 @@ export async function generateFinalPDF(documentId: string) {
     // Check access rights
     const session = await auth();
     const isAuthor = document.authorId === session?.user?.id;
-    const isSigner = document.signers.some((s: { email: string }) => s.email === session?.user?.email);
+    const isSigner = document.signers.some(
+      (s: { email: string }) => s.email === session?.user?.email,
+    );
 
     if (!isAuthor && !isSigner) {
       return {
@@ -327,7 +362,8 @@ export async function generateFinalPDF(documentId: string) {
     }
 
     // Check if the signer has completed
-    const signerCompleted = document.signers.length > 0 && document.signers[0].status === "COMPLETED";
+    const signerCompleted =
+      document.signers.length > 0 && document.signers[0].status === "COMPLETED";
 
     if (!signerCompleted) {
       return {
@@ -378,16 +414,26 @@ export async function generateFinalPDF(documentId: string) {
     // Embed fields and signatures
     for (const field of processedFields) {
       // Collect signature data for certification page
-      if (field.type === "signature" && field.value && field.value.startsWith("data:image")) {
+      if (
+        field.type === "signature" &&
+        field.value &&
+        field.value.startsWith("data:image")
+      ) {
         // Find the signer email for this signature field
-        const signer = document.signers.find((s: any) => s.id === field.signerId);
+        const signer = document.signers.find(
+          (s: any) => s.id === field.signerId,
+        );
         if (signer?.email) {
           signatures.set(signer.email, field.value);
         }
       }
 
       // Skip fields with no value or that should be hidden
-      if ((!field.value && field.type !== "checkbox") || field.isVisible === false) continue;
+      if (
+        (!field.value && field.type !== "checkbox") ||
+        field.isVisible === false
+      )
+        continue;
 
       const page = pdfDoc.getPage(field.pageNumber - 1);
       const { width: pageWidth, height: pageHeight } = page.getSize(); // Convert coordinates to PDF coordinate system (0,0 is bottom-left in PDF)
@@ -409,10 +455,17 @@ export async function generateFinalPDF(documentId: string) {
 
               // Determine image format - default to PNG but check for JPEG
               let signatureImage;
-              if (field.value.includes("data:image/jpeg") || field.value.includes("data:image/jpg")) {
-                signatureImage = await pdfDoc.embedJpg(Buffer.from(base64Data, "base64"));
+              if (
+                field.value.includes("data:image/jpeg") ||
+                field.value.includes("data:image/jpg")
+              ) {
+                signatureImage = await pdfDoc.embedJpg(
+                  Buffer.from(base64Data, "base64"),
+                );
               } else {
-                signatureImage = await pdfDoc.embedPng(Buffer.from(base64Data, "base64"));
+                signatureImage = await pdfDoc.embedPng(
+                  Buffer.from(base64Data, "base64"),
+                );
               }
 
               // Calculate proportional dimensions to maintain aspect ratio
@@ -452,15 +505,21 @@ export async function generateFinalPDF(documentId: string) {
               try {
                 const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
                 const fontSize = 10;
-                page.drawText(field.type === "signature" ? "Signature" : "Initial", {
-                  x: x + 4,
-                  y: y + field.height / 2 - fontSize / 2,
-                  size: fontSize,
-                  font,
-                  color: rgb(0.5, 0.5, 0.5),
-                });
+                page.drawText(
+                  field.type === "signature" ? "Signature" : "Initial",
+                  {
+                    x: x + 4,
+                    y: y + field.height / 2 - fontSize / 2,
+                    size: fontSize,
+                    font,
+                    color: rgb(0.5, 0.5, 0.5),
+                  },
+                );
               } catch (fallbackError) {
-                console.error("Error adding fallback signature text:", fallbackError);
+                console.error(
+                  "Error adding fallback signature text:",
+                  fallbackError,
+                );
               }
             }
           }
@@ -524,7 +583,9 @@ export async function generateFinalPDF(documentId: string) {
             const fontSize = field.fontSize || 12;
 
             // Apply any text color
-            const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
+            const textColor = field.textColor
+              ? parseHexColor(field.textColor)
+              : rgb(0, 0, 0);
 
             // Draw text with precise positioning and overflow handling
             const textValue = String(field.value || "");
@@ -537,7 +598,11 @@ export async function generateFinalPDF(documentId: string) {
             if (textWidth > fieldContentWidth) {
               // Text is too long, add ellipsis
               let truncated = textValue;
-              while (font.widthOfTextAtSize(truncated + "...", fontSize) > fieldContentWidth && truncated.length > 0) {
+              while (
+                font.widthOfTextAtSize(truncated + "...", fontSize) >
+                  fieldContentWidth &&
+                truncated.length > 0
+              ) {
                 truncated = truncated.slice(0, -1);
               }
               displayText = truncated + "...";
@@ -571,7 +636,9 @@ export async function generateFinalPDF(documentId: string) {
                 const date = new Date(dateText);
                 if (!isNaN(date.getTime())) {
                   // Format date as MM/DD/YYYY for better readability
-                  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+                  const month = (date.getMonth() + 1)
+                    .toString()
+                    .padStart(2, "0");
                   const day = date.getDate().toString().padStart(2, "0");
                   const year = date.getFullYear();
                   dateText = `${month}/${day}/${year}`;
@@ -584,7 +651,9 @@ export async function generateFinalPDF(documentId: string) {
 
             // Draw date text with better styling
             const fontSize = field.fontSize || 12;
-            const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
+            const textColor = field.textColor
+              ? parseHexColor(field.textColor)
+              : rgb(0, 0, 0);
 
             // Calculate text width for potential truncation
             const textWidth = font.widthOfTextAtSize(dateText, fontSize);
@@ -592,7 +661,11 @@ export async function generateFinalPDF(documentId: string) {
 
             // Truncate if needed
             if (textWidth > fieldWidth) {
-              dateText = dateText.substring(0, Math.floor(dateText.length * (fieldWidth / textWidth)) - 3) + "...";
+              dateText =
+                dateText.substring(
+                  0,
+                  Math.floor(dateText.length * (fieldWidth / textWidth)) - 3,
+                ) + "...";
             }
 
             // Calculate vertical position for better alignment
@@ -614,7 +687,9 @@ export async function generateFinalPDF(documentId: string) {
           {
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const fontSize = field.fontSize || 12;
-            const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
+            const textColor = field.textColor
+              ? parseHexColor(field.textColor)
+              : rgb(0, 0, 0);
 
             const displayValue = field.value || "";
 
@@ -626,7 +701,11 @@ export async function generateFinalPDF(documentId: string) {
             let formattedValue = displayValue;
             if (textWidth > fieldWidth) {
               let truncated = displayValue;
-              while (font.widthOfTextAtSize(truncated + "...", fontSize) > fieldWidth && truncated.length > 0) {
+              while (
+                font.widthOfTextAtSize(truncated + "...", fontSize) >
+                  fieldWidth &&
+                truncated.length > 0
+              ) {
                 truncated = truncated.slice(0, -1);
               }
               formattedValue = truncated + "...";
@@ -649,7 +728,8 @@ export async function generateFinalPDF(documentId: string) {
             if (field.type === "radio" && field.options) {
               try {
                 // Check if options are available and draw a radio button
-                const options = field.options?.split(",").map((o) => o.trim()) || [];
+                const options =
+                  field.options?.split(",").map((o) => o.trim()) || [];
                 if (field.value && options.includes(field.value)) {
                   // Draw a filled circle for the selected option
                   const circleRadius = Math.min(8, field.height * 0.2);
@@ -687,7 +767,9 @@ export async function generateFinalPDF(documentId: string) {
           {
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const fontSize = field.fontSize || 12;
-            const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
+            const textColor = field.textColor
+              ? parseHexColor(field.textColor)
+              : rgb(0, 0, 0);
 
             let displayValue = field.value || "";
 
@@ -695,7 +777,13 @@ export async function generateFinalPDF(documentId: string) {
             const numValue = parseFloat(displayValue);
             if (!isNaN(numValue)) {
               // If it seems to be a monetary value (has 2 decimal places)
-              if (field.validationRule && (field.validationRule.includes("*") || field.validationRule.includes("+") || field.validationRule.includes("-") || field.validationRule.includes("/"))) {
+              if (
+                field.validationRule &&
+                (field.validationRule.includes("*") ||
+                  field.validationRule.includes("+") ||
+                  field.validationRule.includes("-") ||
+                  field.validationRule.includes("/"))
+              ) {
                 // Format with 2 decimal places for calculations
                 displayValue = numValue.toFixed(2);
               } else if (Number.isInteger(numValue)) {
@@ -711,7 +799,11 @@ export async function generateFinalPDF(documentId: string) {
             // Handle text overflow with ellipsis if needed
             if (textWidth > fieldWidth) {
               let truncated = displayValue;
-              while (font.widthOfTextAtSize(truncated + "...", fontSize) > fieldWidth && truncated.length > 0) {
+              while (
+                font.widthOfTextAtSize(truncated + "...", fontSize) >
+                  fieldWidth &&
+                truncated.length > 0
+              ) {
                 truncated = truncated.slice(0, -1);
               }
               displayValue = truncated + "...";
@@ -737,7 +829,9 @@ export async function generateFinalPDF(documentId: string) {
           {
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const fontSize = field.fontSize || 12;
-            const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
+            const textColor = field.textColor
+              ? parseHexColor(field.textColor)
+              : rgb(0, 0, 0);
 
             // Format as currency
             let formattedValue = field.value || "$0.00";
@@ -765,7 +859,11 @@ export async function generateFinalPDF(documentId: string) {
             // Handle text overflow with ellipsis if needed
             if (textWidth > fieldWidth) {
               let truncated = formattedValue;
-              while (font.widthOfTextAtSize(truncated + "...", fontSize) > fieldWidth && truncated.length > 0) {
+              while (
+                font.widthOfTextAtSize(truncated + "...", fontSize) >
+                  fieldWidth &&
+                truncated.length > 0
+              ) {
                 truncated = truncated.slice(0, -1);
               }
               formattedValue = truncated + "...";
@@ -791,7 +889,9 @@ export async function generateFinalPDF(documentId: string) {
           {
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const fontSize = field.fontSize || 12;
-            const textColor = field.textColor ? parseHexColor(field.textColor) : rgb(0, 0, 0);
+            const textColor = field.textColor
+              ? parseHexColor(field.textColor)
+              : rgb(0, 0, 0);
 
             const displayValue = field.value || "";
 
@@ -803,7 +903,11 @@ export async function generateFinalPDF(documentId: string) {
             let formattedValue = displayValue;
             if (textWidth > fieldWidth) {
               let truncated = displayValue;
-              while (font.widthOfTextAtSize(truncated + "...", fontSize) > fieldWidth && truncated.length > 0) {
+              while (
+                font.widthOfTextAtSize(truncated + "...", fontSize) >
+                  fieldWidth &&
+                truncated.length > 0
+              ) {
                 truncated = truncated.slice(0, -1);
               }
               formattedValue = truncated + "...";
@@ -858,7 +962,13 @@ export async function generateFinalPDF(documentId: string) {
     // Add document metadata
     pdfDoc.setTitle(document.title || "Signed Document by Royal Sign");
     pdfDoc.setSubject("Electronically Signed Document by Royal Sign");
-    pdfDoc.setKeywords(["royalmotionit", "electronic signature", "signed document", "legal document", document.id]);
+    pdfDoc.setKeywords([
+      "royalmotionit",
+      "electronic signature",
+      "signed document",
+      "legal document",
+      document.id,
+    ]);
     pdfDoc.setProducer("Royal Sign E-Signature Platform");
     pdfDoc.setCreator("Royal Sign");
     pdfDoc.setAuthor(document.authorName || "Royal Sign");
@@ -888,7 +998,14 @@ export async function generateFinalPDF(documentId: string) {
     };
 
     // Add certification page with signature verification information
-    await addCertificationPage(pdfDoc, document, document.signers, documentHash, signerClientInfo, signatures);
+    await addCertificationPage(
+      pdfDoc,
+      document,
+      document.signers,
+      documentHash,
+      signerClientInfo,
+      signatures,
+    );
 
     // Save the PDF
     let finalPdfBytes;
@@ -1006,7 +1123,8 @@ export async function generateFinalPDF(documentId: string) {
 
       if (signer && signer.email) {
         // Import the email action to send signed document with PDF attachment
-        const { sendSignedDocumentWithPdf, sendSignedDocumentWithPdfToAdmin } = await import("@/actions/email");
+        const { sendSignedDocumentWithPdf, sendSignedDocumentWithPdfToAdmin } =
+          await import("@/actions/email");
 
         // Send email with PDF attachment to the signer
         await sendSignedDocumentWithPdf(
@@ -1017,7 +1135,7 @@ export async function generateFinalPDF(documentId: string) {
           finalPdfBytes,
           document.authorName || "Royal Sign",
           document.authorEmail || undefined,
-          "Your document has been successfully signed. Please find the attached PDF for your records."
+          "Your document has been successfully signed. Please find the attached PDF for your records.",
         );
 
         console.log(`Sent signed PDF via email to ${signer.email}`);
@@ -1030,7 +1148,7 @@ export async function generateFinalPDF(documentId: string) {
           signer.name,
           signer.email,
           finalPdfBytes,
-          "The document has been successfully signed by the signer. Please find the attached PDF for your records."
+          "The document has been successfully signed by the signer. Please find the attached PDF for your records.",
         );
 
         console.log(`Sent signed PDF to admin for document ${documentId}`);
@@ -1077,7 +1195,7 @@ async function addCertificationPage(
   signers: any[],
   documentHash: string,
   clientInfo?: { userAgent?: string; ipAddress?: string },
-  signatures?: Map<string, string>
+  signatures?: Map<string, string>,
 ) {
   // Add a new page at the end of the document for certification
   const certPage = pdfDoc.addPage();
@@ -1272,7 +1390,9 @@ async function addCertificationPage(
     color: textColor,
   });
 
-  const createdDate = document.createdAt ? formatBangladeshiTime(document.createdAt) : "Unknown";
+  const createdDate = document.createdAt
+    ? formatBangladeshiTime(document.createdAt)
+    : "Unknown";
 
   certPage.drawText(createdDate, {
     x: 150,
@@ -1293,7 +1413,9 @@ async function addCertificationPage(
     color: textColor,
   });
 
-  const completedDate = document.signedAt ? formatBangladeshiTime(document.signedAt) : formatBangladeshiTime(new Date());
+  const completedDate = document.signedAt
+    ? formatBangladeshiTime(document.signedAt)
+    : formatBangladeshiTime(new Date());
 
   certPage.drawText(completedDate, {
     x: 150,
@@ -1433,7 +1555,9 @@ async function addCertificationPage(
         color: textColor,
       });
 
-      const signedDate = signer.completedAt ? formatBangladeshiTime(signer.completedAt) : "Unknown";
+      const signedDate = signer.completedAt
+        ? formatBangladeshiTime(signer.completedAt)
+        : "Unknown";
 
       certPage.drawText(signedDate, {
         x: 150,
@@ -1459,21 +1583,36 @@ async function addCertificationPage(
 
       if (!signerSignatureValue) {
         // Fallback to looking in document fields if not found in signatures map
-        const signerSignatureField = document.fields.find((field: any) => field.type === "signature" && field.signerEmail === signer.email && field.value);
+        const signerSignatureField = document.fields.find(
+          (field: any) =>
+            field.type === "signature" &&
+            field.signerEmail === signer.email &&
+            field.value,
+        );
         signerSignatureValue = signerSignatureField?.value;
       }
 
-      if (signerSignatureValue && signerSignatureValue.startsWith("data:image")) {
+      if (
+        signerSignatureValue &&
+        signerSignatureValue.startsWith("data:image")
+      ) {
         try {
           // Extract base64 data
           const base64Data = signerSignatureValue.split(",")[1];
           if (base64Data) {
             // Determine image format and embed
             let signatureImage;
-            if (signerSignatureValue.includes("data:image/jpeg") || signerSignatureValue.includes("data:image/jpg")) {
-              signatureImage = await pdfDoc.embedJpg(Buffer.from(base64Data, "base64"));
+            if (
+              signerSignatureValue.includes("data:image/jpeg") ||
+              signerSignatureValue.includes("data:image/jpg")
+            ) {
+              signatureImage = await pdfDoc.embedJpg(
+                Buffer.from(base64Data, "base64"),
+              );
             } else {
-              signatureImage = await pdfDoc.embedPng(Buffer.from(base64Data, "base64"));
+              signatureImage = await pdfDoc.embedPng(
+                Buffer.from(base64Data, "base64"),
+              );
             }
 
             // Calculate proportional dimensions while keeping signature a reasonable size
@@ -1523,7 +1662,10 @@ async function addCertificationPage(
             yPosition -= 20;
           }
         } catch (error) {
-          console.error("Error embedding signature in certification page:", error);
+          console.error(
+            "Error embedding signature in certification page:",
+            error,
+          );
           // Fallback text
           certPage.drawText("(Digital signature applied)", {
             x: 150,
@@ -1712,7 +1854,10 @@ function formatBangladeshiTime(date: Date | string | undefined): string {
 
   // Format to DD-MMM-YYYY HH:MM:SS
   const day = bangladeshiTime.getUTCDate().toString().padStart(2, "0");
-  const month = bangladeshiTime.toLocaleString("en", { month: "short", timeZone: "UTC" });
+  const month = bangladeshiTime.toLocaleString("en", {
+    month: "short",
+    timeZone: "UTC",
+  });
   const year = bangladeshiTime.getUTCFullYear();
   const hours = bangladeshiTime.getUTCHours().toString().padStart(2, "0");
   const minutes = bangladeshiTime.getUTCMinutes().toString().padStart(2, "0");

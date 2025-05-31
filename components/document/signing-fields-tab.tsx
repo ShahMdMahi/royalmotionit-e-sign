@@ -315,7 +315,9 @@ export function SigningFieldsTab({
     <div className="space-y-4">
       <Tabs
         value={activeTab}
-        onValueChange={(value) => setActiveTab(value as "all" | "required" | "current")}
+        onValueChange={(value) =>
+          setActiveTab(value as "all" | "required" | "current")
+        }
       >
         <TabsList className="grid grid-cols-3 w-full">
           <TabsTrigger value="current">Current Page</TabsTrigger>

@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, CheckCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,7 +22,13 @@ interface SignConfirmationDialogProps {
   isLoading: boolean;
 }
 
-export function SignConfirmationDialog({ open, onOpenChangeAction, onConfirmAction, documentTitle, isLoading }: SignConfirmationDialogProps) {
+export function SignConfirmationDialog({
+  open,
+  onOpenChangeAction,
+  onConfirmAction,
+  documentTitle,
+  isLoading,
+}: SignConfirmationDialogProps) {
   const [agreement, setAgreement] = useState(false);
 
   const handleConfirm = () => {
@@ -30,7 +43,10 @@ export function SignConfirmationDialog({ open, onOpenChangeAction, onConfirmActi
             <CheckCircle className="h-5 w-5 text-primary" />
             Confirm Document Signing
           </DialogTitle>
-          <DialogDescription>You are about to electronically sign &quot;{documentTitle}&quot;. This action cannot be undone.</DialogDescription>
+          <DialogDescription>
+            You are about to electronically sign &quot;{documentTitle}&quot;.
+            This action cannot be undone.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-3">
@@ -40,27 +56,49 @@ export function SignConfirmationDialog({ open, onOpenChangeAction, onConfirmActi
                 <AlertTriangle className="h-4 w-4 text-amber-500" />
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-amber-800">Legal Notice</h3>
+                <h3 className="text-sm font-medium text-amber-800">
+                  Legal Notice
+                </h3>
                 <div className="mt-2 text-sm text-amber-700">
-                  <p>By clicking &quot;Sign Document&quot;, you agree that your electronic signature is the legal equivalent of your manual signature on this document.</p>
+                  <p>
+                    By clicking &quot;Sign Document&quot;, you agree that your
+                    electronic signature is the legal equivalent of your manual
+                    signature on this document.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="flex items-center space-x-2 pt-2">
-            <Checkbox id="agreement" checked={agreement} onCheckedChange={(checked) => setAgreement(checked === true)} />
-            <Label htmlFor="agreement" className="text-sm text-muted-foreground">
-              I understand that this is a legally binding signature and I consent to electronically sign this document.
+            <Checkbox
+              id="agreement"
+              checked={agreement}
+              onCheckedChange={(checked) => setAgreement(checked === true)}
+            />
+            <Label
+              htmlFor="agreement"
+              className="text-sm text-muted-foreground"
+            >
+              I understand that this is a legally binding signature and I
+              consent to electronically sign this document.
             </Label>
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChangeAction(false)} disabled={isLoading}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChangeAction(false)}
+            disabled={isLoading}
+          >
             Cancel
           </Button>
-          <Button onClick={handleConfirm} disabled={!agreement || isLoading} className="relative">
+          <Button
+            onClick={handleConfirm}
+            disabled={!agreement || isLoading}
+            className="relative"
+          >
             {isLoading ? (
               <>
                 <span className="opacity-0">Sign Document</span>

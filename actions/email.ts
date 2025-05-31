@@ -290,8 +290,13 @@ export async function sendSignedDocumentWithPdf(
         documentTitle,
         documentId,
         senderName: senderName || "Royal Sign",
-        senderEmail: senderEmail || process.env.GMAIL_SMTP_USER || "no-reply@royalsign.com",
-        message: message || "Your document has been successfully signed. Please find the attached PDF.",
+        senderEmail:
+          senderEmail ||
+          process.env.GMAIL_SMTP_USER ||
+          "no-reply@royalsign.com",
+        message:
+          message ||
+          "Your document has been successfully signed. Please find the attached PDF.",
       }),
     );
 
@@ -365,7 +370,9 @@ export async function sendSignedDocumentWithPdfToAdmin(
       ],
     });
 
-    console.log(`Admin notification email with signed PDF sent to ${adminEmail}`);
+    console.log(
+      `Admin notification email with signed PDF sent to ${adminEmail}`,
+    );
   } catch (error) {
     console.error("Error sending admin notification with signed PDF:", error);
   }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import React from "react";
 import {
   Menu,
   User,
@@ -90,8 +91,12 @@ export function AdminMobileMenu({
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="md:hidden">
-          <Menu className="h-5 w-5" />
+        <Button
+          variant="outline"
+          size="icon"
+          className="md:hidden h-8 w-8 sm:h-9 sm:w-9"
+        >
+          <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
           <span className="sr-only">Toggle admin menu</span>
         </Button>
       </SheetTrigger>
@@ -99,19 +104,19 @@ export function AdminMobileMenu({
         side="left"
         className="flex flex-col w-full max-w-[80vw] sm:max-w-[300px] p-0"
       >
-        <SheetHeader className="border-b pb-4 pt-4 px-4 space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="relative h-9 w-9 overflow-hidden rounded-md bg-primary/10 flex items-center justify-center">
+        <SheetHeader className="border-b pb-3 pt-3 sm:pb-4 sm:pt-4 px-3 sm:px-4 space-y-1 sm:space-y-2">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="relative h-8 w-8 sm:h-9 sm:w-9 overflow-hidden rounded-md bg-primary/10 flex items-center justify-center">
               <Image
                 src="/icon_logo.png"
                 alt="RoyalMotionIT"
                 width={24}
                 height={24}
-                className="object-contain"
+                className="object-contain h-5 w-5 sm:h-6 sm:w-6"
               />
             </div>
             <div className="flex flex-col">
-              <SheetTitle className="text-base font-bold text-left">
+              <SheetTitle className="text-sm sm:text-base font-bold text-left">
                 Admin Panel
               </SheetTitle>
               <SheetDescription className="text-xs text-left mt-0">
@@ -123,22 +128,22 @@ export function AdminMobileMenu({
 
         {/* Display user info if available */}
         {userName && (
-          <div className="px-4 py-3 border-b">
-            <div className="flex items-center gap-3 bg-muted/50 p-2 rounded-md">
-              <Avatar className="h-8 w-8">
+          <div className="px-3 sm:px-4 py-2 sm:py-3 border-b">
+            <div className="flex items-center gap-2 sm:gap-3 bg-muted/50 p-2 rounded-md">
+              <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
                 {userImage ? (
                   <AvatarImage src={userImage} alt={userName || "Admin"} />
                 ) : (
-                  <AvatarFallback className="bg-primary/10 text-primary">
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs sm:text-sm">
                     {getInitials(userName)}
                   </AvatarFallback>
                 )}
               </Avatar>
               <div className="flex flex-col overflow-hidden">
-                <span className="text-sm font-medium truncate">
+                <span className="text-xs sm:text-sm font-medium truncate">
                   {userName || "Admin"}
                 </span>
-                <span className="text-xs text-muted-foreground truncate">
+                <span className="text-xs text-muted-foreground truncate max-w-[150px]">
                   {userEmail}
                 </span>
               </div>
@@ -158,13 +163,17 @@ export function AdminMobileMenu({
                 href={item.href}
                 onClick={() => setIsOpen(false)}
                 className={cn(
-                  "flex items-center text-sm py-2 px-3 hover:text-primary transition-colors rounded-md hover:bg-muted",
+                  "flex items-center text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-3 hover:text-primary transition-colors rounded-md hover:bg-muted",
                   item.name === "Admin Dashboard" &&
                     "text-primary bg-primary/10",
                   item.name === "User Dashboard" && "text-primary",
                 )}
               >
-                {item.icon}
+                <span className="flex items-center">
+                  {React.cloneElement(item.icon, {
+                    className: "h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2",
+                  })}
+                </span>
                 {item.name}
               </Link>
             ))}
@@ -172,15 +181,15 @@ export function AdminMobileMenu({
 
           <Separator className="my-2 mx-2" />
 
-          <div className="flex flex-col gap-2 py-3 px-4">
-            <form action={logoutUser} className="w-full">
+          <div className="px-4 py-2">
+            <form action={logoutUser}>
               <Button
                 type="submit"
                 variant="destructive"
                 size="sm"
-                className="justify-start gap-2 w-full text-sm h-9"
+                className="justify-start gap-1.5 sm:gap-2 w-full text-xs sm:text-sm h-8 sm:h-9"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Sign Out
               </Button>
             </form>

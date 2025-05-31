@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, RefreshCw } from "lucide-react";
 
@@ -26,13 +33,20 @@ export default function Error({ error, reset }: ErrorProps) {
             </div>
             Something went wrong
           </CardTitle>
-          <CardDescription>We encountered an error while processing your request</CardDescription>
+          <CardDescription>
+            We encountered an error while processing your request
+          </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="flex flex-col justify-center items-center h-[40vh] space-y-6">
             <div className="text-center max-w-md">
-              <p className="text-muted-foreground mb-4">{error.message || "An unexpected error occurred. Please try again later."}</p>
-              <p className="text-xs text-muted-foreground/70">{error.digest && `Error ID: ${error.digest}`}</p>
+              <p className="text-muted-foreground mb-4">
+                {error.message ||
+                  "An unexpected error occurred. Please try again later."}
+              </p>
+              <p className="text-xs text-muted-foreground/70">
+                {error.digest && `Error ID: ${error.digest}`}
+              </p>
             </div>
           </div>
         </CardContent>

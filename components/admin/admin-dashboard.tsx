@@ -16,14 +16,14 @@ import { logoutUser } from "@/actions/auth";
 
 export function AdminDashboardComponent() {
   return (
-    <div className="container py-8 max-w-7xl mx-auto">
-      <div className="flex flex-col gap-8">
+    <div className="container py-4 sm:py-6 md:py-8 max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
+      <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
         {/* Header Section */}
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tighter">
+        <div className="space-y-1 sm:space-y-2">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tighter">
             Welcome to the Admin Dashboard
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Manage your organization, documents, and users from this central
             dashboard.
           </p>
@@ -31,8 +31,10 @@ export function AdminDashboardComponent() {
 
         {/* First Row - Main Admin Features */}
         <div>
-          <h2 className="text-xl font-medium mb-4">Administration</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <h2 className="text-lg sm:text-xl font-medium mb-2 sm:mb-4">
+            Administration
+          </h2>
+          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <Link href="/admin/documents" className="w-full">
               <Card className="h-full card-hover border-border hover:border-primary/50">
                 <CardContent className="flex flex-col items-center justify-center gap-4 pt-6 pb-6">

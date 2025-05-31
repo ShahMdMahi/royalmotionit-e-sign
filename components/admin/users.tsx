@@ -91,72 +91,78 @@ export function UsersComponent({
   ).length;
 
   return (
-    <div className="container py-8 max-w-7xl mx-auto">
-      <div className="flex flex-col gap-8">
+    <div className="container py-4 sm:py-8 px-2 sm:px-4 max-w-7xl mx-auto">
+      <div className="flex flex-col gap-4 sm:gap-8">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tighter">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
+          <div className="space-y-0.5 sm:space-y-1">
+            <h1 className="text-xl xs:text-2xl sm:text-3xl font-bold tracking-tighter">
               User Management
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-xs xs:text-sm text-muted-foreground">
               View and manage all users in the system.
             </p>
           </div>
           <Button
-            className="flex items-center gap-2"
+            className="flex items-center gap-1.5 sm:gap-2 h-8 sm:h-10 text-xs sm:text-sm"
             onClick={() => toast.info("Add user functionality coming soon!")}
           >
-            <Users className="size-4" />
+            <Users className="size-3.5 sm:size-4" />
             <span>Add New User</span>
           </Button>
         </div>
 
         {/* User Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <Card className="card-hover border-border">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-4">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Total Users
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
               <div className="flex items-center justify-between">
-                <div className="text-2xl font-bold">{totalUsers}</div>
-                <div className="size-8 rounded-full bg-blue-100 flex items-center justify-center">
-                  <Users className="size-4 text-blue-600" />
+                <div className="text-lg xs:text-xl sm:text-2xl font-bold">
+                  {totalUsers}
+                </div>
+                <div className="size-6 sm:size-8 rounded-full bg-blue-100 flex items-center justify-center">
+                  <Users className="size-3 sm:size-4 text-blue-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="card-hover border-border">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-4">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Admin Users
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
               <div className="flex items-center justify-between">
-                <div className="text-2xl font-bold">{adminUsers}</div>
-                <div className="size-8 rounded-full bg-amber-100 flex items-center justify-center">
-                  <Users className="size-4 text-amber-600" />
+                <div className="text-lg xs:text-xl sm:text-2xl font-bold">
+                  {adminUsers}
+                </div>
+                <div className="size-6 sm:size-8 rounded-full bg-amber-100 flex items-center justify-center">
+                  <Users className="size-3 sm:size-4 text-amber-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="card-hover border-border">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-4">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Regular Users
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
               <div className="flex items-center justify-between">
-                <div className="text-2xl font-bold">{regularUsers}</div>
-                <div className="size-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <Users className="size-4 text-emerald-600" />
+                <div className="text-lg xs:text-xl sm:text-2xl font-bold">
+                  {regularUsers}
+                </div>
+                <div className="size-6 sm:size-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <Users className="size-3 sm:size-4 text-emerald-600" />
                 </div>
               </div>
             </CardContent>
@@ -165,35 +171,35 @@ export function UsersComponent({
 
         {/* Users Table Card */}
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Users className="size-5 text-primary" /> All Users
+          <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
+            <CardTitle className="text-base sm:text-lg flex items-center gap-1.5 sm:gap-2">
+              <Users className="size-4 sm:size-5 text-primary" /> All Users
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Manage user accounts and permissions
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 sm:p-4 pt-2 sm:pt-3">
             {/* Search input */}
-            <div className="mb-6 flex items-center gap-4">
+            <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-2.5 top-2.5 h-3.5 sm:h-4 w-3.5 sm:w-4 text-muted-foreground" />
                 <Input
                   type="search"
                   placeholder="Search by name, email, ID or role..."
-                  className="pl-9"
+                  className="pl-8 sm:pl-9 h-8 sm:h-10 text-xs sm:text-sm"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               <Button
                 variant="outline"
-                className="flex items-center gap-2"
+                className="flex items-center gap-1.5 h-8 sm:h-10 text-xs sm:text-sm"
                 onClick={() =>
                   toast.info("Add user functionality coming soon!")
                 }
               >
-                <Users className="size-4" />
+                <Users className="size-3.5 sm:size-4" />
                 <span>Add User</span>
               </Button>
             </div>
@@ -202,48 +208,72 @@ export function UsersComponent({
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">ID</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="w-[80px] sm:w-[100px] text-xs sm:text-sm py-2 sm:py-3">
+                        ID
+                      </TableHead>
+                      <TableHead className="text-xs sm:text-sm py-2 sm:py-3">
+                        Name
+                      </TableHead>
+                      <TableHead className="text-xs sm:text-sm py-2 sm:py-3">
+                        Email
+                      </TableHead>
+                      <TableHead className="text-xs sm:text-sm py-2 sm:py-3">
+                        Role
+                      </TableHead>
+                      <TableHead className="text-xs sm:text-sm py-2 sm:py-3 text-right">
+                        Actions
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredUsers.map((user) => (
                       <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.id}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
+                        <TableCell className="font-medium text-xs sm:text-sm py-2.5 sm:py-3">
+                          {user.id}
+                        </TableCell>
+                        <TableCell className="py-2.5 sm:py-3">
+                          <div className="flex items-center gap-1.5 sm:gap-2">
                             <div
-                              className={`size-2 rounded-full ${user.emailVerified ? "bg-emerald-500" : "bg-slate-300"}`}
+                              className={`size-1.5 sm:size-2 rounded-full ${
+                                user.emailVerified
+                                  ? "bg-emerald-500"
+                                  : "bg-slate-300"
+                              }`}
                             ></div>
-                            {user.name || "No name"}
+                            <span className="text-xs sm:text-sm">
+                              {user.name || "No name"}
+                            </span>
                           </div>
                         </TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>
+                        <TableCell className="text-xs sm:text-sm py-2.5 sm:py-3">
+                          {user.email}
+                        </TableCell>
+                        <TableCell className="py-2.5 sm:py-3">
                           {user.role?.toLowerCase() === "admin" ? (
                             <Badge
                               variant="outline"
-                              className="bg-amber-50 text-amber-700 border-amber-200 capitalize"
+                              className="bg-amber-50 text-amber-700 border-amber-200 capitalize text-[10px] xs:text-xs h-5 sm:h-6"
                             >
                               Admin
                             </Badge>
                           ) : (
                             <Badge
                               variant="outline"
-                              className="bg-slate-100 text-slate-700 border-slate-200 capitalize"
+                              className="bg-slate-100 text-slate-700 border-slate-200 capitalize text-[10px] xs:text-xs h-5 sm:h-6"
                             >
                               User
                             </Badge>
                           )}
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
+                        <TableCell className="text-right py-2.5 sm:py-3">
+                          <div className="flex justify-end gap-0.5 sm:gap-1">
                             <Link href={`/admin/users/${user.id}`}>
-                              <Button variant="ghost" size="icon">
-                                <Edit className="h-4 w-4" />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="size-7 sm:size-8"
+                              >
+                                <Edit className="size-3.5 sm:size-4" />
                                 <span className="sr-only">Edit user</span>
                               </Button>
                             </Link>
@@ -251,7 +281,11 @@ export function UsersComponent({
                             <Button
                               variant="ghost"
                               size="icon"
-                              className={`${user.id === currentUserId ? "opacity-40 cursor-not-allowed" : "text-destructive hover:bg-destructive/10"}`}
+                              className={`size-7 sm:size-8 ${
+                                user.id === currentUserId
+                                  ? "opacity-40 cursor-not-allowed"
+                                  : "text-destructive hover:bg-destructive/10"
+                              }`}
                               onClick={() => setUserToDelete(user)}
                               disabled={user.id === currentUserId}
                               title={
@@ -260,7 +294,7 @@ export function UsersComponent({
                                   : "Delete user"
                               }
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="size-3.5 sm:size-4" />
                               <span className="sr-only">Delete user</span>
                             </Button>
                           </div>
@@ -271,7 +305,7 @@ export function UsersComponent({
                 </Table>
               </div>
             ) : (
-              <div className="flex items-center justify-center p-8 text-muted-foreground border rounded-md">
+              <div className="flex items-center justify-center p-6 sm:p-8 text-xs sm:text-sm text-muted-foreground border rounded-md">
                 {searchTerm
                   ? "No users found matching your search"
                   : "No users found"}
@@ -285,10 +319,12 @@ export function UsersComponent({
           open={!!userToDelete}
           onOpenChange={(open) => !open && setUserToDelete(null)}
         >
-          <AlertDialogContent>
+          <AlertDialogContent className="max-w-[90vw] w-full sm:max-w-md">
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete User</AlertDialogTitle>
-              <AlertDialogDescription>
+              <AlertDialogTitle className="text-base sm:text-lg">
+                Delete User
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-xs sm:text-sm">
                 {userToDelete && (
                   <>
                     Are you sure you want to delete
@@ -299,13 +335,16 @@ export function UsersComponent({
                 )}
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setUserToDelete(null)}>
+            <AlertDialogFooter className="gap-2 sm:gap-0 flex-col xs:flex-row">
+              <AlertDialogCancel
+                onClick={() => setUserToDelete(null)}
+                className="h-8 sm:h-9 text-xs sm:text-sm mt-0"
+              >
                 Cancel
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeleteUser}
-                className="bg-destructive hover:bg-destructive/90"
+                className="bg-destructive hover:bg-destructive/90 h-8 sm:h-9 text-xs sm:text-sm"
                 disabled={isDeleting}
               >
                 {isDeleting ? "Deleting..." : "Delete User"}

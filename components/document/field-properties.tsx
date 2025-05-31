@@ -5,15 +5,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Info } from "lucide-react";
 import { HexColorPicker } from "react-colorful";
 import { DocumentField, Signer } from "@/types/document";
-import { handleFieldPropertiesUpdate, handleFieldPropertiesClose } from "@/actions/field-properties-actions";
+import {
+  handleFieldPropertiesUpdate,
+  handleFieldPropertiesClose,
+} from "@/actions/field-properties-actions";
 
 interface FieldPropertiesProps {
   field: DocumentField;
@@ -23,7 +36,13 @@ interface FieldPropertiesProps {
   onCloseAction?: typeof handleFieldPropertiesClose;
 }
 
-export function FieldProperties({ field, signers = [], availableFieldIds = [], onUpdateAction = handleFieldPropertiesUpdate, onCloseAction = handleFieldPropertiesClose }: FieldPropertiesProps) {
+export function FieldProperties({
+  field,
+  signers = [],
+  availableFieldIds = [],
+  onUpdateAction = handleFieldPropertiesUpdate,
+  onCloseAction = handleFieldPropertiesClose,
+}: FieldPropertiesProps) {
   const [localField, setLocalField] = useState<DocumentField>({ ...field });
   const [validationError, setValidationError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("general");
@@ -51,7 +70,10 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
     return {};
   });
 
-  const handleChange = (key: keyof DocumentField, value: string | number | boolean | undefined) => {
+  const handleChange = (
+    key: keyof DocumentField,
+    value: string | number | boolean | undefined,
+  ) => {
     setLocalField((prev) => ({
       ...prev,
       [key]: value,
@@ -127,25 +149,43 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="placeholder">Placeholder</Label>
-                <Input id="placeholder" value={localField.placeholder || ""} onChange={(e) => handleChange("placeholder", e.target.value)} placeholder="Enter placeholder text" />
+                <Input
+                  id="placeholder"
+                  value={localField.placeholder || ""}
+                  onChange={(e) => handleChange("placeholder", e.target.value)}
+                  placeholder="Enter placeholder text"
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="fontSize">Font Size</Label>
-                <Input id="fontSize" type="number" value={localField.fontSize || 12} onChange={(e) => handleChange("fontSize", parseInt(e.target.value))} placeholder="12" />
+                <Input
+                  id="fontSize"
+                  type="number"
+                  value={localField.fontSize || 12}
+                  onChange={(e) =>
+                    handleChange("fontSize", parseInt(e.target.value))
+                  }
+                  placeholder="12"
+                />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="fontFamily">Font Family</Label>
-              <Select value={localField.fontFamily || "Inter"} onValueChange={(value) => handleChange("fontFamily", value)}>
+              <Select
+                value={localField.fontFamily || "Inter"}
+                onValueChange={(value) => handleChange("fontFamily", value)}
+              >
                 <SelectTrigger id="fontFamily">
                   <SelectValue placeholder="Select font" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Inter">Inter</SelectItem>
                   <SelectItem value="Arial">Arial</SelectItem>
-                  <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+                  <SelectItem value="Times New Roman">
+                    Times New Roman
+                  </SelectItem>
                   <SelectItem value="Courier New">Courier New</SelectItem>
                 </SelectContent>
               </Select>
@@ -153,7 +193,10 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
 
             <div className="space-y-2">
               <Label>Text Validation</Label>
-              <Select value={localField.validationRule || "none"} onValueChange={(value) => handleChange("validationRule", value)}>
+              <Select
+                value={localField.validationRule || "none"}
+                onValueChange={(value) => handleChange("validationRule", value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select validation" />
                 </SelectTrigger>
@@ -174,8 +217,14 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
         return (
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <Switch id="requireSignature" checked={localField.required} onCheckedChange={(checked) => handleChange("required", checked)} />
-              <Label htmlFor="requireSignature">Require {localField.type}</Label>
+              <Switch
+                id="requireSignature"
+                checked={localField.required}
+                onCheckedChange={(checked) => handleChange("required", checked)}
+              />
+              <Label htmlFor="requireSignature">
+                Require {localField.type}
+              </Label>
             </div>
 
             <div className="space-y-2">
@@ -243,7 +292,10 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
                     handleChange("options", optionsString);
                   }}
                 />
-                <p className="text-xs text-muted-foreground">Enter comma-separated values, e.g., &quot;Option 1, Option 2&quot;</p>
+                <p className="text-xs text-muted-foreground">
+                  Enter comma-separated values, e.g., &quot;Option 1, Option
+                  2&quot;
+                </p>
               </div>
             </div>
           </div>
@@ -255,7 +307,15 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Default Value</Label>
-                <Select value={localField.value === "true" ? "checked" : "unchecked"} onValueChange={(value) => handleChange("value", value === "checked" ? "true" : "false")}>
+                <Select
+                  value={localField.value === "true" ? "checked" : "unchecked"}
+                  onValueChange={(value) =>
+                    handleChange(
+                      "value",
+                      value === "checked" ? "true" : "false",
+                    )
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select default state" />
                   </SelectTrigger>
@@ -274,8 +334,15 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="formula">Formula Expression</Label>
-              <Input id="formula" value={localField.value || ""} onChange={(e) => handleChange("value", e.target.value)} placeholder="e.g., {field_1} + {field_2}" />
-              <p className="text-xs text-muted-foreground">Use {"{field_id}"} to reference other fields</p>
+              <Input
+                id="formula"
+                value={localField.value || ""}
+                onChange={(e) => handleChange("value", e.target.value)}
+                placeholder="e.g., {field_1} + {field_2}"
+              />
+              <p className="text-xs text-muted-foreground">
+                Use {"{field_id}"} to reference other fields
+              </p>
             </div>
           </div>
         );
@@ -294,7 +361,10 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
                     handleChange("options", optionsString);
                   }}
                 />
-                <p className="text-xs text-muted-foreground">Enter comma-separated values, e.g., &quot;Option 1, Option 2&quot;</p>
+                <p className="text-xs text-muted-foreground">
+                  Enter comma-separated values, e.g., &quot;Option 1, Option
+                  2&quot;
+                </p>
               </div>
             </div>
           </div>
@@ -306,11 +376,20 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="amount">Amount</Label>
-                <Input id="amount" type="number" value={localField.value || ""} onChange={(e) => handleChange("value", e.target.value)} placeholder="Enter amount" />
+                <Input
+                  id="amount"
+                  type="number"
+                  value={localField.value || ""}
+                  onChange={(e) => handleChange("value", e.target.value)}
+                  placeholder="Enter amount"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="currency">Currency</Label>
-                <Select value={localField.placeholder || "USD"} onValueChange={(value) => handleChange("placeholder", value)}>
+                <Select
+                  value={localField.placeholder || "USD"}
+                  onValueChange={(value) => handleChange("placeholder", value)}
+                >
                   <SelectTrigger id="currency">
                     <SelectValue placeholder="Select currency" />
                   </SelectTrigger>
@@ -332,8 +411,16 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
             <div className="space-y-2">
               <Label>Image Properties</Label>
               <div className="flex items-center space-x-2">
-                <Switch id="proportionalResize" checked={localField.value === "true"} onCheckedChange={(checked) => handleChange("value", checked ? "true" : "false")} />
-                <Label htmlFor="proportionalResize">Maintain aspect ratio</Label>
+                <Switch
+                  id="proportionalResize"
+                  checked={localField.value === "true"}
+                  onCheckedChange={(checked) =>
+                    handleChange("value", checked ? "true" : "false")
+                  }
+                />
+                <Label htmlFor="proportionalResize">
+                  Maintain aspect ratio
+                </Label>
               </div>
             </div>
           </div>
@@ -386,13 +473,22 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
                 <Checkbox
                   id="required"
                   checked={localField.required}
-                  onCheckedChange={(checked) => handleChange("required", !!checked)}
+                  onCheckedChange={(checked) =>
+                    handleChange("required", !!checked)
+                  }
                   className="data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
                 />
-                <Label htmlFor="required" className="font-medium cursor-pointer">
+                <Label
+                  htmlFor="required"
+                  className="font-medium cursor-pointer"
+                >
                   <span className="flex items-center">
                     Required Field
-                    {localField.required && <span className="ml-2 text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full">Required</span>}
+                    {localField.required && (
+                      <span className="ml-2 text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full">
+                        Required
+                      </span>
+                    )}
                   </span>
                 </Label>
               </div>
@@ -404,7 +500,10 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
                     <div className="mr-2 p-1 bg-blue-100 rounded-full">
                       <Info className="h-4 w-4 text-blue-500" />
                     </div>
-                    <p className="text-sm text-blue-700">This field will be assigned to the document signer automatically.</p>
+                    <p className="text-sm text-blue-700">
+                      This field will be assigned to the document signer
+                      automatically.
+                    </p>
                   </div>
                 </div>
               )}
@@ -423,7 +522,8 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
                       variant="outline"
                       className="w-full justify-start"
                       style={{
-                        backgroundColor: localField.backgroundColor || "transparent",
+                        backgroundColor:
+                          localField.backgroundColor || "transparent",
                         borderColor: localField.color || "#000000",
                         color: localField.textColor || "#000000",
                       }}
@@ -439,8 +539,14 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
                   </PopoverTrigger>
                   <PopoverContent className="w-64">
                     <div className="space-y-2">
-                      <HexColorPicker color={localField.color || "#000000"} onChange={(color) => handleChange("color", color)} />
-                      <Input value={localField.color || "#000000"} onChange={(e) => handleChange("color", e.target.value)} />
+                      <HexColorPicker
+                        color={localField.color || "#000000"}
+                        onChange={(color) => handleChange("color", color)}
+                      />
+                      <Input
+                        value={localField.color || "#000000"}
+                        onChange={(e) => handleChange("color", e.target.value)}
+                      />
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -462,8 +568,16 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
                   </PopoverTrigger>
                   <PopoverContent className="w-64">
                     <div className="space-y-2">
-                      <HexColorPicker color={localField.textColor || "#000000"} onChange={(color) => handleChange("textColor", color)} />
-                      <Input value={localField.textColor || "#000000"} onChange={(e) => handleChange("textColor", e.target.value)} />
+                      <HexColorPicker
+                        color={localField.textColor || "#000000"}
+                        onChange={(color) => handleChange("textColor", color)}
+                      />
+                      <Input
+                        value={localField.textColor || "#000000"}
+                        onChange={(e) =>
+                          handleChange("textColor", e.target.value)
+                        }
+                      />
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -477,7 +591,8 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
                       <div
                         className="h-4 w-4 rounded border mr-2"
                         style={{
-                          backgroundColor: localField.backgroundColor || "transparent",
+                          backgroundColor:
+                            localField.backgroundColor || "transparent",
                         }}
                       />
                       {localField.backgroundColor || "Select background"}
@@ -485,8 +600,18 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
                   </PopoverTrigger>
                   <PopoverContent className="w-64">
                     <div className="space-y-2">
-                      <HexColorPicker color={localField.backgroundColor || "#ffffff"} onChange={(color) => handleChange("backgroundColor", color)} />
-                      <Input value={localField.backgroundColor || "#ffffff"} onChange={(e) => handleChange("backgroundColor", e.target.value)} />
+                      <HexColorPicker
+                        color={localField.backgroundColor || "#ffffff"}
+                        onChange={(color) =>
+                          handleChange("backgroundColor", color)
+                        }
+                      />
+                      <Input
+                        value={localField.backgroundColor || "#ffffff"}
+                        onChange={(e) =>
+                          handleChange("backgroundColor", e.target.value)
+                        }
+                      />
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -508,8 +633,16 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
                   </PopoverTrigger>
                   <PopoverContent className="w-64">
                     <div className="space-y-2">
-                      <HexColorPicker color={localField.borderColor || "#cccccc"} onChange={(color) => handleChange("borderColor", color)} />
-                      <Input value={localField.borderColor || "#cccccc"} onChange={(e) => handleChange("borderColor", e.target.value)} />
+                      <HexColorPicker
+                        color={localField.borderColor || "#cccccc"}
+                        onChange={(color) => handleChange("borderColor", color)}
+                      />
+                      <Input
+                        value={localField.borderColor || "#cccccc"}
+                        onChange={(e) =>
+                          handleChange("borderColor", e.target.value)
+                        }
+                      />
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -520,13 +653,25 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
           <TabsContent value="conditional" className="mt-4 space-y-4">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="conditional-field">Show this field based on:</Label>
-                <Select value={conditionalLogic.fieldId || "no_condition"} onValueChange={(value) => updateConditionalLogic("fieldId", value === "no_condition" ? "" : value)}>
+                <Label htmlFor="conditional-field">
+                  Show this field based on:
+                </Label>
+                <Select
+                  value={conditionalLogic.fieldId || "no_condition"}
+                  onValueChange={(value) =>
+                    updateConditionalLogic(
+                      "fieldId",
+                      value === "no_condition" ? "" : value,
+                    )
+                  }
+                >
                   <SelectTrigger id="conditional-field">
                     <SelectValue placeholder="Select a field" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="no_condition">No condition (always show)</SelectItem>
+                    <SelectItem value="no_condition">
+                      No condition (always show)
+                    </SelectItem>
                     {availableFieldIds
                       .filter((id) => id !== localField.id) // Don't allow self-reference
                       .map((fieldId) => (
@@ -542,7 +687,12 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="condition-type">Condition</Label>
-                    <Select value={conditionalLogic.condition || "equals"} onValueChange={(value) => updateConditionalLogic("condition", value)}>
+                    <Select
+                      value={conditionalLogic.condition || "equals"}
+                      onValueChange={(value) =>
+                        updateConditionalLogic("condition", value)
+                      }
+                    >
                       <SelectTrigger id="condition-type">
                         <SelectValue placeholder="Select condition" />
                       </SelectTrigger>
@@ -550,25 +700,47 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
                         <SelectItem value="equals">Equals</SelectItem>
                         <SelectItem value="notEquals">Not Equals</SelectItem>
                         <SelectItem value="contains">Contains</SelectItem>
-                        <SelectItem value="notContains">Does Not Contain</SelectItem>
+                        <SelectItem value="notContains">
+                          Does Not Contain
+                        </SelectItem>
                         <SelectItem value="isEmpty">Is Empty</SelectItem>
                         <SelectItem value="isNotEmpty">Is Not Empty</SelectItem>
                         <SelectItem value="isChecked">Is Checked</SelectItem>
-                        <SelectItem value="isNotChecked">Is Not Checked</SelectItem>
+                        <SelectItem value="isNotChecked">
+                          Is Not Checked
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
-                  {conditionalLogic.condition && !["isEmpty", "isNotEmpty", "isChecked", "isNotChecked"].includes(conditionalLogic.condition) && (
-                    <div className="space-y-2">
-                      <Label htmlFor="condition-value">Value</Label>
-                      <Input id="condition-value" value={conditionalLogic.value || ""} onChange={(e) => updateConditionalLogic("value", e.target.value)} placeholder="Enter value" />
-                    </div>
-                  )}
+                  {conditionalLogic.condition &&
+                    ![
+                      "isEmpty",
+                      "isNotEmpty",
+                      "isChecked",
+                      "isNotChecked",
+                    ].includes(conditionalLogic.condition) && (
+                      <div className="space-y-2">
+                        <Label htmlFor="condition-value">Value</Label>
+                        <Input
+                          id="condition-value"
+                          value={conditionalLogic.value || ""}
+                          onChange={(e) =>
+                            updateConditionalLogic("value", e.target.value)
+                          }
+                          placeholder="Enter value"
+                        />
+                      </div>
+                    )}
 
                   <div className="space-y-2">
                     <Label htmlFor="action">Action</Label>
-                    <Select value={conditionalLogic.action || "show"} onValueChange={(value) => updateConditionalLogic("action", value)}>
+                    <Select
+                      value={conditionalLogic.action || "show"}
+                      onValueChange={(value) =>
+                        updateConditionalLogic("action", value)
+                      }
+                    >
                       <SelectTrigger id="action">
                         <SelectValue placeholder="Select action" />
                       </SelectTrigger>
@@ -583,11 +755,19 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
                     <Info className="h-4 w-4" />
                     <AlertDescription>
                       This field will
-                      {conditionalLogic.action === "hide" ? "be hidden" : "only appear"}
-                      {conditionalLogic.condition && ` when field ${conditionalLogic.fieldId} ${conditionalLogic.condition}`}
+                      {conditionalLogic.action === "hide"
+                        ? "be hidden"
+                        : "only appear"}
+                      {conditionalLogic.condition &&
+                        ` when field ${conditionalLogic.fieldId} ${conditionalLogic.condition}`}
                       {conditionalLogic.value &&
                         conditionalLogic.condition &&
-                        !["isEmpty", "isNotEmpty", "isChecked", "isNotChecked"].includes(conditionalLogic.condition) &&
+                        ![
+                          "isEmpty",
+                          "isNotEmpty",
+                          "isChecked",
+                          "isNotChecked",
+                        ].includes(conditionalLogic.condition) &&
                         ` "${conditionalLogic.value}"`}
                       .
                     </AlertDescription>
@@ -600,10 +780,17 @@ export function FieldProperties({ field, signers = [], availableFieldIds = [], o
       </div>
 
       <div className="mt-8 flex justify-end gap-3">
-        <Button variant="outline" onClick={() => onCloseAction()} className="px-4 hover:bg-slate-100 transition-colors">
+        <Button
+          variant="outline"
+          onClick={() => onCloseAction()}
+          className="px-4 hover:bg-slate-100 transition-colors"
+        >
           Cancel
         </Button>
-        <Button onClick={handleSubmit} className="px-6 bg-amber-500 hover:bg-amber-600 transition-colors">
+        <Button
+          onClick={handleSubmit}
+          className="px-6 bg-amber-500 hover:bg-amber-600 transition-colors"
+        >
           Save Changes
         </Button>
       </div>

@@ -15,7 +15,9 @@ export default function Loading() {
         {/* Loading Text */}
         <div className="space-y-2">
           <h2 className="text-2xl font-semibold text-foreground">Loading...</h2>
-          <p className="text-muted-foreground">Please wait while we prepare your experience</p>
+          <p className="text-muted-foreground">
+            Please wait while we prepare your experience
+          </p>
         </div>
 
         {/* Loading Bar */}

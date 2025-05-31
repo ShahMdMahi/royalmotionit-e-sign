@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
-  try {    // Get IP address from request headers
+  try {
+    // Get IP address from request headers
     const forwarded = request.headers.get("x-forwarded-for");
     const realIp = request.headers.get("x-real-ip");
     const clientIp = request.headers.get("x-client-ip");
     const remoteAddress = request.headers.get("x-remote-address");
 
     // Priority order for IP detection
-    let ipAddress = 
-      forwarded?.split(",")[0]?.trim() || 
-      realIp || 
-      clientIp || 
+    let ipAddress =
+      forwarded?.split(",")[0]?.trim() ||
+      realIp ||
+      clientIp ||
       remoteAddress ||
       "127.0.0.1";
 
@@ -27,6 +28,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error getting client info:", error);
-    return NextResponse.json({ error: "Failed to get client information" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to get client information" },
+      { status: 500 },
+    );
   }
 }

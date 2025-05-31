@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 export default function Footer() {
   return (
     <footer className="w-full border-t bg-background">
-      <div className="container px-4 py-10 md:py-16">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+      <div className="container px-4 py-8 sm:py-10 md:py-16">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Company Info */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
@@ -115,13 +115,13 @@ export default function Footer() {
               Subscribe to our newsletter for updates and tips.
             </p>
             <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   type="email"
                   placeholder="Enter your email"
                   className="h-9 text-sm"
                 />
-                <Button size="sm" className="h-9">
+                <Button size="sm" className="h-9 whitespace-nowrap">
                   <Mail className="mr-1 h-4 w-4" />
                   <span>Subscribe</span>
                 </Button>

@@ -17,9 +17,13 @@ export default auth(async (req) => {
   // Path detection
   const isPrivateRoute = privateRoutes.includes(nextUrl.pathname);
   // Check for document edit routes that might have dynamic IDs
-  const isDocumentEditRoute = /\/documents\/[^\/]+\/edit/.test(nextUrl.pathname);
+  const isDocumentEditRoute = /\/documents\/[^\/]+\/edit/.test(
+    nextUrl.pathname,
+  );
   // Check for document sign routes
-  const isDocumentSignRoute = /\/documents\/[^\/]+\/sign/.test(nextUrl.pathname);
+  const isDocumentSignRoute = /\/documents\/[^\/]+\/sign/.test(
+    nextUrl.pathname,
+  );
   const isAuthRoute = nextUrl.pathname.includes("/auth");
   const isApiRoute = nextUrl.pathname.includes("/api");
   const isRegistrationRoute = nextUrl.pathname.includes("/auth/register");

@@ -50,11 +50,12 @@ export default async function SingleDocument({
         const documentForComponent = {
           ...document, // Keep all original Prisma fields
           // Apply fixes for the fields that need type conversion
-          signers: normalizedDocument.signers?.map((signer) => ({
-            ...signer,
-            name: signer.name,
-            role: signer.role,
-          })) || [],
+          signers:
+            normalizedDocument.signers?.map((signer) => ({
+              ...signer,
+              name: signer.name,
+              role: signer.role,
+            })) || [],
         };
 
         // Return the document with author and signers data

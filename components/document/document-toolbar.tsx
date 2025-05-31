@@ -16,7 +16,13 @@ interface DocumentToolbarProps {
   onSave?: () => Promise<void>;
 }
 
-export function DocumentToolbar({ document, onSaveAction = handleDocumentSave, isSaving, isSubmitting, onSave }: DocumentToolbarProps) {
+export function DocumentToolbar({
+  document,
+  onSaveAction = handleDocumentSave,
+  isSaving,
+  isSubmitting,
+  onSave,
+}: DocumentToolbarProps) {
   const router = useRouter();
   const saving = isSaving || isSubmitting || false;
   const pathname = window.location.pathname;
@@ -66,44 +72,70 @@ export function DocumentToolbar({ document, onSaveAction = handleDocumentSave, i
   return (
     <div className="p-4 border-b flex items-center justify-between bg-background shadow-sm">
       <div className="flex items-center space-x-4">
-        <Button variant="ghost" onClick={handleBack} data-testid="document-back-button">
+        <Button
+          variant="ghost"
+          onClick={handleBack}
+          data-testid="document-back-button"
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
           {isEditMode ? "Back to Document" : "Back to Documents"}
         </Button>
 
-        <h1 className="text-lg font-medium hidden md:block">{document.title || "Untitled Document"}</h1>
+        <h1 className="text-lg font-medium hidden md:block">
+          {document.title || "Untitled Document"}
+        </h1>
       </div>
       <div className="flex items-center space-x-2">
         {!isEditMode ? (
           <>
             {/* Only show Edit button for admin users and draft documents */}
             {document.status === "DRAFT" && userRole === "ADMIN" && (
-              <Button variant="outline" onClick={handleEdit} data-testid="document-edit-button">
+              <Button
+                variant="outline"
+                onClick={handleEdit}
+                data-testid="document-edit-button"
+              >
                 <Settings className="h-4 w-4 mr-2" />
                 Edit
               </Button>
             )}
             {/* Show Sign button for regular users when document is pending signature */}
             {document.status === "PENDING" && userRole !== "ADMIN" && (
-              <Button onClick={() => router.push(`/documents/${document.id}/sign`)} variant="default" data-testid="document-sign-button">
+              <Button
+                onClick={() => router.push(`/documents/${document.id}/sign`)}
+                variant="default"
+                data-testid="document-sign-button"
+              >
                 <FileSignature className="h-4 w-4 mr-2" />
                 Sign Document
               </Button>
             )}
-            <Button variant="outline" onClick={handlePreview} data-testid="document-preview-button">
+            <Button
+              variant="outline"
+              onClick={handlePreview}
+              data-testid="document-preview-button"
+            >
               <Eye className="h-4 w-4 mr-2" />
               Preview
             </Button>
           </>
         ) : (
           <>
-            <Button variant="outline" onClick={handlePreview} data-testid="document-preview-button">
+            <Button
+              variant="outline"
+              onClick={handlePreview}
+              data-testid="document-preview-button"
+            >
               <Eye className="h-4 w-4 mr-2" />
               Preview
             </Button>
             {/* Only show Save button for admin users in edit mode */}
             {userRole === "ADMIN" && (
-              <Button onClick={onSave ? onSave : () => onSaveAction(document)} disabled={saving} data-testid="document-save-button">
+              <Button
+                onClick={onSave ? onSave : () => onSaveAction(document)}
+                disabled={saving}
+                data-testid="document-save-button"
+              >
                 <Save className="h-4 w-4 mr-2" />
                 {saving ? "Saving..." : "Save"}
               </Button>

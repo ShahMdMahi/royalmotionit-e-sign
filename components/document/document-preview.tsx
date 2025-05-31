@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, FileSignature } from "lucide-react";
+import { ArrowLeft, FileSignature } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { getFromR2 } from "@/actions/r2";
 import { Document, DocumentField } from "@/types/document";
@@ -20,7 +20,7 @@ export function DocumentPreview({ document, fields }: DocumentPreviewProps) {
 
   const router = useRouter();
   const pathname = usePathname();
-  
+
   // Fetch PDF data from R2
   useEffect(() => {
     const fetchPdf = async () => {
@@ -66,34 +66,6 @@ export function DocumentPreview({ document, fields }: DocumentPreviewProps) {
     }
   };
 
-  const handleDownload = async () => {
-    try {
-      // Generate download URL from R2 key
-      if (document?.key) {
-        const result = await getFromR2({
-          Key: document.key,
-          ResponseContentDisposition: `attachment; filename="${document.title || "document"}.pdf"`,
-        });
-        if (result.success && result.data) {
-          // Get the URL from data or create a temporary URL if needed
-          const url = (typeof result.data === "string" ? result.data : null) || (result.data.Body instanceof Blob ? URL.createObjectURL(result.data.Body) : null);
-          if (url) {
-            window.open(url, "_blank");
-          } else {
-            toast.error("Unable to generate document URL");
-          }
-        } else {
-          toast.error("Failed to generate document download link");
-        }
-      } else {
-        toast.error("Document key is not available");
-      }
-    } catch (error) {
-      console.error("Error downloading document:", error);
-      toast.error("Failed to download document");
-    }
-  };
-
   if (isLoading || !pdfData) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -110,17 +82,18 @@ export function DocumentPreview({ document, fields }: DocumentPreviewProps) {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Document
           </Button>
-          <h1 className="text-lg font-medium hidden md:block">{document.title || "Untitled Document"} - Preview</h1>
+          <h1 className="text-lg font-medium hidden md:block">
+            {document.title || "Untitled Document"} - Preview
+          </h1>
         </div>
 
         <div className="flex items-center space-x-2">
-          <Button variant="outline" onClick={handleDownload} disabled={!document.key}>
-            <Download className="h-4 w-4 mr-2" />
-            Download
-          </Button>
-
           {!isAdminRoute && document.status === "PENDING" && (
-            <Button variant="outline" onClick={handleSignRedirect} disabled={!document.key}>
+            <Button
+              variant="outline"
+              onClick={handleSignRedirect}
+              disabled={!document.key}
+            >
               <FileSignature className="h-4 w-4 mr-2" />
               Sign
             </Button>
@@ -130,7 +103,12 @@ export function DocumentPreview({ document, fields }: DocumentPreviewProps) {
 
       <div className="p-4 flex-grow">
         <div className="bg-muted rounded-lg overflow-hidden h-full">
-          <PDFViewerSimple pdfData={pdfData} fields={fields} highlightFields={true} debug={process.env.NODE_ENV === "development"} />
+          <PDFViewerSimple
+            pdfData={pdfData}
+            fields={fields}
+            highlightFields={true}
+            debug={process.env.NODE_ENV === "development"}
+          />
         </div>
       </div>
     </div>

@@ -54,16 +54,17 @@ export default async function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex items-center gap-2">
+      <div className="container flex h-14 sm:h-16 items-center justify-between">
+        <Link href="/" className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Image
               src="/icon_logo.png"
               alt="RoyalMotionIT"
-              width={24}
-              height={24}
+              width={20}
+              height={20}
+              className="w-5 h-5 sm:w-6 sm:h-6"
             />
-            <span className="text-xl font-bold">Royal Sign</span>
+            <span className="text-base sm:text-xl font-bold">Royal Sign</span>
           </div>
         </Link>
 
@@ -84,10 +85,13 @@ export default async function Navbar() {
 
         <div className="flex items-center gap-4">
           {isLoggedIn ? (
-            <div className="flex gap-4 items-center">
-              <Button className="flex items-center" asChild>
+            <>
+              <Button
+                className="flex items-center h-8 sm:h-9 text-xs sm:text-sm"
+                asChild
+              >
                 <Link href="/dashboard">
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  <LayoutDashboard className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span>Dashboard</span>
                 </Link>
               </Button>
@@ -95,10 +99,7 @@ export default async function Navbar() {
               {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="relative rounded-full h-8 w-8 p-0"
-                  >
+                  <Button className="relative rounded-full h-7 w-7 sm:h-8 sm:w-8 p-0">
                     <Avatar className="h-8 w-8">
                       {userImage ? (
                         <AvatarImage src={userImage} alt={userName || "User"} />
@@ -168,17 +169,17 @@ export default async function Navbar() {
                   </ScrollArea>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
+            </>
           ) : (
             <>
               <Button
                 variant="outline"
                 asChild
-                className="hidden sm:inline-flex"
+                className="hidden sm:inline-flex h-8 sm:h-9 text-xs sm:text-sm"
               >
                 <Link href="/auth/login">Login</Link>
               </Button>
-              <Button asChild>
+              <Button asChild className="h-8 sm:h-9 text-xs sm:text-sm">
                 <Link href="/auth/register">Register</Link>
               </Button>
             </>

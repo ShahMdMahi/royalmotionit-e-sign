@@ -116,7 +116,7 @@ export function VerifyEmailForm({ token }: VerifyEmailProps) {
             Return to Login
           </Button>
           <div className="text-center text-xs pt-2">
-            Need a new verification link? 
+            Need a new verification link?
             <Link href="/auth/login" className="text-primary hover:underline">
               Sign in to request one
             </Link>

@@ -47,11 +47,13 @@ export const sendEmail = async (payload: Payload) => {
     console.log(`To: ${recipient}`);
     console.log(`Subject: ${subject}`);
     console.log("Content preview:", html.substring(0, 100) + "...");
-    
+
     if (attachments && attachments.length > 0) {
       console.log(`Email has ${attachments.length} attachment(s):`);
       attachments.forEach((attachment, index) => {
-        console.log(`  Attachment ${index + 1}: ${attachment.filename} (${attachment.content.byteLength} bytes)`);
+        console.log(
+          `  Attachment ${index + 1}: ${attachment.filename} (${attachment.content.byteLength} bytes)`,
+        );
       });
     }
 
@@ -67,17 +69,18 @@ export const sendEmail = async (payload: Payload) => {
       subject,
       html,
     };
-    
+
     // Add attachments if provided
     if (attachments && attachments.length > 0) {
-      mailOptions.attachments = attachments.map(att => ({
+      mailOptions.attachments = attachments.map((att) => ({
         ...att,
-        content: att.content instanceof Uint8Array && !(att.content instanceof Buffer)
-          ? Buffer.from(att.content)
-          : att.content,
+        content:
+          att.content instanceof Uint8Array && !(att.content instanceof Buffer)
+            ? Buffer.from(att.content)
+            : att.content,
       }));
     }
-    
+
     const info = await transporter.sendMail(mailOptions);
 
     console.log(`Email sent successfully to ${recipient}`);

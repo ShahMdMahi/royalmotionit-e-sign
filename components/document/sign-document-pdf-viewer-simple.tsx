@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  useMemo,
+} from "react";
 import { Document, Page } from "react-pdf";
 import { DocumentField } from "@/types/document";
 import { FieldValidationError } from "@/types/validation";
@@ -12,7 +18,12 @@ import { FieldErrorTooltip } from "@/components/document/field-error-tooltip";
 import { PdfFormField } from "@/components/document/pdf-form-fields";
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, RefreshCw } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Import react-pdf styles
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
@@ -62,9 +73,13 @@ export function SignDocumentPdfViewerSimple({
 
       // Check for common PDF errors
       if (error.message.includes("InvalidPDFException")) {
-        console.error("PDF structure is invalid. The document may be corrupted or incomplete.");
+        console.error(
+          "PDF structure is invalid. The document may be corrupted or incomplete.",
+        );
       } else if (error.message.includes("MissingPDFException")) {
-        console.error("PDF not found. The document may have been deleted or moved.");
+        console.error(
+          "PDF not found. The document may have been deleted or moved.",
+        );
       } else if (error.message.includes("UnexpectedResponseException")) {
         console.error("Unexpected server response when loading PDF.");
       }
@@ -75,7 +90,7 @@ export function SignDocumentPdfViewerSimple({
         console.info("First 20 bytes:", Array.from(pdfData.slice(0, 20)));
       }
     },
-    [pdfData]
+    [pdfData],
   );
   // Handle successful PDF loading
   const handleLoadSuccess = useCallback(
@@ -84,7 +99,7 @@ export function SignDocumentPdfViewerSimple({
       onTotalPagesChangeAction(numPages);
       setViewerLoaded(true);
     },
-    [onTotalPagesChangeAction]
+    [onTotalPagesChangeAction],
   );
   // Handle page render success
   interface PageLoadSuccessData {
@@ -116,22 +131,36 @@ export function SignDocumentPdfViewerSimple({
         }
       }
     },
-    [pageSize, viewerScale]
+    [pageSize, viewerScale],
   );
   // Get fields for current page
   const currentPageFields = useMemo(() => {
-    const filteredFields = fields.filter((field) => field.pageNumber === currentPage && field.signerId === currentSignerId);
+    const filteredFields = fields.filter(
+      (field) =>
+        field.pageNumber === currentPage && field.signerId === currentSignerId,
+    );
 
     // Debug logging to help identify field rendering issues
     console.log(
       `Found ${filteredFields.length} fields for page ${currentPage}:`,
-      filteredFields.map((f) => ({ id: f.id, type: f.type, x: f.x, y: f.y, width: f.width, height: f.height }))
+      filteredFields.map((f) => ({
+        id: f.id,
+        type: f.type,
+        x: f.x,
+        y: f.y,
+        width: f.width,
+        height: f.height,
+      })),
     );
 
     // Check specifically for signature fields
-    const signatureFields = filteredFields.filter((f) => f.type === "signature" || f.type === "initial");
+    const signatureFields = filteredFields.filter(
+      (f) => f.type === "signature" || f.type === "initial",
+    );
     if (signatureFields.length > 0) {
-      console.log(`Found ${signatureFields.length} signature/initial fields on page ${currentPage}`);
+      console.log(
+        `Found ${signatureFields.length} signature/initial fields on page ${currentPage}`,
+      );
     }
 
     return filteredFields;
@@ -175,7 +204,7 @@ export function SignDocumentPdfViewerSimple({
       }
       return "border-primary/30 bg-primary/5 hover:bg-primary/10";
     },
-    [fieldValues, fieldErrors, fields]
+    [fieldValues, fieldErrors, fields],
   );
   // Zoom control functions
   const zoomIn = useCallback(() => {
@@ -197,9 +226,10 @@ export function SignDocumentPdfViewerSimple({
     () => ({
       cMapUrl: "https://unpkg.com/pdfjs-dist@3.4.120/cmaps/",
       cMapPacked: true,
-      standardFontDataUrl: "https://unpkg.com/pdfjs-dist@3.4.120/standard_fonts/",
+      standardFontDataUrl:
+        "https://unpkg.com/pdfjs-dist@3.4.120/standard_fonts/",
     }),
-    []
+    [],
   );
 
   // Handle field click with active state
@@ -210,7 +240,7 @@ export function SignDocumentPdfViewerSimple({
       setActiveField(fieldId);
       onFieldClickAction(fieldId);
     },
-    [onFieldClickAction]
+    [onFieldClickAction],
   ); // Create a stable reference to the PDF data
   // Using proper memoization to prevent unnecessary reloads
   const memoizedFile = useMemo(() => {
@@ -238,18 +268,26 @@ export function SignDocumentPdfViewerSimple({
       // Update using server action
       return await onPageChangeAction(newPage);
     },
-    [numPages, onPageChangeAction]
+    [numPages, onPageChangeAction],
   );
   // Handle clicks outside of fields
   const handleOutsideClick = useCallback((e: React.MouseEvent) => {
     // Only handle clicks directly on the document background
-    if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains("page-container")) {
+    if (
+      e.target === e.currentTarget ||
+      (e.target as HTMLElement).classList.contains("page-container")
+    ) {
       setActiveField(null);
     }
 
     // Don't clear active field when clicking inside form inputs
     const target = e.target as HTMLElement;
-    const isFormElement = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.tagName === "BUTTON" || target.closest('[role="dialog"]') !== null;
+    const isFormElement =
+      target.tagName === "INPUT" ||
+      target.tagName === "TEXTAREA" ||
+      target.tagName === "SELECT" ||
+      target.tagName === "BUTTON" ||
+      target.closest('[role="dialog"]') !== null;
 
     if (isFormElement) {
       e.stopPropagation();
@@ -261,7 +299,11 @@ export function SignDocumentPdfViewerSimple({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Only respond to keyboard shortcuts when the PDF is loaded and focused
-      if (!viewerLoaded || document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") {
+      if (
+        !viewerLoaded ||
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA"
+      ) {
         return;
       }
 
@@ -304,18 +346,34 @@ export function SignDocumentPdfViewerSimple({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [viewerLoaded, currentPage, numPages, handlePageNavigation, zoomIn, zoomOut, resetZoom]);
+  }, [
+    viewerLoaded,
+    currentPage,
+    numPages,
+    handlePageNavigation,
+    zoomIn,
+    zoomOut,
+    resetZoom,
+  ]);
 
   return (
     <div className="flex flex-col h-full w-full">
       {/* PDF viewer controls */}
       <div className="flex items-center justify-between px-2 py-1 border-b bg-muted/30">
-        <div className="text-sm text-muted-foreground">{numPages ? `Page ${currentPage} of ${numPages}` : "Loading..."}</div>
+        <div className="text-sm text-muted-foreground">
+          {numPages ? `Page ${currentPage} of ${numPages}` : "Loading..."}
+        </div>
         <div className="flex items-center space-x-1">
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={zoomOut} disabled={zoomLevel <= 0.5}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={zoomOut}
+                  disabled={zoomLevel <= 0.5}
+                >
                   <ZoomOut className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -326,7 +384,12 @@ export function SignDocumentPdfViewerSimple({
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={resetZoom}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-xs"
+                  onClick={resetZoom}
+                >
                   {Math.round(zoomLevel * 100)}%
                 </Button>
               </TooltipTrigger>
@@ -337,7 +400,13 @@ export function SignDocumentPdfViewerSimple({
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={zoomIn} disabled={zoomLevel >= 3}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={zoomIn}
+                  disabled={zoomLevel >= 3}
+                >
                   <ZoomIn className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -349,12 +418,22 @@ export function SignDocumentPdfViewerSimple({
       {/* Page navigation controls */}
       {numPages && numPages > 1 ? (
         <div className="border-t bg-background py-2">
-          <PageNavigation currentPage={currentPage} totalPages={numPages} onPageChangeAction={(page) => handlePageNavigation(page)} />
+          <PageNavigation
+            currentPage={currentPage}
+            totalPages={numPages}
+            onPageChangeAction={(page) => handlePageNavigation(page)}
+          />
         </div>
       ) : null}
       {/* PDF viewer container */}
       <div className="flex-1 overflow-auto relative" ref={viewerContainerRef}>
-        <div className={cn("flex justify-center min-h-full transition-opacity duration-300", viewerLoaded ? "opacity-100" : "opacity-0")} onClick={handleOutsideClick}>
+        <div
+          className={cn(
+            "flex justify-center min-h-full transition-opacity duration-300",
+            viewerLoaded ? "opacity-100" : "opacity-0",
+          )}
+          onClick={handleOutsideClick}
+        >
           {memoizedFile ? (
             <div ref={pageRef} className="relative">
               <Document
@@ -371,9 +450,18 @@ export function SignDocumentPdfViewerSimple({
                 }
                 error={
                   <div className="flex flex-col items-center justify-center p-4 text-destructive">
-                    <p className="font-medium mb-2">Failed to load PDF document</p>
-                    <p className="text-sm text-muted-foreground">The document may be invalid or corrupted</p>
-                    <Button variant="outline" size="sm" className="mt-4" onClick={() => window.location.reload()}>
+                    <p className="font-medium mb-2">
+                      Failed to load PDF document
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      The document may be invalid or corrupted
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-4"
+                      onClick={() => window.location.reload()}
+                    >
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Reload Page
                     </Button>
@@ -395,33 +483,54 @@ export function SignDocumentPdfViewerSimple({
                     }
                   />
                 ) : (
-                  <div className="flex items-center justify-center p-4">Loading PDF viewer...</div>
+                  <div className="flex items-center justify-center p-4">
+                    Loading PDF viewer...
+                  </div>
                 )}
 
                 {/* Interactive field overlay */}
                 <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
                   {currentPageFields.map((field) => {
                     // Make sure field has all required positioning properties
-                    if (field.x === undefined || field.y === undefined || field.width === undefined || field.height === undefined) {
-                      console.error("Field is missing position/size data:", field);
+                    if (
+                      field.x === undefined ||
+                      field.y === undefined ||
+                      field.width === undefined ||
+                      field.height === undefined
+                    ) {
+                      console.error(
+                        "Field is missing position/size data:",
+                        field,
+                      );
                       return null; // Skip rendering this field
                     }
 
                     // Calculate scaled position and size
-                    const fieldCoords = pdfToScreenCoordinates(Number(field.x), Number(field.y), effectiveScale);
+                    const fieldCoords = pdfToScreenCoordinates(
+                      Number(field.x),
+                      Number(field.y),
+                      effectiveScale,
+                    );
                     const width = Number(field.width) * effectiveScale;
                     const height = Number(field.height) * effectiveScale;
                     const isActive = field.id === activeField;
-                    const hasError = fieldErrors.some((error) => error.fieldId === field.id);
+                    const hasError = fieldErrors.some(
+                      (error) => error.fieldId === field.id,
+                    );
                     const value = fieldValues[field.id] || "";
 
                     return (
-                      <FieldErrorTooltip key={field.id} fieldId={field.id} fieldErrors={fieldErrors}>
+                      <FieldErrorTooltip
+                        key={field.id}
+                        fieldId={field.id}
+                        fieldErrors={fieldErrors}
+                      >
                         <div
                           className={cn(
                             "absolute border-2 rounded-md pointer-events-auto transition-all overflow-hidden",
                             getFieldStatusClasses(field.id),
-                            isActive && "ring-2 ring-primary ring-offset-2 shadow-lg scale-[1.02]"
+                            isActive &&
+                              "ring-2 ring-primary ring-offset-2 shadow-lg scale-[1.02]",
                           )}
                           style={{
                             left: `${fieldCoords.x}px`,
@@ -457,7 +566,10 @@ export function SignDocumentPdfViewerSimple({
                             onFocusAction={(fieldId) => {
                               setActiveField(fieldId);
                               // For signature fields, directly trigger the click action
-                              if (field.type === "signature" || field.type === "initial") {
+                              if (
+                                field.type === "signature" ||
+                                field.type === "initial"
+                              ) {
                                 onFieldClickAction(fieldId);
                               }
                             }}
@@ -489,7 +601,11 @@ export function SignDocumentPdfViewerSimple({
       {/* Page navigation controls */}
       {numPages && numPages > 1 ? (
         <div className="border-t bg-background py-2">
-          <PageNavigation currentPage={currentPage} totalPages={numPages} onPageChangeAction={(page) => handlePageNavigation(page)} />
+          <PageNavigation
+            currentPage={currentPage}
+            totalPages={numPages}
+            onPageChangeAction={(page) => handlePageNavigation(page)}
+          />
         </div>
       ) : null}
     </div>

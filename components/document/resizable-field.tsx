@@ -38,7 +38,7 @@ export function ResizableField({
     id: field.id,
     data: {
       field,
-    }
+    },
   });
 
   // Store the field's original position when drag starts with precise values
@@ -55,7 +55,7 @@ export function ResizableField({
       current: { x: Number(field.x), y: Number(field.y) },
     };
   }, [field.x, field.y]);
-  
+
   // Handle transform changes to update position when dragging ends
   useEffect(() => {
     if (transform && (transform.x !== 0 || transform.y !== 0)) {

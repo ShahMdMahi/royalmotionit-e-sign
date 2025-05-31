@@ -106,10 +106,10 @@ function evaluateCondition(
       return value !== "true" && value !== "checked";
     case "isEmpty":
       // Handle null, undefined, and empty string values safely
-      return !value || (typeof value === 'string' && value.trim() === "");
+      return !value || (typeof value === "string" && value.trim() === "");
     case "isNotEmpty":
       // Handle null, undefined, and empty string values safely
-      return !!value && (typeof value === 'string' && value.trim() !== "");
+      return !!value && typeof value === "string" && value.trim() !== "";
     case "startsWith":
       return value.startsWith(conditionValue);
     case "endsWith":

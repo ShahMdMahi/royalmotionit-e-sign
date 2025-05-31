@@ -192,7 +192,7 @@ export async function POST(req: NextRequest) {
         { status: 401 },
       );
     }
-    
+
     if (!session.user) {
       return NextResponse.json(
         {
@@ -203,9 +203,9 @@ export async function POST(req: NextRequest) {
         { status: 401 },
       );
     }
-    
+
     // Check if user is admin
-    if (session.user.role !== 'ADMIN') {
+    if (session.user.role !== "ADMIN") {
       return NextResponse.json(
         {
           success: false,

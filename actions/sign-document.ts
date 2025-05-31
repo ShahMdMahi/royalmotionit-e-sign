@@ -4,13 +4,22 @@ import { prisma } from "@/prisma/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { generateFinalPDF } from "./pdf-generator";
-import { sendDocumentSignRequestEmail, sendDocumentSignedNotification } from "./email";
+import {
+  sendDocumentSignRequestEmail,
+  sendDocumentSignedNotification,
+} from "./email";
 import { evaluateFormula, isFieldVisible } from "./formula-evaluator";
 
 import { validateField } from "@/schema/document-fields";
 import { DocumentFieldType } from "@/types/document";
-import { convertToDocumentField, convertToDocumentFields } from "@/utils/document-field-converter";
-import { FieldValidationError, DocumentValidationResult } from "@/types/validation";
+import {
+  convertToDocumentField,
+  convertToDocumentFields,
+} from "@/utils/document-field-converter";
+import {
+  FieldValidationError,
+  DocumentValidationResult,
+} from "@/types/validation";
 
 /**
  * Validate field values based on their type before saving
@@ -20,9 +29,15 @@ import { FieldValidationError, DocumentValidationResult } from "@/types/validati
  * @param value Value to validate
  * @returns Validation result with error message if invalid
  */
-function validateFieldValue(field: any, value: string): { valid: boolean; error?: string } {
+function validateFieldValue(
+  field: any,
+  value: string,
+): { valid: boolean; error?: string } {
   // Skip validation if value is empty (unless field is required, handled separately)
-  if (!value || (typeof value === "string" && value.trim() === "" && !field.required)) {
+  if (
+    !value ||
+    (typeof value === "string" && value.trim() === "" && !field.required)
+  ) {
     return { valid: true };
   }
 
@@ -41,7 +56,9 @@ function validateFieldValue(field: any, value: string): { valid: boolean; error?
         if (value && !isNaN(new Date(value).getTime())) {
           // Valid date, but check for range constraints if specified
           if (field.validationRule && field.validationRule.includes("range:")) {
-            const rangeMatch = field.validationRule.match(/range:([^,]+),([^,]+)/);
+            const rangeMatch = field.validationRule.match(
+              /range:([^,]+),([^,]+)/,
+            );
             if (rangeMatch) {
               const [_, minStr, maxStr] = rangeMatch;
               let min: Date | null = null;
@@ -97,7 +114,11 @@ function validateFieldValue(field: any, value: string): { valid: boolean; error?
       // Extract error message from Zod validation result with improved formatting
       let errorMessage = "Invalid value";
 
-      if (typeof result.error === "object" && result.error && "issues" in result.error) {
+      if (
+        typeof result.error === "object" &&
+        result.error &&
+        "issues" in result.error
+      ) {
         const issue = result.error.issues[0];
         errorMessage = issue?.message || "Invalid value";
 
@@ -132,7 +153,12 @@ function validateFieldValue(field: any, value: string): { valid: boolean; error?
  * @param sourceValue Value of the source field
  * @param allFields All document fields
  */
-async function handleConditionalLogic(logic: any, sourceFieldId: string, sourceValue: string, allFields: any[]) {
+async function handleConditionalLogic(
+  logic: any,
+  sourceFieldId: string,
+  sourceValue: string,
+  allFields: any[],
+) {
   // Validate logic structure
   if (!logic.condition || !logic.action || !logic.targetFieldId) {
     console.error("Invalid conditional logic structure:", logic);
@@ -176,11 +202,16 @@ async function handleConditionalLogic(logic: any, sourceFieldId: string, sourceV
       break;
     case "isEmpty":
       // Handle null, undefined, and empty string values safely
-      conditionMet = !sourceValue || (typeof sourceValue === "string" && sourceValue.trim() === "");
+      conditionMet =
+        !sourceValue ||
+        (typeof sourceValue === "string" && sourceValue.trim() === "");
       break;
     case "isNotEmpty":
       // Handle null, undefined, and empty string values safely
-      conditionMet = !!sourceValue && typeof sourceValue === "string" && sourceValue.trim() !== "";
+      conditionMet =
+        !!sourceValue &&
+        typeof sourceValue === "string" &&
+        sourceValue.trim() !== "";
       break;
     default:
       console.error("Unknown condition type:", logic.condition.type);
@@ -249,7 +280,7 @@ export async function completeDocumentSigning(
   documentId: string,
   signerId: string,
   fieldValues: Record<string, string>,
-  clientInfo?: { userAgent?: string; ipAddress?: string }
+  clientInfo?: { userAgent?: string; ipAddress?: string },
 ): Promise<{
   success: boolean;
   message: string;
@@ -315,17 +346,22 @@ export async function completeDocumentSigning(
       // User is not authenticated, return error that requires login
       return {
         success: false,
-        message: "You need to login with the email address of the signer to complete this action",
+        message:
+          "You need to login with the email address of the signer to complete this action",
         requiresLogin: true,
         signerEmail: signer.email,
       };
     }
 
     // Verify email matches (basic auth)
-    if (!session.user.email || signer.email.toLowerCase() !== session.user.email.toLowerCase()) {
+    if (
+      !session.user.email ||
+      signer.email.toLowerCase() !== session.user.email.toLowerCase()
+    ) {
       return {
         success: false,
-        message: "You are not authorized to sign this document. Please login with the email address the document was sent to.",
+        message:
+          "You are not authorized to sign this document. Please login with the email address the document was sent to.",
         requiresLogin: true,
         signerEmail: signer.email,
       };
@@ -363,18 +399,21 @@ export async function completeDocumentSigning(
 
     // Prepare fields with their entered values for validation by merging document fields with user input
     const fieldsToValidate = document.fields
-      .filter(field => field.signerId === signerId)
-      .map(field => {
+      .filter((field) => field.signerId === signerId)
+      .map((field) => {
         // Create a copy of the field with the updated value from user input
         return {
           ...field,
           // Use the provided field value or keep the existing one
-          value: fieldValues[field.id] !== undefined ? fieldValues[field.id] : field.value || "",
+          value:
+            fieldValues[field.id] !== undefined
+              ? fieldValues[field.id]
+              : field.value || "",
           // Ensure type is a valid DocumentFieldType
           type: field.type as DocumentFieldType,
         };
       });
-      
+
     // Ensure all field values are strings, not null
     fieldsToValidate.forEach((field) => {
       // Extra safety check to ensure all values are strings
@@ -391,7 +430,7 @@ export async function completeDocumentSigning(
     // print typed fields in a big red style in the console
     console.log(
       "%cTyped Fields for Validation: " + JSON.stringify(typedFields, null, 2),
-      "color: red; font-weight: bold; font-size: 16px;"
+      "color: red; font-weight: bold; font-size: 16px;",
     );
 
     // Validate all fields with the enhanced validator
@@ -400,7 +439,7 @@ export async function completeDocumentSigning(
     // print validation result in a big red style in the console
     console.log(
       "%cValidation Result: " + JSON.stringify(validationResult, null, 2),
-      "color: red; font-weight: bold; font-size: 16px;"
+      "color: red; font-weight: bold; font-size: 16px;",
     );
 
     if (!validationResult.valid) {
@@ -410,7 +449,9 @@ export async function completeDocumentSigning(
         .map((error) => error.message);
 
       // Get the list of validation errors for API response
-      const validationErrors = Object.values(validationResult.fieldErrors).flat();
+      const validationErrors = Object.values(
+        validationResult.fieldErrors,
+      ).flat();
 
       return {
         success: false,
@@ -419,10 +460,10 @@ export async function completeDocumentSigning(
         validationErrors,
       };
     }
-    
+
     // Move directly to updating field values if validation passed
     // We already validated all fields with validateAllFields above
-    
+
     for (const fieldId in fieldValues) {
       // Make sure the field belongs to the document and signer
       const field = document.fields.find((f) => f.id === fieldId);
@@ -438,7 +479,7 @@ export async function completeDocumentSigning(
             value = "";
           }
         }
-        
+
         // Process conditional logic if present
         if (field.conditionalLogic) {
           try {
@@ -455,7 +496,10 @@ export async function completeDocumentSigning(
         // Format data for specific field types before saving
         if (field.type === "checkbox" && value) {
           // Normalize checkbox values
-          value = value.toLowerCase() === "true" || value.toLowerCase() === "checked" ? "true" : "false";
+          value =
+            value.toLowerCase() === "true" || value.toLowerCase() === "checked"
+              ? "true"
+              : "false";
         } else if (field.type === "date" && value) {
           // Attempt to format date values consistently
           try {
@@ -476,7 +520,9 @@ export async function completeDocumentSigning(
             value,
           },
         }); // After updating a field, evaluate any formula fields that might depend on it
-        const formulaFields = document.fields.filter((f) => f.type === "formula" && f.validationRule);
+        const formulaFields = document.fields.filter(
+          (f) => f.type === "formula" && f.validationRule,
+        );
         for (const formulaField of formulaFields) {
           if (formulaField.validationRule) {
             // Create a properly typed array of fields for formula evaluation
@@ -490,7 +536,10 @@ export async function completeDocumentSigning(
               return convertToDocumentField(f);
             });
 
-            const newValue = evaluateFormula(formulaField.validationRule, updatedFields);
+            const newValue = evaluateFormula(
+              formulaField.validationRule,
+              updatedFields,
+            );
 
             // Update the formula field value
             await prisma.documentField.update({
@@ -571,11 +620,14 @@ export async function completeDocumentSigning(
               document.title || "Untitled Document",
               document.id,
               session?.user?.name ?? signer.name ?? "Signer",
-              session?.user?.email ?? signer.email ?? ""
+              session?.user?.email ?? signer.email ?? "",
             );
           }
         } catch (error) {
-          console.error("Error sending completion notification to document author:", error);
+          console.error(
+            "Error sending completion notification to document author:",
+            error,
+          );
           // Non-fatal error, continue with the process
         }
 

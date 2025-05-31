@@ -88,7 +88,7 @@ export const AccountVerificationEmail = ({
             <Text style={text}>
               Thank you for registering with Royal Sign. To complete your
               registration and access all features, please verify your email
-              address: 
+              address:
               <span
                 style={{
                   ...highlight,
@@ -215,7 +215,7 @@ export const AccountVerificationEmail = ({
             />
             <Text style={footerText}>
               If you have any questions or need assistance, please contact our
-              support team at 
+              support team at
               <Link
                 href="mailto:support@royalmotionit.com"
                 style={{
@@ -233,7 +233,7 @@ export const AccountVerificationEmail = ({
                 borderLeft: `3px solid ${theme.primaryHex}`,
               }}
             >
-              Account email: 
+              Account email:
               <span
                 style={{
                   ...highlight,

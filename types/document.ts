@@ -5,7 +5,13 @@ export interface Document {
   authorId: string;
   authorName?: string;
   authorEmail?: string;
-  status: "DRAFT" | "PENDING" | "COMPLETED" | "EXPIRED" | "DECLINED" | "CANCELED";
+  status:
+    | "DRAFT"
+    | "PENDING"
+    | "COMPLETED"
+    | "EXPIRED"
+    | "DECLINED"
+    | "CANCELED";
   key: string;
   type: string;
   createdAt: Date;
@@ -22,7 +28,21 @@ export interface Document {
   signers?: Signer[]; // Added back for compatibility
 }
 
-export type DocumentFieldType = "signature" | "initial" | "text" | "textarea" | "date" | "checkbox" | "dropdown" | "email" | "phone" | "image" | "formula" | "radio" | "payment" | "number";
+export type DocumentFieldType =
+  | "signature"
+  | "initial"
+  | "text"
+  | "textarea"
+  | "date"
+  | "checkbox"
+  | "dropdown"
+  | "email"
+  | "phone"
+  | "image"
+  | "formula"
+  | "radio"
+  | "payment"
+  | "number";
 
 export interface DocumentField {
   id: string;

@@ -117,7 +117,12 @@ export function PDFViewerSimple({
 
   // Handle page render success to get dimensions and update scale
   const onPageLoadSuccess = useCallback(
-    (page: { originalWidth: number; originalHeight: number; width: number; height: number }) => {
+    (page: {
+      originalWidth: number;
+      originalHeight: number;
+      width: number;
+      height: number;
+    }) => {
       // Page has rendered, now we can measure its dimensions
       setViewerLoaded(true);
 
@@ -130,7 +135,7 @@ export function PDFViewerSimple({
 
         // Store the original size for reference
         setPageSize(originalSize);
-        console.log(pageSize)
+        console.log(pageSize);
 
         if (debug) {
           console.log(

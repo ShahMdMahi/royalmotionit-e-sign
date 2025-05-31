@@ -1,14 +1,36 @@
 "use client";
 
-import { Document as PrismaDocument, User as PrismaUser, DocumentField as PrismaDocumentField } from "@prisma/client";
+import {
+  Document as PrismaDocument,
+  User as PrismaUser,
+  DocumentField as PrismaDocumentField,
+} from "@prisma/client";
 import { useEffect, useState } from "react";
 import { getFromR2 } from "@/actions/r2";
 import { PDFViewer } from "../common/pdf-viewer";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { FileText, AlertTriangle, ArrowLeft, Info, Clock, Check, Shield, Hash, User as UserIcon, Calendar } from "lucide-react";
+import {
+  FileText,
+  AlertTriangle,
+  ArrowLeft,
+  Info,
+  Clock,
+  Check,
+  Shield,
+  Hash,
+  User as UserIcon,
+  Calendar,
+} from "lucide-react";
 import Link from "next/link";
 import { DocumentToolbar } from "../document/document-toolbar";
 import { toast } from "sonner";
@@ -36,7 +58,11 @@ interface SingleDocumentComponentProps {
   backLink?: string;
 }
 
-export function SingleDocumentComponent({ document, author, backLink = "/documents" }: SingleDocumentComponentProps) {
+export function SingleDocumentComponent({
+  document,
+  author,
+  backLink = "/documents",
+}: SingleDocumentComponentProps) {
   const [pdfData, setPdfData] = useState<Uint8Array | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,16 +85,24 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
             setPdfData(response.data.Body);
             setError(null);
           } else {
-            console.error("Failed to fetch PDF: Response successful but no body content.");
+            console.error(
+              "Failed to fetch PDF: Response successful but no body content.",
+            );
             setError("PDF content is missing in the response.");
           }
         } else {
-          console.error("Failed to fetch PDF:", response.message, response.error);
+          console.error(
+            "Failed to fetch PDF:",
+            response.message,
+            response.error,
+          );
           setError(response.message || "Failed to load PDF document.");
         }
       } catch (e) {
         console.error("Error fetching document:", e);
-        setError(e instanceof Error ? e.message : "An unexpected error occurred.");
+        setError(
+          e instanceof Error ? e.message : "An unexpected error occurred.",
+        );
       } finally {
         setIsLoading(false);
       }
@@ -127,7 +161,9 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
             </div>
             Loading Document...
           </CardTitle>
-          <CardDescription>Please wait while the document is being loaded.</CardDescription>
+          <CardDescription>
+            Please wait while the document is being loaded.
+          </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="flex flex-col justify-center items-center h-[60vh] space-y-4">
@@ -149,7 +185,9 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
             </div>
             Error Loading Document
           </CardTitle>
-          <CardDescription>There was an issue retrieving the document.</CardDescription>
+          <CardDescription>
+            There was an issue retrieving the document.
+          </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="flex flex-col justify-center items-center h-96 text-destructive space-y-4">
@@ -195,7 +233,11 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
                     email: document.signers[0].email,
                     name: document.signers[0].name || undefined,
                     role: document.signers[0].role || undefined,
-                    status: document.signers[0].status as "PENDING" | "COMPLETED" | "DECLINED" | "VIEWED",
+                    status: document.signers[0].status as
+                      | "PENDING"
+                      | "COMPLETED"
+                      | "DECLINED"
+                      | "VIEWED",
                   }
                 : undefined,
             fields: document.fields?.map((f) => ({
@@ -236,11 +278,21 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
                 </div>
                 {document.title}
               </CardTitle>
-              <CardDescription className="text-sm sm:text-base">{document.description || "View the document and check its details below."}</CardDescription>
+              <CardDescription className="text-sm sm:text-base">
+                {document.description ||
+                  "View the document and check its details below."}
+              </CardDescription>
             </div>
-            <Badge variant={getStatusBadgeVariant(document.status)} className="text-xs sm:text-sm px-2 py-1 h-auto">
-              {document.status === "COMPLETED" && <Check className="size-3 mr-1" />}
-              {document.status === "PENDING" && <Clock className="size-3 mr-1" />}
+            <Badge
+              variant={getStatusBadgeVariant(document.status)}
+              className="text-xs sm:text-sm px-2 py-1 h-auto"
+            >
+              {document.status === "COMPLETED" && (
+                <Check className="size-3 mr-1" />
+              )}
+              {document.status === "PENDING" && (
+                <Clock className="size-3 mr-1" />
+              )}
               {document.status}
             </Badge>
           </div>
@@ -248,12 +300,18 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
         <CardContent className="p-0">
           <Tabs defaultValue="document" className="w-full">
             <TabsList className="grid w-full grid-cols-2 p-0 bg-muted/50">
-              <TabsTrigger value="document" className="rounded-none border-r py-3">
-                <FileText className="size-4 mr-2" />
+              <TabsTrigger
+                value="document"
+                className="rounded-none border-r py-2 sm:py-3 text-xs sm:text-sm"
+              >
+                <FileText className="size-3 sm:size-4 mr-1 sm:mr-2" />
                 Document
               </TabsTrigger>
-              <TabsTrigger value="details" className="rounded-none py-3">
-                <Info className="size-4 mr-2" />
+              <TabsTrigger
+                value="details"
+                className="rounded-none py-2 sm:py-3 text-xs sm:text-sm"
+              >
+                <Info className="size-3 sm:size-4 mr-1 sm:mr-2" />
                 Details
               </TabsTrigger>
             </TabsList>
@@ -262,7 +320,9 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
               {error && pdfData && (
                 <div className="m-6 p-4 border border-destructive/50 bg-destructive/10 text-destructive rounded-md">
                   <p className="flex items-center gap-2">
-                    <AlertTriangle className="size-4" /> There was an issue refreshing the document: {error}. Displaying cached or previous version.
+                    <AlertTriangle className="size-4" /> There was an issue
+                    refreshing the document: {error}. Displaying cached or
+                    previous version.
                   </p>
                 </div>
               )}
@@ -270,7 +330,9 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
               {!pdfData && !error && (
                 <div className="flex flex-col items-center justify-center h-96 border-b m-6 rounded-md bg-muted/20">
                   <FileText className="size-12 text-muted-foreground/50 mb-2" />
-                  <p className="text-muted-foreground">No document preview available.</p>
+                  <p className="text-muted-foreground">
+                    No document preview available.
+                  </p>
                 </div>
               )}
 
@@ -298,13 +360,18 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
                         <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                           <FileText className="size-3.5" /> Title:
                         </p>
-                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{document.title}</p>
+                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                          {document.title}
+                        </p>
                       </div>
                       <div>
                         <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                           <Shield className="size-3.5" /> Status:
                         </p>
-                        <Badge variant={getStatusBadgeVariant(document.status)} className="mt-1">
+                        <Badge
+                          variant={getStatusBadgeVariant(document.status)}
+                          className="mt-1"
+                        >
                           {document.status}
                         </Badge>
                       </div>
@@ -313,27 +380,35 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
                           <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                             <Info className="size-3.5" /> Description:
                           </p>
-                          <p className="text-muted-foreground whitespace-pre-wrap bg-background/50 p-1.5 rounded border">{document.description}</p>
+                          <p className="text-muted-foreground whitespace-pre-wrap bg-background/50 p-1.5 rounded border">
+                            {document.description}
+                          </p>
                         </div>
                       )}
                       <div>
                         <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                           <UserIcon className="size-3.5" /> Author:
                         </p>
-                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{author?.name || author?.email || "Unknown"}</p>
+                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                          {author?.name || author?.email || "Unknown"}
+                        </p>
                       </div>
                       <div>
                         <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                           <Calendar className="size-3.5" /> Created:
                         </p>
-                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{formatDate(document.createdAt)}</p>
+                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                          {formatDate(document.createdAt)}
+                        </p>
                       </div>
                       {document.hash && (
                         <div className="sm:col-span-2">
                           <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                             <Hash className="size-3.5" /> Document Hash:
                           </p>
-                          <p className="text-muted-foreground break-all text-xs font-mono bg-background/50 p-1.5 rounded border">{document.hash}</p>
+                          <p className="text-muted-foreground break-all text-xs font-mono bg-background/50 p-1.5 rounded border">
+                            {document.hash}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -351,20 +426,26 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
                         <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                           <Calendar className="size-3.5" /> Created At:
                         </p>
-                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{formatDate(document.createdAt)}</p>
+                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                          {formatDate(document.createdAt)}
+                        </p>
                       </div>
                       <div>
                         <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                           <Calendar className="size-3.5" /> Updated At:
                         </p>
-                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{formatDate(document.updatedAt)}</p>
+                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                          {formatDate(document.updatedAt)}
+                        </p>
                       </div>
                       {document.preparedAt && (
                         <div>
                           <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                             <Calendar className="size-3.5" /> Prepared At:
                           </p>
-                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{formatDate(document.preparedAt)}</p>
+                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                            {formatDate(document.preparedAt)}
+                          </p>
                         </div>
                       )}
                       {document.sentAt && (
@@ -372,7 +453,9 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
                           <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                             <Calendar className="size-3.5" /> Sent At:
                           </p>
-                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{formatDate(document.sentAt)}</p>
+                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                            {formatDate(document.sentAt)}
+                          </p>
                         </div>
                       )}
                       {/* Remove viewedAt since it's not available in the document type */}
@@ -381,7 +464,9 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
                           <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                             <Calendar className="size-3.5" /> Signed At:
                           </p>
-                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{formatDate(document.signedAt)}</p>
+                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                            {formatDate(document.signedAt)}
+                          </p>
                         </div>
                       )}
                       {document.expiresAt && (
@@ -389,7 +474,9 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
                           <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                             <Calendar className="size-3.5" /> Expires At:
                           </p>
-                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{formatDate(document.expiresAt)}</p>
+                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                            {formatDate(document.expiresAt)}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -405,24 +492,34 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
                       <Separator />
                       <div className="rounded-lg bg-muted/20 p-4">
                         {document.signers.map((signer) => (
-                          <div key={signer.id} className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                          <div
+                            key={signer.id}
+                            className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm"
+                          >
                             <div>
                               <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                                 <UserIcon className="size-3.5" /> Name:
                               </p>
-                              <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{signer.name || "Not specified"}</p>
+                              <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                                {signer.name || "Not specified"}
+                              </p>
                             </div>
                             <div>
                               <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                                 <Info className="size-3.5" /> Email:
                               </p>
-                              <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{signer.email}</p>
+                              <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                                {signer.email}
+                              </p>
                             </div>
                             <div>
                               <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                                 <Info className="size-3.5" /> Status:
                               </p>
-                              <Badge variant={getStatusBadgeVariant(signer.status)} className="mt-1">
+                              <Badge
+                                variant={getStatusBadgeVariant(signer.status)}
+                                className="mt-1"
+                              >
                                 {signer.status}
                               </Badge>
                             </div>
@@ -431,7 +528,9 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
                                 <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
                                   <Info className="size-3.5" /> Role:
                                 </p>
-                                <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">{signer.role}</p>
+                                <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                                  {signer.role}
+                                </p>
                               </div>
                             )}
                           </div>
@@ -444,10 +543,15 @@ export function SingleDocumentComponent({ document, author, backLink = "/documen
             </TabsContent>
           </Tabs>
         </CardContent>
-        <CardFooter className="border-t p-4 flex justify-between">
-          <Button variant="outline" size="sm" asChild>
+        <CardFooter className="border-t p-2 sm:p-3 md:p-4 flex justify-between">
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="text-xs sm:text-sm"
+          >
             <Link href={backLink}>
-              <ArrowLeft className="size-4 mr-2" /> Back
+              <ArrowLeft className="size-3 sm:size-4 mr-1 sm:mr-2" /> Back
             </Link>
           </Button>
         </CardFooter>

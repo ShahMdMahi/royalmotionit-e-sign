@@ -145,7 +145,8 @@ export function FieldsOverlayContainer({
         // which will be recalculated on the next render cycle
         if (viewerContainerRef.current) {
           // Force a re-calculation by triggering a layout flush
-          viewerContainerRef.current.scrollTop = viewerContainerRef.current.scrollTop;
+          viewerContainerRef.current.scrollTop =
+            viewerContainerRef.current.scrollTop;
         }
       }, 100); // 100ms debounce time
     };
@@ -308,7 +309,7 @@ export function FieldsOverlayContainer({
 
         // Only create overlays for pages that have fields
         if (fieldsForPage.length === 0) return null;
-        
+
         // Get page position to create a perfectly aligned overlay that's positioned relative to the PDF page
         const pageBounds = pageElement.getBoundingClientRect();
         const viewerBounds =
