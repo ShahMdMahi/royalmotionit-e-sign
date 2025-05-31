@@ -70,78 +70,205 @@ export function DocumentToolbar({
   };
 
   return (
-    <div className="p-4 border-b flex items-center justify-between bg-background shadow-sm">
-      <div className="flex items-center space-x-4">
-        <Button
-          variant="ghost"
-          onClick={handleBack}
-          data-testid="document-back-button"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          {isEditMode ? "Back to Document" : "Back to Documents"}
-        </Button>
+    <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
+      {/* Mobile Layout */}
+      <div className="flex flex-col sm:hidden">
+        {/* Top row - Back button and title */}
+        <div className="flex items-center justify-between p-3 border-b border-border/50">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBack}
+            data-testid="document-back-button"
+            className="flex-shrink-0"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            <span className="text-xs">Back</span>
+          </Button>
 
-        <h1 className="text-lg font-medium hidden md:block">
-          {document.title || "Untitled Document"}
-        </h1>
-      </div>
-      <div className="flex items-center space-x-2">
-        {!isEditMode ? (
-          <>
-            {/* Only show Edit button for admin users and draft documents */}
-            {document.status === "DRAFT" && userRole === "ADMIN" && (
+          <h1 className="text-sm font-medium text-center flex-1 mx-2 truncate">
+            {document.title || "Untitled Document"}
+          </h1>
+        </div>
+
+        {/* Bottom row - Action buttons */}
+        <div className="flex items-center justify-center gap-2 p-2 bg-muted/30">
+          {!isEditMode ? (
+            <>
+              {/* Edit button for admin users and draft documents */}
+              {document.status === "DRAFT" && userRole === "ADMIN" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEdit}
+                  data-testid="document-edit-button"
+                  className="flex-1 max-w-[100px]"
+                >
+                  <Settings className="h-3 w-3" />
+                  <span className="ml-1 text-xs">Edit</span>
+                </Button>
+              )}
+              {/* Sign button for regular users */}
+              {document.status === "PENDING" && userRole !== "ADMIN" && (
+                <Button
+                  onClick={() => router.push(`/documents/${document.id}/sign`)}
+                  variant="default"
+                  size="sm"
+                  data-testid="document-sign-button"
+                  className="flex-1 max-w-[120px]"
+                >
+                  <FileSignature className="h-3 w-3" />
+                  <span className="ml-1 text-xs">Sign</span>
+                </Button>
+              )}
               <Button
                 variant="outline"
-                onClick={handleEdit}
-                data-testid="document-edit-button"
+                size="sm"
+                onClick={handlePreview}
+                data-testid="document-preview-button"
+                className="flex-1 max-w-[100px]"
               >
-                <Settings className="h-4 w-4 mr-2" />
-                Edit
+                <Eye className="h-3 w-3" />
+                <span className="ml-1 text-xs">Preview</span>
               </Button>
-            )}
-            {/* Show Sign button for regular users when document is pending signature */}
-            {document.status === "PENDING" && userRole !== "ADMIN" && (
+            </>
+          ) : (
+            <>
               <Button
-                onClick={() => router.push(`/documents/${document.id}/sign`)}
-                variant="default"
-                data-testid="document-sign-button"
+                variant="outline"
+                size="sm"
+                onClick={handlePreview}
+                data-testid="document-preview-button"
+                className="flex-1 max-w-[100px]"
               >
-                <FileSignature className="h-4 w-4 mr-2" />
-                Sign Document
+                <Eye className="h-3 w-3" />
+                <span className="ml-1 text-xs">Preview</span>
               </Button>
-            )}
-            <Button
-              variant="outline"
-              onClick={handlePreview}
-              data-testid="document-preview-button"
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              Preview
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              variant="outline"
-              onClick={handlePreview}
-              data-testid="document-preview-button"
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              Preview
-            </Button>
-            {/* Only show Save button for admin users in edit mode */}
-            {userRole === "ADMIN" && (
+              {/* Save button for admin users in edit mode */}
+              {userRole === "ADMIN" && (
+                <Button
+                  onClick={onSave ? onSave : () => onSaveAction(document)}
+                  disabled={saving}
+                  data-testid="document-save-button"
+                  size="sm"
+                  className="flex-1 max-w-[100px]"
+                >
+                  <Save className="h-3 w-3" />
+                  <span className="ml-1 text-xs">
+                    {saving ? "Saving..." : "Save"}
+                  </span>
+                </Button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Tablet and Desktop Layout */}
+      <div className="hidden sm:flex items-center justify-between p-4 lg:px-6">
+        <div className="flex items-center space-x-3 lg:space-x-4 min-w-0 flex-1">
+          <Button
+            variant="ghost"
+            onClick={handleBack}
+            data-testid="document-back-button"
+            className="flex-shrink-0 hover:bg-muted/80 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            <span className="hidden md:inline">
+              {isEditMode ? "Back to Document" : "Back to Documents"}
+            </span>
+            <span className="md:hidden">Back</span>
+          </Button>
+
+          <div className="min-w-0 flex-1">
+            <h1 className="text-base lg:text-lg font-medium truncate text-foreground">
+              {document.title || "Untitled Document"}
+            </h1>
+            <div className="flex items-center gap-2 mt-1">
+              <span
+                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                  document.status === "DRAFT"
+                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
+                    : document.status === "PENDING"
+                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                      : document.status === "COMPLETED"
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                        : "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400"
+                }`}
+              >
+                {document.status}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2 lg:space-x-3 flex-shrink-0">
+          {!isEditMode ? (
+            <>
+              {/* Edit button for admin users and draft documents */}
+              {document.status === "DRAFT" && userRole === "ADMIN" && (
+                <Button
+                  variant="outline"
+                  onClick={handleEdit}
+                  data-testid="document-edit-button"
+                  className="hover:bg-muted/80 transition-colors"
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  <span className="hidden lg:inline">Edit</span>
+                </Button>
+              )}
+              {/* Sign button for regular users */}
+              {document.status === "PENDING" && userRole !== "ADMIN" && (
+                <Button
+                  onClick={() => router.push(`/documents/${document.id}/sign`)}
+                  variant="default"
+                  data-testid="document-sign-button"
+                  className="bg-primary hover:bg-primary/90 transition-colors shadow-sm"
+                >
+                  <FileSignature className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Sign Document</span>
+                  <span className="sm:hidden">Sign</span>
+                </Button>
+              )}
               <Button
-                onClick={onSave ? onSave : () => onSaveAction(document)}
-                disabled={saving}
-                data-testid="document-save-button"
+                variant="outline"
+                onClick={handlePreview}
+                data-testid="document-preview-button"
+                className="hover:bg-muted/80 transition-colors"
               >
-                <Save className="h-4 w-4 mr-2" />
-                {saving ? "Saving..." : "Save"}
+                <Eye className="h-4 w-4 mr-2" />
+                <span className="hidden lg:inline">Preview</span>
               </Button>
-            )}
-          </>
-        )}
+            </>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                onClick={handlePreview}
+                data-testid="document-preview-button"
+                className="hover:bg-muted/80 transition-colors"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                <span className="hidden lg:inline">Preview</span>
+              </Button>
+              {/* Save button for admin users in edit mode */}
+              {userRole === "ADMIN" && (
+                <Button
+                  onClick={onSave ? onSave : () => onSaveAction(document)}
+                  disabled={saving}
+                  data-testid="document-save-button"
+                  className="bg-primary hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-sm"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">
+                    {saving ? "Saving..." : "Save"}
+                  </span>
+                  <span className="sm:hidden">{saving ? "..." : "Save"}</span>
+                </Button>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

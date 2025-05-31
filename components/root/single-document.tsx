@@ -153,22 +153,27 @@ export function SingleDocumentComponent({
 
   if (isLoading) {
     return (
-      <Card className="w-full max-w-7xl mx-auto my-8 border-border shadow-lg">
-        <CardHeader className="border-b border-border">
-          <CardTitle className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
-            <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <FileText className="size-4 text-primary" />
+      <Card className="w-full max-w-7xl mx-auto my-2 xs:my-3 sm:my-4 md:my-6 lg:my-8 border-border shadow-lg">
+        <CardHeader className="border-b border-border p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6">
+          <CardTitle className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-semibold flex items-center gap-1 xs:gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3">
+            <div className="size-4 xs:size-5 sm:size-6 md:size-7 lg:size-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <FileText className="size-2 xs:size-2.5 sm:size-3 md:size-3.5 lg:size-4 text-primary" />
             </div>
-            Loading Document...
+            <span className="truncate">Loading Document...</span>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs xs:text-sm sm:text-base">
             Please wait while the document is being loaded.
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-6">
-          <div className="flex flex-col justify-center items-center h-[60vh] space-y-4">
-            <Progress value={30} className="w-full max-w-md" />
-            <p className="text-muted-foreground">Retrieving document data...</p>
+        <CardContent className="p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6">
+          <div className="flex flex-col justify-center items-center h-48 xs:h-56 sm:h-64 md:h-80 lg:h-96 space-y-2 xs:space-y-3 sm:space-y-4">
+            <Progress
+              value={30}
+              className="w-full max-w-xs sm:max-w-sm md:max-w-md"
+            />
+            <p className="text-xs xs:text-sm sm:text-base text-muted-foreground text-center">
+              Retrieving document data...
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -177,34 +182,46 @@ export function SingleDocumentComponent({
 
   if (error && !pdfData) {
     return (
-      <Card className="w-full max-w-7xl mx-auto my-8 border-border shadow-lg">
-        <CardHeader className="border-b border-border bg-destructive/5">
-          <CardTitle className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
-            <div className="size-8 rounded-full bg-destructive/10 flex items-center justify-center">
-              <AlertTriangle className="size-4 text-destructive" />
+      <Card className="w-full max-w-7xl mx-auto my-2 xs:my-3 sm:my-4 md:my-6 lg:my-8 border-border shadow-lg">
+        <CardHeader className="border-b border-border bg-destructive/5 p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6">
+          <CardTitle className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-semibold flex items-center gap-1 xs:gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3">
+            <div className="size-4 xs:size-5 sm:size-6 md:size-7 lg:size-8 rounded-full bg-destructive/10 flex items-center justify-center">
+              <AlertTriangle className="size-2 xs:size-2.5 sm:size-3 md:size-3.5 lg:size-4 text-destructive" />
             </div>
-            Error Loading Document
+            <span className="truncate">Error Loading Document</span>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs xs:text-sm sm:text-base">
             There was an issue retrieving the document.
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-6">
-          <div className="flex flex-col justify-center items-center h-96 text-destructive space-y-4">
-            <div className="p-4 border border-destructive/50 bg-destructive/10 rounded-md max-w-md w-full">
-              <p className="flex items-start gap-2">
-                <AlertTriangle className="size-4 shrink-0 mt-1" /> {error}
+        <CardContent className="p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6">
+          <div className="flex flex-col justify-center items-center h-48 xs:h-56 sm:h-64 md:h-80 lg:h-96 text-destructive space-y-2 xs:space-y-3 sm:space-y-4">
+            <div className="p-2 xs:p-3 sm:p-4 border border-destructive/50 bg-destructive/10 rounded-md max-w-xs sm:max-w-sm md:max-w-md w-full">
+              <p className="flex items-start gap-1 xs:gap-1.5 sm:gap-2 text-xs xs:text-sm sm:text-base">
+                <AlertTriangle className="size-3 xs:size-3.5 sm:size-4 shrink-0 mt-0.5" />
+                <span className="break-words">{error}</span>
               </p>
             </div>
-            <Button variant="outline" onClick={() => window.location.reload()}>
+            <Button
+              variant="outline"
+              onClick={() => window.location.reload()}
+              className="h-7 xs:h-8 sm:h-9 md:h-10 text-xs xs:text-sm sm:text-base px-2 xs:px-3 sm:px-4 md:px-6"
+            >
               Retry Loading
             </Button>
           </div>
         </CardContent>
-        <CardFooter className="border-t p-4 flex justify-between">
-          <Button variant="outline" size="sm" asChild>
+        <CardFooter className="border-t p-1.5 xs:p-2 sm:p-3 md:p-4 flex justify-between">
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="h-6 xs:h-7 sm:h-8 md:h-9 text-xs xs:text-sm sm:text-base"
+          >
             <Link href={backLink}>
-              <ArrowLeft className="size-4 mr-2" /> Back
+              <ArrowLeft className="size-2.5 xs:size-3 sm:size-4 mr-1 xs:mr-1.5 sm:mr-2" />
+              <span className="hidden xs:inline">Back</span>
+              <span className="xs:hidden">←</span>
             </Link>
           </Button>
         </CardFooter>
@@ -268,30 +285,30 @@ export function SingleDocumentComponent({
         }}
       />
 
-      <Card className="w-full max-w-7xl mx-auto my-6 border-border shadow-lg">
-        <CardHeader className="border-b border-border">
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-            <div className="space-y-1">
-              <CardTitle className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
-                <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <FileText className="size-4 text-primary" />
+      <Card className="w-full max-w-7xl mx-auto my-2 xs:my-3 sm:my-4 md:my-6 lg:my-8 border-border shadow-lg">
+        <CardHeader className="border-b border-border p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6">
+          <div className="flex flex-col space-y-2 xs:space-y-3 sm:space-y-0 sm:flex-row sm:gap-2 md:gap-3 lg:gap-4 sm:items-center justify-between">
+            <div className="space-y-1 flex-1 min-w-0">
+              <CardTitle className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-semibold flex items-center gap-1 xs:gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3">
+                <div className="size-4 xs:size-5 sm:size-6 md:size-7 lg:size-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <FileText className="size-2 xs:size-2.5 sm:size-3 md:size-3.5 lg:size-4 text-primary" />
                 </div>
-                {document.title}
+                <span className="truncate">{document.title}</span>
               </CardTitle>
-              <CardDescription className="text-sm sm:text-base">
+              <CardDescription className="text-xs xs:text-sm sm:text-base line-clamp-2 sm:line-clamp-1">
                 {document.description ||
                   "View the document and check its details below."}
               </CardDescription>
             </div>
             <Badge
               variant={getStatusBadgeVariant(document.status)}
-              className="text-xs sm:text-sm px-2 py-1 h-auto"
+              className="text-xs xs:text-sm sm:text-base px-1.5 xs:px-2 sm:px-3 py-0.5 xs:py-1 h-auto self-start sm:self-auto shrink-0"
             >
               {document.status === "COMPLETED" && (
-                <Check className="size-3 mr-1" />
+                <Check className="size-2.5 xs:size-3 sm:size-3.5 mr-1" />
               )}
               {document.status === "PENDING" && (
-                <Clock className="size-3 mr-1" />
+                <Clock className="size-2.5 xs:size-3 sm:size-3.5 mr-1" />
               )}
               {document.status}
             </Badge>
@@ -302,35 +319,39 @@ export function SingleDocumentComponent({
             <TabsList className="grid w-full grid-cols-2 p-0 bg-muted/50">
               <TabsTrigger
                 value="document"
-                className="rounded-none border-r py-2 sm:py-3 text-xs sm:text-sm"
+                className="rounded-none border-r py-1.5 xs:py-2 sm:py-3 md:py-4 text-xs xs:text-sm sm:text-base data-[state=active]:bg-background"
               >
-                <FileText className="size-3 sm:size-4 mr-1 sm:mr-2" />
-                Document
+                <FileText className="size-2.5 xs:size-3 sm:size-4 md:size-5 mr-1 xs:mr-1.5 sm:mr-2" />
+                <span className="hidden xs:inline">Document</span>
+                <span className="xs:hidden">Doc</span>
               </TabsTrigger>
               <TabsTrigger
                 value="details"
-                className="rounded-none py-2 sm:py-3 text-xs sm:text-sm"
+                className="rounded-none py-1.5 xs:py-2 sm:py-3 md:py-4 text-xs xs:text-sm sm:text-base data-[state=active]:bg-background"
               >
-                <Info className="size-3 sm:size-4 mr-1 sm:mr-2" />
-                Details
+                <Info className="size-2.5 xs:size-3 sm:size-4 md:size-5 mr-1 xs:mr-1.5 sm:mr-2" />
+                <span className="hidden xs:inline">Details</span>
+                <span className="xs:hidden">Info</span>
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="document" className="p-0 border-t">
               {error && pdfData && (
-                <div className="m-6 p-4 border border-destructive/50 bg-destructive/10 text-destructive rounded-md">
-                  <p className="flex items-center gap-2">
-                    <AlertTriangle className="size-4" /> There was an issue
-                    refreshing the document: {error}. Displaying cached or
-                    previous version.
+                <div className="m-2 xs:m-3 sm:m-4 md:m-6 p-2 xs:p-3 sm:p-4 border border-destructive/50 bg-destructive/10 text-destructive rounded-md">
+                  <p className="flex items-center gap-1 xs:gap-1.5 sm:gap-2 text-xs xs:text-sm sm:text-base">
+                    <AlertTriangle className="size-3 xs:size-3.5 sm:size-4 shrink-0" />
+                    <span className="break-words">
+                      There was an issue refreshing the document: {error}.
+                      Displaying cached or previous version.
+                    </span>
                   </p>
                 </div>
               )}
 
               {!pdfData && !error && (
-                <div className="flex flex-col items-center justify-center h-96 border-b m-6 rounded-md bg-muted/20">
-                  <FileText className="size-12 text-muted-foreground/50 mb-2" />
-                  <p className="text-muted-foreground">
+                <div className="flex flex-col items-center justify-center h-48 xs:h-56 sm:h-64 md:h-80 lg:h-96 border-b m-2 xs:m-3 sm:m-4 md:m-6 rounded-md bg-muted/20">
+                  <FileText className="size-6 xs:size-8 sm:size-10 md:size-12 lg:size-16 text-muted-foreground/50 mb-1 xs:mb-2 sm:mb-3" />
+                  <p className="text-xs xs:text-sm sm:text-base text-muted-foreground text-center px-2">
                     No document preview available.
                   </p>
                 </div>
@@ -347,66 +368,72 @@ export function SingleDocumentComponent({
 
             <TabsContent value="details" className="pt-0 border-t">
               <ScrollArea className="h-full">
-                <div className="p-6 space-y-8">
+                <div className="p-2 xs:p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 xs:space-y-5 sm:space-y-6 md:space-y-8">
                   {/* Document Information */}
-                  <div className="space-y-3">
-                    <h3 className="text-lg font-medium flex items-center gap-2">
-                      <Shield className="size-5 text-primary" />
-                      Document Information
+                  <div className="space-y-1.5 xs:space-y-2 sm:space-y-3">
+                    <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-medium flex items-center gap-1 xs:gap-1.5 sm:gap-2">
+                      <Shield className="size-3 xs:size-4 sm:size-5 md:size-6 text-primary" />
+                      <span>Document Information</span>
                     </h3>
                     <Separator />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm rounded-lg bg-muted/20 p-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 xs:gap-x-4 sm:gap-x-6 gap-y-2 xs:gap-y-3 sm:gap-y-4 text-xs xs:text-sm sm:text-base rounded-lg bg-muted/20 p-2 xs:p-3 sm:p-4">
                       <div>
-                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                          <FileText className="size-3.5" /> Title:
+                        <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                          <FileText className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                          Title:
                         </p>
-                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                        <p className="text-muted-foreground bg-background/50 p-1 xs:p-1.5 rounded border text-[9px] xs:text-[10px] sm:text-xs break-words">
                           {document.title}
                         </p>
                       </div>
                       <div>
-                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                          <Shield className="size-3.5" /> Status:
+                        <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                          <Shield className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                          Status:
                         </p>
                         <Badge
                           variant={getStatusBadgeVariant(document.status)}
-                          className="mt-1"
+                          className="mt-1 text-[9px] xs:text-xs sm:text-sm"
                         >
                           {document.status}
                         </Badge>
                       </div>
                       {document.description && (
                         <div className="sm:col-span-2">
-                          <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                            <Info className="size-3.5" /> Description:
+                          <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                            <Info className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                            Description:
                           </p>
-                          <p className="text-muted-foreground whitespace-pre-wrap bg-background/50 p-1.5 rounded border">
+                          <p className="text-muted-foreground whitespace-pre-wrap bg-background/50 p-1 xs:p-1.5 rounded border text-[9px] xs:text-[10px] sm:text-xs leading-relaxed">
                             {document.description}
                           </p>
                         </div>
                       )}
                       <div>
-                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                          <UserIcon className="size-3.5" /> Author:
+                        <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                          <UserIcon className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                          Author:
                         </p>
-                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                        <p className="text-muted-foreground bg-background/50 p-1 xs:p-1.5 rounded border text-[9px] xs:text-[10px] sm:text-xs break-words">
                           {author?.name || author?.email || "Unknown"}
                         </p>
                       </div>
                       <div>
-                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                          <Calendar className="size-3.5" /> Created:
+                        <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                          <Calendar className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                          Created:
                         </p>
-                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                        <p className="text-muted-foreground bg-background/50 p-1 xs:p-1.5 rounded border text-[9px] xs:text-[10px] sm:text-xs break-words">
                           {formatDate(document.createdAt)}
                         </p>
                       </div>
                       {document.hash && (
                         <div className="sm:col-span-2">
-                          <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                            <Hash className="size-3.5" /> Document Hash:
+                          <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                            <Hash className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                            Document Hash:
                           </p>
-                          <p className="text-muted-foreground break-all text-xs font-mono bg-background/50 p-1.5 rounded border">
+                          <p className="text-muted-foreground break-all text-[8px] xs:text-[9px] sm:text-xs font-mono bg-background/50 p-1 xs:p-1.5 rounded border leading-tight">
                             {document.hash}
                           </p>
                         </div>
@@ -415,66 +442,71 @@ export function SingleDocumentComponent({
                   </div>
 
                   {/* Timeline Information */}
-                  <div className="space-y-3">
-                    <h3 className="text-lg font-medium flex items-center gap-2">
-                      <Clock className="size-5 text-primary" />
-                      Document Timeline
+                  <div className="space-y-1.5 xs:space-y-2 sm:space-y-3">
+                    <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-medium flex items-center gap-1 xs:gap-1.5 sm:gap-2">
+                      <Clock className="size-3 xs:size-4 sm:size-5 md:size-6 text-primary" />
+                      <span>Document Timeline</span>
                     </h3>
                     <Separator />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm rounded-lg bg-muted/20 p-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 xs:gap-x-4 sm:gap-x-6 gap-y-2 xs:gap-y-3 sm:gap-y-4 text-xs xs:text-sm sm:text-base rounded-lg bg-muted/20 p-2 xs:p-3 sm:p-4">
                       <div>
-                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                          <Calendar className="size-3.5" /> Created At:
+                        <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                          <Calendar className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                          Created At:
                         </p>
-                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                        <p className="text-muted-foreground bg-background/50 p-1 xs:p-1.5 rounded border text-[9px] xs:text-[10px] sm:text-xs break-words">
                           {formatDate(document.createdAt)}
                         </p>
                       </div>
                       <div>
-                        <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                          <Calendar className="size-3.5" /> Updated At:
+                        <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                          <Calendar className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                          Updated At:
                         </p>
-                        <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                        <p className="text-muted-foreground bg-background/50 p-1 xs:p-1.5 rounded border text-[9px] xs:text-[10px] sm:text-xs break-words">
                           {formatDate(document.updatedAt)}
                         </p>
                       </div>
                       {document.preparedAt && (
                         <div>
-                          <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                            <Calendar className="size-3.5" /> Prepared At:
+                          <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                            <Calendar className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                            Prepared At:
                           </p>
-                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                          <p className="text-muted-foreground bg-background/50 p-1 xs:p-1.5 rounded border text-[9px] xs:text-[10px] sm:text-xs break-words">
                             {formatDate(document.preparedAt)}
                           </p>
                         </div>
                       )}
                       {document.sentAt && (
                         <div>
-                          <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                            <Calendar className="size-3.5" /> Sent At:
+                          <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                            <Calendar className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                            Sent At:
                           </p>
-                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                          <p className="text-muted-foreground bg-background/50 p-1 xs:p-1.5 rounded border text-[9px] xs:text-[10px] sm:text-xs break-words">
                             {formatDate(document.sentAt)}
                           </p>
                         </div>
                       )}
-                      {/* Remove viewedAt since it's not available in the document type */}
                       {document.signedAt && (
                         <div>
-                          <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                            <Calendar className="size-3.5" /> Signed At:
+                          <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                            <Calendar className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                            Signed At:
                           </p>
-                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                          <p className="text-muted-foreground bg-background/50 p-1 xs:p-1.5 rounded border text-[9px] xs:text-[10px] sm:text-xs break-words">
                             {formatDate(document.signedAt)}
                           </p>
                         </div>
                       )}
                       {document.expiresAt && (
                         <div>
-                          <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                            <Calendar className="size-3.5" /> Expires At:
+                          <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                            <Calendar className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                            Expires At:
                           </p>
-                          <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                          <p className="text-muted-foreground bg-background/50 p-1 xs:p-1.5 rounded border text-[9px] xs:text-[10px] sm:text-xs break-words">
                             {formatDate(document.expiresAt)}
                           </p>
                         </div>
@@ -484,51 +516,55 @@ export function SingleDocumentComponent({
 
                   {/* Signer Information */}
                   {document.signers && document.signers.length > 0 && (
-                    <div className="space-y-3">
-                      <h3 className="text-lg font-medium flex items-center gap-2">
-                        <UserIcon className="size-5 text-primary" />
-                        Signer Information
+                    <div className="space-y-1.5 xs:space-y-2 sm:space-y-3">
+                      <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-medium flex items-center gap-1 xs:gap-1.5 sm:gap-2">
+                        <UserIcon className="size-3 xs:size-4 sm:size-5 md:size-6 text-primary" />
+                        <span>Signer Information</span>
                       </h3>
                       <Separator />
-                      <div className="rounded-lg bg-muted/20 p-4">
+                      <div className="rounded-lg bg-muted/20 p-2 xs:p-3 sm:p-4">
                         {document.signers.map((signer) => (
                           <div
                             key={signer.id}
-                            className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm"
+                            className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 xs:gap-x-4 sm:gap-x-6 gap-y-2 xs:gap-y-3 sm:gap-y-4 text-xs xs:text-sm sm:text-base"
                           >
                             <div>
-                              <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                                <UserIcon className="size-3.5" /> Name:
+                              <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                                <UserIcon className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                                Name:
                               </p>
-                              <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                              <p className="text-muted-foreground bg-background/50 p-1 xs:p-1.5 rounded border text-[9px] xs:text-[10px] sm:text-xs break-words">
                                 {signer.name || "Not specified"}
                               </p>
                             </div>
                             <div>
-                              <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                                <Info className="size-3.5" /> Email:
+                              <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                                <Info className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                                Email:
                               </p>
-                              <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                              <p className="text-muted-foreground bg-background/50 p-1 xs:p-1.5 rounded border text-[9px] xs:text-[10px] sm:text-xs break-all">
                                 {signer.email}
                               </p>
                             </div>
                             <div>
-                              <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                                <Info className="size-3.5" /> Status:
+                              <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                                <Info className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                                Status:
                               </p>
                               <Badge
                                 variant={getStatusBadgeVariant(signer.status)}
-                                className="mt-1"
+                                className="mt-1 text-[9px] xs:text-xs sm:text-sm"
                               >
                                 {signer.status}
                               </Badge>
                             </div>
                             {signer.role && (
                               <div>
-                                <p className="font-semibold text-primary flex items-center gap-1.5 mb-1">
-                                  <Info className="size-3.5" /> Role:
+                                <p className="font-semibold text-primary flex items-center gap-1 xs:gap-1.5 mb-1">
+                                  <Info className="size-2.5 xs:size-3 sm:size-3.5" />{" "}
+                                  Role:
                                 </p>
-                                <p className="text-muted-foreground bg-background/50 p-1.5 rounded border">
+                                <p className="text-muted-foreground bg-background/50 p-1 xs:p-1.5 rounded border text-[9px] xs:text-[10px] sm:text-xs break-words">
                                   {signer.role}
                                 </p>
                               </div>
@@ -543,15 +579,17 @@ export function SingleDocumentComponent({
             </TabsContent>
           </Tabs>
         </CardContent>
-        <CardFooter className="border-t p-2 sm:p-3 md:p-4 flex justify-between">
+        <CardFooter className="border-t p-1.5 xs:p-2 sm:p-3 md:p-4 flex justify-between">
           <Button
             variant="outline"
             size="sm"
             asChild
-            className="text-xs sm:text-sm"
+            className="h-6 xs:h-7 sm:h-8 md:h-9 text-xs xs:text-sm sm:text-base"
           >
             <Link href={backLink}>
-              <ArrowLeft className="size-3 sm:size-4 mr-1 sm:mr-2" /> Back
+              <ArrowLeft className="size-2.5 xs:size-3 sm:size-4 mr-1 xs:mr-1.5 sm:mr-2" />
+              <span className="hidden xs:inline">Back</span>
+              <span className="xs:hidden">←</span>
             </Link>
           </Button>
         </CardFooter>

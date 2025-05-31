@@ -48,15 +48,20 @@ export function DocumentToolbar({
     key: document.key || "",
     description: document.description || undefined, // Convert null to undefined
     sequentialSigning: document.sequentialSigning || false,
+    // Ensure proper date handling for responsive display
+    createdAt: new Date(document.createdAt),
+    updatedAt: new Date(document.updatedAt),
   };
 
-  // Pass the converted document to the original component
+  // Pass the converted document to the original component with responsive wrapper
   return (
-    <OriginalDocumentToolbar
-      document={safeDocument as Document}
-      isSaving={isSaving}
-      onSaveAction={onSaveAction}
-      {...rest}
-    />
+    <div className="w-full">
+      <OriginalDocumentToolbar
+        document={safeDocument as Document}
+        isSaving={isSaving}
+        onSaveAction={onSaveAction}
+        {...rest}
+      />
+    </div>
   );
 }
