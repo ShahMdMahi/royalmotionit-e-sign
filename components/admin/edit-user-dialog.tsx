@@ -39,7 +39,7 @@ export function EditUserDialog({
   onCloseAction,
 }: EditUserDialogProps) {
   const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -48,6 +48,8 @@ export function EditUserDialog({
     handleSubmit,
     reset,
     setValue,
+    watch,
+    setError,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(UpdateUserSchema),
@@ -55,6 +57,8 @@ export function EditUserDialog({
       name: "",
       email: "",
       role: "USER" as Role,
+      emailVerified: false,
+      notification: true,
     },
   });
 
@@ -63,7 +67,9 @@ export function EditUserDialog({
     if (user) {
       setValue("name", user.name || "");
       setValue("email", user.email || "");
-      setValue("role", user.role || "USER");
+      setValue("role", user.role || ("USER" as Role));
+      setValue("emailVerified", !!user.emailVerified);
+      setValue("notification", user.notification ?? true);
     }
   }, [user, setValue]);
 
@@ -78,13 +84,9 @@ export function EditUserDialog({
         formData.append("email", data.email);
         formData.append("role", data.role);
 
-        // Handle optional boolean fields
-        if (data.emailVerified) {
-          formData.append("emailVerified", "on");
-        }
-        if (data.notification) {
-          formData.append("notification", "on");
-        }
+        // Handle boolean fields, ensuring they're always included in the FormData
+        formData.append("emailVerified", data.emailVerified ? "on" : "off");
+        formData.append("notification", data.notification ? "on" : "off");
 
         const response = await updateUser(
           user.id,
@@ -97,12 +99,24 @@ export function EditUserDialog({
           router.refresh(); // Refresh the page to update the user list
           onCloseAction();
         } else {
-          setError(response.message || "Failed to update user");
+          if (response.errors) {
+            // Set form errors using setError from react-hook-form if specific field errors exist
+            Object.entries(response.errors).forEach(([field, messages]) => {
+              if (messages && messages.length > 0) {
+                const fieldName = field as keyof FormData;
+                setError(fieldName, {
+                  type: "manual",
+                  message: messages[0],
+                });
+              }
+            });
+          }
+          setApiError(response.message || "Failed to update user");
           toast.error(response.message || "Failed to update user");
         }
       } catch (err) {
         console.error("Error updating user:", err);
-        setError("An unexpected error occurred");
+        setApiError("An unexpected error occurred");
         toast.error("An unexpected error occurred. Please try again.");
       }
     });
@@ -110,14 +124,26 @@ export function EditUserDialog({
 
   // Reset form and error state when dialog closes
   const handleClose = () => {
-    reset();
-    setError(null);
+    // Wait until next tick to reset the form to avoid UI flicker
+    setTimeout(() => {
+      reset({
+        name: "",
+        email: "",
+        role: "USER" as Role,
+        emailVerified: false,
+        notification: true,
+      });
+      setApiError(null);
+    }, 100);
     onCloseAction();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl">Edit User</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
@@ -125,9 +151,9 @@ export function EditUserDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {error && (
+        {apiError && (
           <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
-            {error}
+            {apiError}
           </div>
         )}
 
@@ -164,21 +190,18 @@ export function EditUserDialog({
           <div className="space-y-2">
             <Label>Role</Label>
             <RadioGroup
-              defaultValue={user?.role || "USER"}
+              value={watch("role")}
+              onValueChange={(value) => setValue("role", value as Role)}
               className="flex gap-4"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="USER" id="user" {...register("role")} />
+                <RadioGroupItem value="USER" id="user" />
                 <Label htmlFor="user" className="cursor-pointer text-sm">
                   User
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem
-                  value="ADMIN"
-                  id="admin"
-                  {...register("role")}
-                />
+                <RadioGroupItem value="ADMIN" id="admin" />
                 <Label htmlFor="admin" className="cursor-pointer text-sm">
                   Admin
                 </Label>
@@ -187,12 +210,14 @@ export function EditUserDialog({
             {errors.role && (
               <p className="text-xs text-destructive">{errors.role.message}</p>
             )}
-          </div>{" "}
+          </div>
           <div className="flex items-center space-x-2 pt-2">
             <Checkbox
               id="emailVerified"
-              defaultChecked={!!user?.emailVerified}
-              {...register("emailVerified")}
+              checked={watch("emailVerified") ?? !!user?.emailVerified}
+              onCheckedChange={(checked) =>
+                setValue("emailVerified", checked === true)
+              }
             />
             <Label
               htmlFor="emailVerified"
@@ -209,8 +234,10 @@ export function EditUserDialog({
           <div className="flex items-center space-x-2">
             <Checkbox
               id="notification"
-              defaultChecked={user?.notification ?? true}
-              {...register("notification")}
+              checked={watch("notification") ?? user?.notification ?? true}
+              onCheckedChange={(checked) =>
+                setValue("notification", checked === true)
+              }
             />
             <Label
               htmlFor="notification"

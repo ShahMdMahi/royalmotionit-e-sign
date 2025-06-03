@@ -4,6 +4,7 @@ import {
   ChangeNameSchema,
   ChangePasswordSchema,
   UpdateUserSchema,
+  CreateUserSchema,
 } from "@/schema";
 import { prisma } from "@/prisma/prisma";
 import bcryptjs from "bcryptjs";
@@ -372,7 +373,7 @@ export async function updateUser(
         name,
         email,
         role: role as Role,
-        emailVerified: emailVerified ? new Date() : userExists.emailVerified,
+        emailVerified: emailVerified ? new Date() : null, // Allow unverifying users
         notification,
       },
     });
@@ -566,6 +567,118 @@ export async function deleteUser(userId: string) {
     return {
       success: false,
       message: "An error occurred while deleting the user.",
+    };
+  }
+}
+
+/**
+ * Create a new user
+ * Only admins can create users
+ */
+export async function createUser(formData: FormData) {
+  try {
+    const session = await auth();
+
+    // Check if the current user is authenticated and has admin privileges
+    if (!session || !session.user || session.user.role !== Role.ADMIN) {
+      return {
+        success: false,
+        message: "Unauthorized: Only administrators can create users.",
+      };
+    }
+
+    // Validate form fields
+    const validatedFields = CreateUserSchema.safeParse({
+      name: formData.get("name"),
+      email: formData.get("email"),
+      password: formData.get("password"),
+      role: formData.get("role"),
+      emailVerified: formData.get("emailVerified") === "on",
+      notification: formData.get("notification") === "on",
+    });
+
+    // If form validation fails, return errors early
+    if (!validatedFields.success) {
+      return {
+        errors: validatedFields.error.flatten().fieldErrors,
+        message: "Please correct the errors in the form.",
+        success: false,
+      };
+    }
+
+    const { name, email, password, role, emailVerified, notification } =
+      validatedFields.data;
+
+    // Check if user with this email already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return {
+        success: false,
+        message: "A user with this email already exists.",
+      };
+    }
+
+    // Hash the password
+    const hashedPassword = await bcryptjs.hash(password, 10);
+
+    // Create new user
+    const newUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role,
+        emailVerified: emailVerified ? new Date() : null,
+        notification,
+      },
+    });
+
+    // Send welcome and credentials email
+    const { sendAdminCreatedUserEmail, sendWelcomeEmail } = await import(
+      "@/actions/email"
+    );
+    await sendAdminCreatedUserEmail(
+      name || "User",
+      email,
+      password, // Send the plain text password in the email
+      emailVerified === true, // Ensure it's a boolean value
+    );
+
+    // If not email verified, send verification email
+    if (!emailVerified && email) {
+      const { generateVerificationToken } = await import("@/lib/token");
+      const verificationToken = await generateVerificationToken(email);
+
+      if (verificationToken.verificationToken?.token) {
+        const { sendAccountVerificationEmail } = await import(
+          "@/actions/email"
+        );
+        await sendAccountVerificationEmail(
+          name || "User",
+          email,
+          verificationToken.verificationToken.token,
+        );
+      }
+    }
+
+    // Also send a welcome email with general information
+    await sendWelcomeEmail(name || "User", email);
+
+    // Revalidate the users page to refresh the list
+    revalidatePath("/admin/users");
+
+    return {
+      success: true,
+      message: "User created successfully and emails sent.",
+    };
+  } catch (error) {
+    console.error("Error creating user:", error);
+    return {
+      success: false,
+      message: "An error occurred while creating the user.",
     };
   }
 }

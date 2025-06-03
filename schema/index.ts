@@ -83,3 +83,23 @@ export const UpdateUserSchema = z.object({
   emailVerified: z.boolean().optional(),
   notification: z.boolean().optional(),
 });
+
+export const CreateUserSchema = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  email: z.string().email({ message: "Valid email is required" }),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters" })
+    .regex(/[A-Z]/, {
+      message: "Password must contain at least one uppercase letter",
+    })
+    .regex(/[a-z]/, {
+      message: "Password must contain at least one lowercase letter",
+    })
+    .regex(/[0-9]/, { message: "Password must contain at least one number" }),
+  role: z.enum(["ADMIN", "USER"], {
+    message: "Role must be either ADMIN or USER",
+  }),
+  emailVerified: z.boolean().optional(),
+  notification: z.boolean().optional(),
+});

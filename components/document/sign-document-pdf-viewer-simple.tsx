@@ -549,7 +549,6 @@ export function SignDocumentPdfViewerSimple({
                           data-field-type={field.type}
                           data-field-required={field.required}
                         >
-                          {" "}
                           <PdfFormField
                             field={field}
                             value={value}

@@ -372,7 +372,7 @@ export function EditDocumentComponent({
               Field Properties
             </SheetTitle>
             <SheetDescription className="text-xs xs:text-sm">
-              Configure the selected{" "}
+              Configure the selected
               <span className="font-medium">{selectedField?.type}</span> field
             </SheetDescription>
           </SheetHeader>

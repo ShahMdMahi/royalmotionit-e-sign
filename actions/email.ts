@@ -11,6 +11,7 @@ import { DocumentSignedNotification } from "@/emails/document-signed-notificatio
 import { NewSignerEmail } from "@/emails/new-signer-email";
 import { DocumentSignedWithPdf } from "@/emails/document-signed-with-pdf";
 import { DocumentSignedWithPdfToAdmin } from "@/emails/document-signed-with-pdf-to-admin";
+import { AdminCreatedUserEmail } from "@/emails/admin-created-user-email";
 
 /**
  * Sends a welcome email to a new user
@@ -375,5 +376,39 @@ export async function sendSignedDocumentWithPdfToAdmin(
     );
   } catch (error) {
     console.error("Error sending admin notification with signed PDF:", error);
+  }
+}
+
+/**
+ * Sends a credentials email to a user created by an administrator
+ * @param username - The user's display name
+ * @param userEmail - The user's email address
+ * @param password - The plain text password (only sent once, should be changed after login)
+ * @param isEmailVerified - Whether the admin has marked the email as verified
+ * @returns Promise that resolves when email is sent or rejects on error
+ */
+export async function sendAdminCreatedUserEmail(
+  username: string,
+  userEmail: string,
+  password: string,
+  isEmailVerified: boolean,
+): Promise<void> {
+  try {
+    const emailContent = await render(
+      AdminCreatedUserEmail({
+        username,
+        userEmail,
+        password,
+        isEmailVerified,
+      }),
+    );
+
+    await sendEmail({
+      recipient: userEmail,
+      subject: "Your New Royal Sign Account",
+      html: emailContent,
+    });
+  } catch (error) {
+    console.error("Error sending admin-created user email:", error);
   }
 }

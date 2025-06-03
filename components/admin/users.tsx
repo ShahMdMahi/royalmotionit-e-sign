@@ -39,6 +39,7 @@ import {
 } from "@/actions/user";
 import { useRouter } from "next/navigation";
 import { EditUserDialog } from "./edit-user-dialog";
+import { AddUserDialog } from "./add-user-dialog";
 import {
   Tooltip,
   TooltipContent,
@@ -53,15 +54,16 @@ export function UsersComponent({
   users: User[];
   currentUserId: string;
 }) {
-  const [searchTerm, setSearchTerm] = useState("");
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isVerifying, setIsVerifying] = useState<string | null>(null);
   const [isSendingVerification, setIsSendingVerification] = useState<
     string | null
   >(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
 
   // Filter users based on search term
@@ -160,7 +162,7 @@ export function UsersComponent({
           </div>
           <Button
             className="flex items-center gap-1.5 sm:gap-2 h-8 sm:h-10 text-xs sm:text-sm"
-            onClick={() => toast.info("Add user functionality coming soon!")}
+            onClick={() => setIsAddDialogOpen(true)}
           >
             <Users className="size-3.5 sm:size-4" />
             <span>Add New User</span>
@@ -250,9 +252,7 @@ export function UsersComponent({
               <Button
                 variant="outline"
                 className="flex items-center gap-1.5 h-8 sm:h-10 text-xs sm:text-sm"
-                onClick={() =>
-                  toast.info("Add user functionality coming soon!")
-                }
+                onClick={() => setIsAddDialogOpen(true)}
               >
                 <Users className="size-3.5 sm:size-4" />
                 <span>Add User</span>
@@ -353,7 +353,7 @@ export function UsersComponent({
                                           </div>
                                         ) : (
                                           <>
-                                            <CheckCircle className="size-3 mr-1" />{" "}
+                                            <CheckCircle className="size-3 mr-1" />
                                             Verify
                                           </>
                                         )}
@@ -387,7 +387,7 @@ export function UsersComponent({
                                           </div>
                                         ) : (
                                           <>
-                                            <Mail className="size-3 mr-1" />{" "}
+                                            <Mail className="size-3 mr-1" />
                                             Email
                                           </>
                                         )}
@@ -468,10 +468,10 @@ export function UsersComponent({
               <AlertDialogDescription className="text-xs sm:text-sm">
                 {userToDelete && (
                   <>
-                    Are you sure you want to delete
-                    {userToDelete.name || userToDelete.email}? This action
-                    cannot be undone and will permanently remove the user and
-                    all associated data.
+                    Are you sure you want to delete{" "}
+                    <strong>{userToDelete.name || userToDelete.email}</strong>?
+                    This action cannot be undone and will permanently remove the
+                    user and all associated data.
                   </>
                 )}
               </AlertDialogDescription>
@@ -502,6 +502,12 @@ export function UsersComponent({
             setIsEditDialogOpen(false);
             setUserToEdit(null);
           }}
+        />
+
+        {/* Add User Dialog */}
+        <AddUserDialog
+          isOpen={isAddDialogOpen}
+          onCloseAction={() => setIsAddDialogOpen(false)}
         />
       </div>
     </div>

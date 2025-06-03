@@ -177,7 +177,7 @@ export function PdfDateField({
             ? format(new Date(value), "PPP")
             : field.placeholder || field.label || "Select date"}
         </Button>
-      </PopoverTrigger>{" "}
+      </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"

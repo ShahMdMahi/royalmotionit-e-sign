@@ -326,7 +326,7 @@ export function DocumentSigning({
                           Progress
                         </span>
                         <span className="text-xs sm:text-sm text-gray-600">
-                          {Object.keys(fieldValues).length} /{" "}
+                          {Object.keys(fieldValues).length} /
                           {requiredFieldIds.length}
                         </span>
                       </div>
