@@ -587,6 +587,15 @@ export async function createUser(formData: FormData) {
       };
     }
 
+    // Log raw form data for debugging
+    console.log("Raw formData from client:", {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      role: formData.get("role"),
+      emailVerified: formData.get("emailVerified"),
+      notification: formData.get("notification"),
+    });
+
     // Validate form fields
     const validatedFields = CreateUserSchema.safeParse({
       name: formData.get("name"),
@@ -609,6 +618,14 @@ export async function createUser(formData: FormData) {
     const { name, email, password, role, emailVerified, notification } =
       validatedFields.data;
 
+    // Log parsed and validated data
+    console.log("Validated data:", {
+      email,
+      role,
+      emailVerified,
+      notification,
+    });
+
     // Check if user with this email already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -624,6 +641,14 @@ export async function createUser(formData: FormData) {
     // Hash the password
     const hashedPassword = await bcryptjs.hash(password, 10);
 
+    // Log the emailVerified value for debugging
+    console.log(
+      "About to create user with emailVerified:",
+      emailVerified,
+      "which will be set to:",
+      emailVerified ? new Date() : null,
+    );
+
     // Create new user
     const newUser = await prisma.user.create({
       data: {
@@ -631,10 +656,16 @@ export async function createUser(formData: FormData) {
         email,
         password: hashedPassword,
         role,
-        emailVerified: emailVerified ? new Date() : null,
+        emailVerified: emailVerified === true ? new Date() : null, // Explicit comparison
         notification,
       },
     });
+
+    // Log the created user's emailVerified status
+    console.log(
+      "Created user with emailVerified status:",
+      newUser.emailVerified,
+    );
 
     // Send welcome and credentials email
     const { sendAdminCreatedUserEmail, sendWelcomeEmail } = await import(

@@ -44,6 +44,8 @@ export function AddUserDialog({ isOpen, onCloseAction }: AddUserDialogProps) {
     handleSubmit,
     reset,
     setValue,
+    watch,
+    setError,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(CreateUserSchema),
@@ -62,16 +64,34 @@ export function AddUserDialog({ isOpen, onCloseAction }: AddUserDialogProps) {
       try {
         setApiError(null);
 
+        // Log form data for debugging
+        console.log("Form data being submitted:", {
+          name: data.name,
+          email: data.email,
+          role: data.role,
+          emailVerified: data.emailVerified,
+          notification: data.notification,
+        });
+
         // Convert form data to FormData object
         const formData = new FormData();
-        formData.append("name", data.name);
-        formData.append("email", data.email);
+        formData.append("name", data.name.trim());
+        formData.append("email", data.email.trim().toLowerCase());
         formData.append("password", data.password);
         formData.append("role", data.role);
 
         // Handle boolean fields, ensuring they're always included in the FormData
-        formData.append("emailVerified", data.emailVerified ? "on" : "off");
-        formData.append("notification", data.notification ? "on" : "off");
+        const emailVerifiedValue = data.emailVerified === true ? "on" : "off";
+        const notificationValue = data.notification === true ? "on" : "off";
+        formData.append("emailVerified", emailVerifiedValue);
+        formData.append("notification", notificationValue);
+
+        // Log what's being sent to the server
+        console.log("Values sent to server:", {
+          emailVerifiedValue,
+          notificationValue,
+        });
+
         const response = await createUser(formData);
 
         if (response.success) {
@@ -80,9 +100,21 @@ export function AddUserDialog({ isOpen, onCloseAction }: AddUserDialogProps) {
             "Emails sent to user with login credentials and welcome information",
           );
           router.refresh(); // Refresh the page to update the user list
-          reset(); // Reset the form
-          onCloseAction(); // Close the dialog
+          handleClose(); // Reset and close the dialog
         } else {
+          // Check if there are field-specific errors
+          if (response.errors) {
+            // Handle field-specific errors
+            Object.entries(response.errors).forEach(([field, messages]) => {
+              if (field in errors && messages && messages.length > 0) {
+                setError(field as any, {
+                  type: "manual",
+                  message: messages[0],
+                });
+              }
+            });
+          }
+
           setApiError(response.message || "Failed to create user");
           toast.error(response.message || "Failed to create user");
         }
@@ -95,7 +127,16 @@ export function AddUserDialog({ isOpen, onCloseAction }: AddUserDialogProps) {
   };
 
   const handleClose = () => {
-    reset();
+    // Reset form to default values
+    reset({
+      name: "",
+      email: "",
+      password: "",
+      role: "USER" as Role,
+      emailVerified: true,
+      notification: true,
+    });
+    setShowPassword(false);
     setApiError(null);
     onCloseAction();
   };
@@ -104,19 +145,49 @@ export function AddUserDialog({ isOpen, onCloseAction }: AddUserDialogProps) {
   };
 
   const handleGeneratePassword = () => {
-    const newPassword = generatePassword(12, true);
-    setValue("password", newPassword, { shouldValidate: true });
-    setShowPassword(true); // Show the password when generated
+    try {
+      const newPassword = generatePassword(12, true);
+      setValue("password", newPassword, { shouldValidate: true });
+      setShowPassword(true); // Show the password when generated
 
+      // Modern clipboard API with fallback
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard
+          .writeText(newPassword)
+          .then(() => {
+            toast.success("Password generated and copied to clipboard!");
+          })
+          .catch(() => {
+            // Fallback to older method if clipboard API fails
+            copyToClipboardFallback(newPassword);
+          });
+      } else {
+        // Fallback for non-secure contexts or older browsers
+        copyToClipboardFallback(newPassword);
+      }
+    } catch (error) {
+      console.error("Error generating password:", error);
+      toast.error("Failed to generate password");
+    }
+  };
+
+  const copyToClipboardFallback = (text: string) => {
     // Create a temporary element to enable copy to clipboard functionality
     const tempInput = document.createElement("input");
+    tempInput.style.position = "absolute";
+    tempInput.style.left = "-9999px";
     document.body.appendChild(tempInput);
-    tempInput.value = newPassword;
+    tempInput.value = text;
     tempInput.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempInput);
 
-    toast.success("Password generated and copied to clipboard!");
+    try {
+      document.execCommand("copy");
+      toast.success("Password generated and copied to clipboard!");
+    } catch (err) {
+      toast.info("Password generated! Please copy it manually.");
+    } finally {
+      document.body.removeChild(tempInput);
+    }
   };
 
   return (
@@ -128,7 +199,7 @@ export function AddUserDialog({ isOpen, onCloseAction }: AddUserDialogProps) {
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm">
             Create a new user account in the system. The user will receive an
-            email with their login credentials.
+            email with their login credentials
           </DialogDescription>
         </DialogHeader>
         <form
@@ -203,11 +274,13 @@ export function AddUserDialog({ isOpen, onCloseAction }: AddUserDialogProps) {
                 placeholder="Create a strong password"
                 className="h-8 sm:h-9 text-xs sm:text-sm pr-9"
                 disabled={isPending}
+                aria-describedby="password-requirements"
               />
               <button
                 type="button"
-                className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
                 onClick={togglePasswordVisibility}
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
                   <EyeOff className="size-3.5 sm:size-4" />
@@ -221,7 +294,10 @@ export function AddUserDialog({ isOpen, onCloseAction }: AddUserDialogProps) {
                 {errors.password.message}
               </p>
             )}
-            <p className="text-[10px] text-muted-foreground">
+            <p
+              id="password-requirements"
+              className="text-[10px] text-muted-foreground"
+            >
               Password must be at least 8 characters with uppercase, lowercase,
               and number. The password will be sent to the user&apos;s email for
               first-time login.
@@ -232,7 +308,8 @@ export function AddUserDialog({ isOpen, onCloseAction }: AddUserDialogProps) {
             <RadioGroup
               defaultValue="USER"
               className="flex gap-3 sm:gap-4"
-              {...register("role")}
+              value={watch("role")}
+              onValueChange={(value) => setValue("role", value as Role)}
             >
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <RadioGroupItem
@@ -271,13 +348,20 @@ export function AddUserDialog({ isOpen, onCloseAction }: AddUserDialogProps) {
             <div className="flex items-center gap-1.5 sm:gap-2">
               <Checkbox
                 id="emailVerified"
-                defaultChecked
-                {...register("emailVerified")}
+                // Remove defaultChecked as it conflicts with controlled component
+                checked={watch("emailVerified") === true}
+                onCheckedChange={(checked) => {
+                  console.log("Email verified checkbox changed to:", checked);
+                  setValue("emailVerified", checked === true);
+                }}
                 disabled={isPending}
               />
               <Label
                 htmlFor="emailVerified"
                 className="text-xs sm:text-sm font-normal cursor-pointer"
+                onClick={() =>
+                  setValue("emailVerified", !watch("emailVerified"))
+                }
               >
                 Mark email as verified
               </Label>
@@ -286,13 +370,18 @@ export function AddUserDialog({ isOpen, onCloseAction }: AddUserDialogProps) {
             <div className="flex items-center gap-1.5 sm:gap-2">
               <Checkbox
                 id="notification"
-                defaultChecked
-                {...register("notification")}
+                // Remove defaultChecked as it conflicts with controlled component
+                checked={watch("notification") === true}
+                onCheckedChange={(checked) => {
+                  console.log("Notification checkbox changed to:", checked);
+                  setValue("notification", checked === true);
+                }}
                 disabled={isPending}
               />
               <Label
                 htmlFor="notification"
                 className="text-xs sm:text-sm font-normal cursor-pointer"
+                onClick={() => setValue("notification", !watch("notification"))}
               >
                 Enable email notifications
               </Label>
