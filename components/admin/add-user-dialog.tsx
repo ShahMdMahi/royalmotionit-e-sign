@@ -107,7 +107,7 @@ export function AddUserDialog({ isOpen, onCloseAction }: AddUserDialogProps) {
             // Handle field-specific errors
             Object.entries(response.errors).forEach(([field, messages]) => {
               if (field in errors && messages && messages.length > 0) {
-                setError(field as any, {
+                setError(field as keyof FormData, {
                   type: "manual",
                   message: messages[0],
                 });
@@ -183,7 +183,7 @@ export function AddUserDialog({ isOpen, onCloseAction }: AddUserDialogProps) {
     try {
       document.execCommand("copy");
       toast.success("Password generated and copied to clipboard!");
-    } catch (err) {
+    } catch {
       toast.info("Password generated! Please copy it manually.");
     } finally {
       document.body.removeChild(tempInput);
